@@ -67,9 +67,16 @@ survey$QUIC_safetyandsecurity <- apply(QUIC[cols_safetyandsecurity], 1,sum)
 
 #M@H
 ```{r}
+ ## COLUMN NAMES FOR M@H SURVEY ## 
 MH <- survey %>%
-  ## COLUMN NAMES FOR M@H SURVEY ## 
-  
+  select("M.H1_1":"M.H35_1")
+
+# Reverse code
+#double check with Laurel and Psyche which ones should be reverse coded in ones we changed 
+cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H13_1")
+MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+ 
+survey$MH_total <- apply(MH,1, sum)
 ```
 
 #STAI
