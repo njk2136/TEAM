@@ -1,0 +1,92 @@
+---
+title: "1_scoring"
+author: "Nick Kathios"
+date: '2022-10-04'
+output: html_document
+---
+
+```{r}
+##this will load in basically all relevant packages. first, run install.packages("tidyverse") and then library(tidyverse)
+library(tidyverse)
+#this will change depending on where this file is in relation to your working dir.
+source("reverseCode.R")
+```
+
+#read in data
+```{r}
+survey <- read.csv(file="../data/pilot/pilot1.csv")
+```
+
+# QUIC (childhood + adolescence)
+```{r}
+#QUIC Scoring
+### UPDATE THIS TO GET CHILDHOOD VS. ADOLESCENT SCORES ### ,, SOME SUBSCALES WERE ALSO REMOVED
+### use column #s to isolate childhood vs. adolescent responses, and then apply the same general script
+QUIC <- survey %>%
+  select("I.had.a.set.morning.routine.on.school.days..i.e...I.usually.did..the.same.thing.each.day.to.get.ready..":"In.my.house.things.I.needed.were.often.misplaced.so.that.I..could.not.find.them.")
+
+#recode verbal responses (if not numbers)
+QUIC[QUIC == "Yes"] <- as.numeric(1)
+QUIC[QUIC == "No"] <- as.numeric(0)
+
+QUIC[1:38] <- as.numeric(unlist(QUIC[1:38]))
+
+cols_reverse <- c("I.had.a.set.morning.routine.on.school.days..i.e...I.usually.did..the.same.thing.each.day.to.get.ready..","My.parents.kept.track.of.what.I.ate..e.g...made.sure.that.I..didn.t.skip.meals.or.tried.to.make.sure.I.ate.healthy.food..", "My.family.ate.a.meal.together.most.days.", "My.parents.tried.to.make.sure.I.got.a.good.night.s.sleep..e.g....I.had.a.regular.bed.time..my.parents.checked.to.make.sure.I..went.to.sleep..", "I.had.a.bedtime.routine..e.g...my.parents.tucked.me.in..my..parents.read.me.a.book..I.took.a.bath..", "In.my.afterschool.or.free.time.hours.at.least.one.of.my..parents.knew.what.I.was.doing.", "I.usually.knew.when.my.parents.were.going.to.be.home.", "At.least.one.of.my.parents.regularly.checked.that.I.did.my..homework.", "At.least.one.of.my.parents.regularly.kept.track.of.my.school..progress.","At.least.one.parent.made.time.each.day.to.see.how.I.was..doing.","My.family.planned.activities.to.do.together.", "My.family.had.holiday.traditions.that.we.did.every.year..e.g....cooking.a.special.food.at.a.particular.time.of.year.decorate..the.house.the.same.way..", "My.parents.had.a.stable.relationship.with.each.other.","I.lived.in.a.clean.house.")
+
+cols_parentalmonitoring <- c("I.had.a.set.morning.routine.on.school.days..i.e...I.usually.did..the.same.thing.each.day.to.get.ready..", "My.parents.kept.track.of.what.I.ate..e.g...made.sure.that.I..didn.t.skip.meals.or.tried.to.make.sure.I.ate.healthy.food..","My.family.ate.a.meal.together.most.days.","My.parents.tried.to.make.sure.I.got.a.good.night.s.sleep..e.g....I.had.a.regular.bed.time..my.parents.checked.to.make.sure.I..went.to.sleep..","I.had.a.bedtime.routine..e.g...my.parents.tucked.me.in..my..parents.read.me.a.book..I.took.a.bath..","In.my.afterschool.or.free.time.hours.at.least.one.of.my..parents.knew.what.I.was.doing.","At.least.one.of.my.parents.regularly.checked.that.I.did.my..homework.", "At.least.one.of.my.parents.regularly.kept.track.of.my.school..progress.","At.least.one.parent.made.time.each.day.to.see.how.I.was..doing.")
+
+cols_parentalpredictability <- c("My.parents.were.often.late.to.pick.me.up..e.g..from.school...aftercare.or.sports..", "I.usually.knew.when.my.parents.were.going.to.be.home.","At.least.one.of.my.parents.had.punishments.that.were..unpredictable.", "I.often.wondered.whether.or.not.one.of.my.parents.would..come.home.at.the.end.of.the.day.", "My.family.planned.activities.to.do.together.","At.least.one.of.my.parents.would.plan.something.for.the..family..but.then.not.follow.through.with.the.plan.", "My.family.had.holiday.traditions.that.we.did.every.year..e.g....cooking.a.special.food.at.a.particular.time.of.year.decorate..the.house.the.same.way..","At.least.one.of.my.parents.was.disorganized.","At.least.one.of.my.parents.was.unpredictable","For.at.least.one.of.my.parents..when.they.were.upset.I.did..not.know.how.they.would.act.", "One.of.my.parents.could.go.from.calm.to.furious.in.an..instant.","One.of.my.parents.could.go.from.calm.to.stressed.or.nervous..in.an.instant.")
+
+cols_parentalenviroment <- c("There.was.a.long.period.of.time.when.I.didn.t.see.one.of.my..parents..e.g..military.deployment..jail.time..custody..arrangements..", "I.experienced.changes.in.my.custody.arrangement.","At.least.one.of.my.parents.changed.jobs.frequently.", "There.were.times.when.one.of.my.parents.was.unemployed..and.couldn.t.find.a.job.even.though.he.she.wanted.one.", "My.parents.had.a.stable.relationship.with.each.other.", "My.parents.got.divorced.", "At.least.one.of.my.parents.had.many.romantic.partners.")
+
+cols_physiscalenvironment <- c("There.were.often.people.coming.and.going.in.my.house.that.I..did.not.expect.to.be.there.", "I.moved.frequently.",  "I.changed.schools.frequently.", "I.changed.schools.mid.year.", "I.lived.in.a.cluttered.house..e.g...piles.of.stuff.everywhere..", "In.my.house.things.I.needed.were.often.misplaced.so.that.I..could.not.find.them.", "I.lived.in.a.clean.house.")
+
+cols_safetyandsecurity <- c("There.was.a.period.of.time.when.I.often.worried.that.I.was..not.going.to.have.enough.food.to.eat.", "There.was.a.period.of.time.when.I.often.worried.that.my..family.would.not.have.enough.money.to.pay.for.necessities..like.clothing.or.bills.", "There.was.a.period.of.time.when.I.did.not.feel.safe.in.my..home.")
+
+# Reverse code
+QUIC[cols_reverse] <- lapply(QUIC[cols_reverse], reverseCode, min=0, max=1)
+
+#scoring
+survey$QUIC_total <- apply(QUIC,1, sum) # total PAS scores
+survey$QUIC_parentalmonitoring <- apply(QUIC[cols_parentalmonitoring], 1,sum)
+survey$QUIC_parentalpredictability <- apply(QUIC[cols_parentalpredictability], 1,sum)
+survey$QUIC_parentalenviroment <- apply(QUIC[cols_parentalenviroment], 1,sum)
+survey$QUIC_physiscalenvironment <- apply(QUIC[cols_physiscalenvironment], 1,sum)
+survey$QUIC_safetyandsecurity <- apply(QUIC[cols_safetyandsecurity], 1,sum)
+```
+
+#CHAOS (childhood + adolescence)
+
+#DT (childhood + adolescence)
+
+#HUMS (adolescent + current)
+
+#AES
+
+#ASRS
+
+#M@H
+```{r}
+MH <- survey %>%
+  ## COLUMN NAMES FOR M@H SURVEY ## 
+  
+```
+
+#STAI
+```{r}
+#isolate survey you're scoring
+STAI <- survey %>%
+  select("STAI1_1":"STAI20_1")
+
+#if it is a simple subscore (i.e. no reverse coding or anything)
+survey$STAI_total <- apply(STAI,1, sum)
+```
+
+
+#CD-RISC
+
+#TIPI
+
+#STOMP
+
+#AES
