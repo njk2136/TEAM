@@ -1,0 +1,121 @@
+---
+title: "2_analysis"
+author: "Nick Kathios"
+date: '2022-10-21'
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+```
+
+#read in data
+```{r}
+scored_data <- read.csv(file="../data/pleasing-displeasing_followup/scored_data.csv")
+master <- read.csv(file="../data/pleasing-displeasing_followup/pleasing_displeasing_scored.csv")
+```
+
+#cleaning original data before merge
+```{r}
+master <- master[-1]
+names(master)[1] <- "PROLIFIC_PID"
+names(master)[10:21] <- c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J','K','L')
+names(master)[22:31] <-c('IADS105','IADS110','IADS220','IADS283','IADS351','IADS353',
+                         'IADS423','IADS502','IADS717','IADS730')
+names(master)[32:39] <- c('Envi1','Envi2','Envi3','Envi4','Envi5','Envi6','Envi7','Envi8')
+
+just_ratings<-master[10:39] -4
+cleaned <- cbind(master[1], just_ratings)
+
+derived <- cleaned[1:13]
+derivedstims <- pivot_longer(derived, A:L, names_to = "stim_name", values_to = "rating" )
+
+IADS <- cleaned[14:23]
+IADS <- cbind(cleaned[1], IADS)
+IADS_stims <- pivot_longer(IADS, IADS105:IADS730, names_to = "stim_name", values_to = "rating" )
+
+envi <- just_ratings[23:30]
+envi <- cbind(cleaned[1], envi)
+envi_stims <- pivot_longer(envi, Envi1:Envi8, names_to = "stim_name", values_to = "rating" )
+
+#changing stim names for pleasing/displeasing comparisons
+names(derived)[2:13] <- c("Displeasing", "Displeasing", "Pleasing","Displeasing",
+                          "Pleasing", "Pleasing", "Displeasing","Displeasing",
+                          "Pleasing", "Pleasing", "Pleasing", "Displeasing")
+
+derived_plsdispls <- pivot_longer(derived, !PROLIFIC_PID, names_to = "stim_name", values_to = "rating" )
+
+names(IADS)[2:11] <- c("Displeasing", "Pleasing", "Pleasing", "Displeasing",
+                          "Pleasing", "Pleasing", "Displeasing","Displeasing",
+                          "Pleasing", "Displeasing")
+IADS_plsdispls <- pivot_longer(IADS, !PROLIFIC_PID, names_to = "stim_name", values_to = "rating")
+
+names(envi)[2:9] <- c("Displeasing", "Displeasing", "Pleasing", "Pleasing",
+                          "Pleasing", "Pleasing", "Displeasing","Displeasing")
+envi_plsdispls <- pivot_longer(envi, !PROLIFIC_PID, names_to = "stim_name", values_to = "rating")
+```
+
+```{r}
+#changing stim names for pleasing/displeasing comparisons
+names(derived)[2:13] <- c("Displeasing1", "Displeasing2", "Pleasing3","Displeasing4",
+                          "Pleasing5", "Pleasing6", "Displeasing7","Displeasing8",
+                          "Pleasing9", "Pleasing10", "Pleasing11", "Displeasing12")
+
+derived_plsdispls <- pivot_longer(derived, !PROLIFIC_PID, names_to = "soundID", values_to = "rating" )
+
+derived_plsdispls$stim_name <- gsub("[0-9]", "", derived_plsdispls$soundID)
+
+names(IADS)[2:11] <- c("Displeasing1", "Pleasing2", "Pleasing3", "Displeasing4",
+                          "Pleasing5", "Pleasing6", "Displeasing7","Displeasing8",
+                          "Pleasing9", "Displeasing10")
+IADS_plsdispls <- pivot_longer(IADS, !PROLIFIC_PID, names_to = "soundID", values_to = "rating")
+
+IADS_plsdispls$stim_name <- gsub("[0-9]", "", IADS_plsdispls$soundID)
+
+names(envi)[2:9] <- c("Displeasing1", "Displeasing2", "Pleasing3", "Pleasing4",
+                          "Pleasing5", "Pleasing6", "Displeasing7","Displeasing8")
+envi_plsdispls <- pivot_longer(envi, !PROLIFIC_PID, names_to = "soundID", values_to = "rating")
+envi_plsdispls$stim_name <- gsub("[0-9]", "", envi_plsdispls$soundID)
+```
+
+#merge the datasets
+```{r}
+all_scored <- merge(master, scored_data, by.x="PROLIFIC_PID", by.y="PROLIFIC_PID")
+digital <-merge(derived_plsdispls, scored_data, by.x="PROLIFIC_PID", by.y="PROLIFIC_PID")
+digital_pleasing <- subset(digital, stim_name=="Pleasing")
+digital_displeasing <- subset(digital, stim_name="Displeasing")
+IADS<-merge(IADS_plsdispls, scored_data, by.x="PROLIFIC_PID", by.y="PROLIFIC_PID")
+IADS_pleasing <- subset(IADS, stim_name=="Pleasing")
+IADS_displeasing <- subset(IADS, stim_name="Displeasing")
+```
+
+#H1
+```{r}
+m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | PROLIFIC_PID) + (1 | soundID), data=digital_pleasing)
+summary(m1)
+
+m2 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | PROLIFIC_PID) + (1 | soundID), data=digital_displeasing)
+summary(m2)
+
+m3 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | PROLIFIC_PID) + (1 | soundID), data=IADS_pleasing)
+summary(m3)
+
+m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | PROLIFIC_PID) + (1 | soundID), data=IADS_displeasing)
+summary(m4)
+```
+
+#H2
+```{r}
+m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
+
+m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m2)
+```
+
+#H3
+```{r}
+m1 <- lm(BMRQ_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
+```

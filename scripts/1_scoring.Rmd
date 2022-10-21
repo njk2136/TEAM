@@ -76,6 +76,8 @@ hist(survey$QUIC_Adolescence_total)
 
 cor.test(survey$QUIC_child_total, survey$QUIC_Adolescence_total)
 ggplot(data=survey, aes(x=QUIC_child_total, y=QUIC_Adolescence_total)) + geom_point()
+
+survey$QUIC_sum <- survey$QUIC_child_total + survey$QUIC_Adolescence_total
 ```
 
 #CHAOS (childhood + adolescence)
@@ -107,6 +109,8 @@ survey$CHAOS_Adolescence_total <- apply(CHAOS_Adolescence,1, sum)
 hist(survey$CHAOS_Adolescence_total)
 cor.test(survey$CHAOS_child_total, survey$CHAOS_Adolescence_total)
 ggplot(data=survey, aes(x=CHAOS_child_total, y=CHAOS_Adolescence_total)) + geom_point()
+
+survey$CHAOS_sum <- survey$CHAOS_child_total + survey$CHAOS_Adolescence_total
 ```
 
 #DT (childhood + adolescence)
@@ -157,6 +161,36 @@ survey$deprivation_Adolescence_physical <- apply(deprivation_Adolescence[cols_ph
 survey$deprivation_Adolescence_cognitive <- apply(deprivation_Adolescence[cols_cognitivedeprivation], 1,sum)
 hist(survey$deprivation_Adolescence_total)
 cor.test(survey$deprivation_child_total, survey$CHAOS_child_total)
+
+survey$deprivation_sum <- survey$deprivation_child_total + survey$deprivation_Adolescence_total
+
+### CHILDHOOD ###
+#Threat Scoring
+threat_child <- survey %>%
+  select("T1c_1":"T2.8c_1")
+
+cols_home_threat <- c("T1c_1","T2c_1","T3c_1","T4c_1","T5c_1","T6c_1","T7c_1","T8c_1","T9c_1","T10c_1","T11c_1","T12c_1")
+cols_neighborhood_threat <- c("T2.1c_1","T2.2c_1","T2.3c_1","T2.4c_1","T2.5c_1","T2.6c_1","T2.7c_1","T2.8c_1")
+survey$threat_childhood_total <- apply(threat_child,1, sum)
+survey$threat_childhood_home <- apply(threat_child[cols_home_threat], 1,sum)
+survey$threat_childhood_neighborhood <- apply(threat_child[cols_neighborhood_threat], 1,sum)
+hist(survey$threat_childhood_total)
+
+### ADOLESCENCE ###
+#Threat Scoring
+threat_adolescence <- survey %>%
+  select("T1a_1":"T2.8a_1")
+
+cols_home_threat <- c("T1a_1","T2a_1","T3a_1","T4a_1","T5a_1","T6a_1","T7a_1","T8a_1","T9a_1","T10a_1","T11a_1","T12a_1")
+cols_neighborhood_threat <- c("T2.1a_1","T2.2a_1","T2.3a_1","T2.4a_1","T2.5a_1","T2.6a_1","T2.7a_1","T2.8a_1")
+survey$threat_adolescence_total <- apply(threat_adolescence,1, sum)
+survey$threat_adolescence_home <- apply(threat_adolescence[cols_home_threat], 1,sum)
+survey$threat_adolescence_neighborhood <- apply(threat_adolescence[cols_neighborhood_threat], 1,sum)
+hist(survey$threat_adolescence_total)
+ggplot(data=survey, aes(x=threat_childhood_total, y=threat_adolescence_total)) + geom_point()+
+  geom_smooth()
+
+survey$Threat_sum <- survey$threat_childhood_total + survey$threat_adolescence_total
 ```
 
 #HUMS (adolescent + current)
@@ -196,3 +230,8 @@ survey$STAI_total <- apply(STAI,1, sum)
 #STOMP
 
 #AES
+
+#write scored survey df to .csv
+```{r}
+write.csv(file='../data/pleasing-displeasing_followup/scored_data.csv', survey)
+```
