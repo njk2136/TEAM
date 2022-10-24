@@ -12,7 +12,7 @@ source("reverseCode.R")
 
 #read in data
 ```{r}
-survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_October 18, 2022_14.03.csv")
+survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_October 23, 2022_08.27.csv")
 ```
 
 # QUIC (childhood + adolescence)
@@ -194,6 +194,30 @@ survey$Threat_sum <- survey$threat_childhood_total + survey$threat_adolescence_t
 ```
 
 #HUMS (adolescent + current)
+```{r}
+### ADOLESCENT ###
+#HUMS Scoring
+HUMS_adolescent <- survey %>%
+  select("HUMS_a1_1":"HUMS_a13_1")
+
+cols_healthy <- c("HUMS_a3_1","HUMS_a5_1","HUMS_a6_1","HUMS_a9_1","HUMS_a13_1")
+cols_unhealthy <- c("HUMS_a1_1","HUMS_a2_1","HUMS_a4_1","HUMS_a7_1","HUMS_a8_1","HUMS_a10_1","HUMS_a11_1","HUMS_a12_1")
+
+survey$HUMS_adolescence_healthy <- apply(HUMS_adolescent[cols_healthy], 1,sum)
+survey$HUMS_adolescence_unhealthy <- apply(HUMS_adolescent[cols_unhealthy], 1,sum)
+
+
+### ADULT ###
+#HUMS Scoring
+HUMS_adult <- survey %>%
+  select("HUMS1_1":"HUMS13_1")
+
+cols_healthy <- c("HUMS3_1","HUMS5_1","HUMS6_1","HUMS9_1","HUMS13_1")
+cols_unhealthy <- c("HUMS1_1","HUMS2_1","HUMS4_1","HUMS7_1","HUMS8_1","HUMS10_1","HUMS11_1","HUMS12_1")
+
+survey$HUMS_adult_healthy <- apply(HUMS_adult[cols_healthy], 1,sum)
+survey$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
+```
 
 #AES
 

@@ -8,6 +8,7 @@ output: html_document
 library(tidyverse)
 library(lme4)
 library(lmerTest)
+library(mediation)
 ```
 
 #read in data
@@ -60,8 +61,9 @@ envi_plsdispls <- pivot_longer(envi, !ID, names_to = "soundID", values_to = "rat
 envi_plsdispls$stim_name <- gsub("[0-9]", "", envi_plsdispls$soundID)
 ```
 
+#UPDATE BASED ON WHERE Q IS IN DF
 ```{r}
-names(scored_data)[12] <- "ID"
+names(scored_data)[5] <- "ID"
 ```
 
 #merge the datasets
@@ -85,22 +87,59 @@ summary(m2)
 
 m3 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 summary(m3)
+#timing follow-up
+m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+summary(m3t)
 
-m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=IADS_displeasing)
+m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=IADS_displeasing)
 summary(m4)
+#timing follow-up
+m4t <- lmer(rating ~ threat_childhood_home + threat_adolescence_home + (1 | ID) + (1 | soundID), data=IADS_displeasing)
+summary(m4t)
 ```
 
 #H2
 ```{r}
 m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
+#timing follow-up
+m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
+summary(m1t)
 
 m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
+#timing follow-up
+m2t <- lm(BAT_total ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
+summary(m2t)
 ```
 
 #H3
 ```{r}
 m1 <- lm(BMRQ_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
+
+m1m <- lm(BMRQ_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total, data=all_scored)
+summary(m1m)
+## need to figure out what the correct treatment variable is
+mediation <- mediate(m1,m1m, treat="QUIC_sum",mediator = "PASS_total")
+summary(mediation)
+#timing
+m2t <- lm(BMRQ_total ~ threat_childhood_total + threat_adolescence_total, data=all_scored)
+summary(m2t)
+```
+
+#exploratory
+```{r}
+cor.test(all_scored$HUMS_adolescence_healthy, all_scored$HUMS_adult_healthy)
+cor.test(all_scored$HUMS_adolescence_unhealthy, all_scored$HUMS_adukt_unhealthy)
+cor.test(all_scored$BMRQ_emotion, all_scored$QUIC_sum)
+
+m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total+ deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)
+summary(m1)
+
+m1 <- lm(HUMS_adukt_unhealthy ~ QUIC_sum + CHAOS_sum+ deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
+
+ggplot(data=all_scored, aes(x=HUMS_adukt_unhealthy, y=QUIC_sum))+
+  geom_point()
 ```
