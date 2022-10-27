@@ -220,8 +220,22 @@ survey$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
 ```
 
 #AES
+```{r}
+#AES Scoring
+AES <- survey %>%
+  select("AES1_1":"AES10_1")
+
+survey$AES_total <- apply(AES,1,sum)
+```
 
 #ASRS
+```{r}
+#ASRS-v1.1 Scoring
+ASRS <- survey %>%
+  select("ASRS1_1":"ASRS6_1")
+
+survey$ASRS_total <- apply(ASRS,1,sum)
+```
 
 #M@H
 ```{r}
@@ -234,7 +248,7 @@ MH <- survey %>%
 cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H13_1")
 MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
  
-survey$MH_total <- apply(MH,1, sum)
+survey$MH_total <- apply(MH,1,sum)
 ```
 
 #STAI
@@ -244,16 +258,35 @@ STAI <- survey %>%
   select("STAI1_1":"STAI20_1")
 
 #if it is a simple subscore (i.e. no reverse coding or anything)
-survey$STAI_total <- apply(STAI,1, sum)
+survey$STAI_total <- apply(STAI,1,sum)
 ```
 
 #CD-RISC
+```{r}
+#CD-RISC Scoring
+CD.RISC <- survey %>%
+  select("CD.RISC1_1":"CD.RISC10_1")
+
+survey$CD.RISC_total <- apply(CD.RISC,1,sum)
+```
 
 #TIPI
+```{r}
+#TIPI Scoring
+TIPI <- survey %>%
+  select("Q3.1_1":"Q3.1_10")
+
+survey$TIPI_total <- apply(TIPI,1,sum)
+```
 
 #STOMP
+```{r}
+#STOMP Scoring
+STOMP <- survey %>%
+  select("STOMP_1":"STOMP_10")
 
-#AES
+survey$STOMP_total <- apply(STOMP,1,sum)
+```
 
 #write scored survey df to .csv
 ```{r}
