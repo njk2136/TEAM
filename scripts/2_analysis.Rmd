@@ -97,11 +97,13 @@ summary(m3)
 m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 summary(m3t)
 
+
 m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=IADS_displeasing)
 summary(m4)
 #timing follow-up
-m4t <- lmer(rating ~ threat_childhood_home + threat_adolescence_home + (1 | ID) + (1 | soundID), data=IADS_displeasing)
+m4t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_displeasing)
 summary(m4t)
+
 
 m5 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=envi_displeasing)
 summary(m5)
@@ -146,7 +148,15 @@ summary(m2t)
 cor.test(all_scored$BMRQ_musicseek, all_scored$QUIC_sum)
 cor.test(all_scored$HUMS_adolescence_unhealthy, all_scored$HUMS_adult_unhealthy)
 
+
+#HUMS - both adolescent + current
 m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
+
+m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total, data=all_scored)
+summary(m1)
+
+m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)
 summary(m1)
 
 m1t <- lm(HUMS_adolescence_unhealthy ~ QUIC_Adolescence_total + QUIC_child_total, data=all_scored)
@@ -181,5 +191,44 @@ matched_controls <- matched_data %>%
 t.test(anhedonics$CHAOS_sum, matched_controls$CHAOS_sum)
 
 ## separate timing / dimensionality modeling stuff with other hypotheses ##
+## DIGITALLY GENERATED SOUDNS
+#pleasing
+#just childhood dimensions
+m1 <- lmer(rating ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
+summary(m1)
 
+#just adolescence dimensions
+m1 <- lmer(rating ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
+summary(m1)
+
+#displeasing
+#just childhood dimensions
+m1 <- lmer(rating ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total +(1 | ID) + (1 | soundID), data=digital_displeasing)
+summary(m1)
+
+#just adolescence dimensions
+m1 <- lmer(rating ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
+summary(m1)
+## directly pitting timing against each other  ##
+m1 <- lmer(rating ~ CHAOS_child_total + CHAOS_Adolescence_total  + (1 | ID) + (1 | soundID), data=digital_displeasing)
+summary(m1)
+
+## one big model ##
+m1 <- lmer(rating ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total + QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
+summary(m1)
+
+### IADS SOUNDS
+#pleasing
+m1 <- lmer(rating ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+summary(m1)
+
+m1 <- lmer(rating ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+summary(m1)
+
+#displeasing
+m1 <- lmer(rating ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total + (1 | ID) + (1 | soundID), data=IADS_displeasing)
+summary(m1)
+
+m1 <- lmer(rating ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_displeasing)
+summary(m1)
 ```
