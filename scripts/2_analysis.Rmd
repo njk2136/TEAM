@@ -7,8 +7,8 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(lme4)
-library(lmerTest)
 library(mediation)
+library(lmerTest)
 ```
 
 #read in data
@@ -29,12 +29,14 @@ names(master)[32:39] <- c('Envi1','Envi2','Envi3','Envi4','Envi5','Envi6','Envi7
 
 just_ratings<-master[10:39] -4
 cleaned <- cbind(master[1], just_ratings)
+cleaned <- cbind(cleaned, master[267])
 
 derived <- cleaned[1:13]
 derivedstims <- pivot_longer(derived, A:L, names_to = "stim_name", values_to = "rating" )
 
 IADS <- cleaned[14:23]
 IADS <- cbind(cleaned[1], IADS)
+IADS <- cbind(cleaned[32], IADS)
 IADS_stims <- pivot_longer(IADS, IADS105:IADS730, names_to = "stim_name", values_to = "rating" )
 
 envi <- just_ratings[23:30]
@@ -49,10 +51,10 @@ derived_plsdispls <- pivot_longer(derived, !ID, names_to = "soundID", values_to 
 
 derived_plsdispls$stim_name <- gsub("[0-9]", "", derived_plsdispls$soundID)
 
-names(IADS)[2:11] <- c("Displeasing1", "Pleasing2", "Pleasing3", "Displeasing4",
+names(IADS)[3:12] <- c("Displeasing1", "Pleasing2", "Pleasing3", "Displeasing4",
                           "Pleasing5", "Pleasing6", "Displeasing7","Displeasing8",
                           "Pleasing9", "Displeasing10")
-IADS_plsdispls <- pivot_longer(IADS, !ID, names_to = "soundID", values_to = "rating")
+IADS_plsdispls <- pivot_longer(IADS, !PASS_total:ID, names_to = "soundID", values_to = "rating")
 
 IADS_plsdispls$stim_name <- gsub("[0-9]", "", IADS_plsdispls$soundID)
 
@@ -97,6 +99,13 @@ summary(m3)
 m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 summary(m3t)
 
+#mediation
+m3m <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+summary(m3m)
+## need to figure out what the correct treatment variable is
+mediation <- mediate(m3,m3m, treat="Threat_sum",mediator = "PASS_total",boot=TRUE)
+summary(mediation)
+
 
 m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=IADS_displeasing)
 summary(m4)
@@ -104,6 +113,9 @@ summary(m4)
 m4t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_displeasing)
 summary(m4t)
 
+#mediation
+m4m <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + STAI_total + (1 | ID) + (1 | soundID), data=IADS_displeasing)
+summary(m4m)
 
 m5 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=envi_displeasing)
 summary(m5)
@@ -118,6 +130,7 @@ m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=
 summary(m1)
 #timing follow-up
 m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
+##check covariance
 summary(m1t)
 
 m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
@@ -146,7 +159,6 @@ summary(m2t)
 ```{r}
 ## eBMRQ subscales + ELA measures
 cor.test(all_scored$BMRQ_musicseek, all_scored$QUIC_sum)
-cor.test(all_scored$HUMS_adolescence_unhealthy, all_scored$HUMS_adult_unhealthy)
 
 
 #HUMS - both adolescent + current
@@ -165,21 +177,29 @@ summary(m1t)
 m2 <- lm(HUMS_adult_unhealthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
 
-m2t <- lm(HUMS_adult_unhealthy ~ QUIC_Adolescence_total + QUIC_child_total, data=all_scored)
-summary(m2t)
+m2 <- lm(HUMS_adult_unhealthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)
+summary(m2)
+
+m2 <- lm(HUMS_adult_unhealthy ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total, data=all_scored)
+summary(m2)
 
 m1 <- lm(HUMS_adolescence_healthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
 
-m1t <- lm(HUMS_adolescence_healthy ~ QUIC_Adolescence_total + QUIC_child_total, data=all_scored)
-summary(m1t)
+m1 <- lm(HUMS_adolescence_healthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)
+summary(m1)
 
-m2 <- lm(HUMS_adult_healthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
-summary(m2)
+m1 <- lm(HUMS_adolescence_healthy ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total, data=all_scored)
+summary(m1)
 
-m2t <- lm(HUMS_adult_healthy ~ QUIC_Adolescence_total + QUIC_child_total, data=all_scored)
-summary(m2t)
+m1 <- lm(HUMS_adult_healthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
 
+m1 <- lm(HUMS_adult_healthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)
+summary(m1)
+
+m1 <- lm(HUMS_adult_healthy ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total, data=all_scored)
+summary(m1)
 ### For all identified relationships, test mediators of CD-RISC + musical training ###
 
 anhedonics <- matched_data %>%
@@ -188,7 +208,7 @@ anhedonics <- matched_data %>%
 matched_controls <- matched_data %>%
   subset(group=="Matched Controls")
 
-t.test(anhedonics$CHAOS_sum, matched_controls$CHAOS_sum)
+t.test(anhedonics$MH_total, matched_controls$MH_total)
 
 ## separate timing / dimensionality modeling stuff with other hypotheses ##
 ## DIGITALLY GENERATED SOUDNS
@@ -205,6 +225,9 @@ summary(m1)
 #just childhood dimensions
 m1 <- lmer(rating ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total +(1 | ID) + (1 | soundID), data=digital_displeasing)
 summary(m1)
+# mediation
+m1m <- lmer(rating ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total + STAI_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
+summary(m1m)
 
 #just adolescence dimensions
 m1 <- lmer(rating ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=digital_displeasing)

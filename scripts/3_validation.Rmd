@@ -1,0 +1,64 @@
+---
+title: "3_validation"
+author: "Nick Kathios"
+date: '2022-10-31'
+output: html_document
+---
+#load packages
+```{r}
+library(tidyverse)
+library(psych)
+library(corrplot)
+source("reverseCode.R")
+```
+#read in data
+```{r}
+MH <- read.csv(file='../data/pleasing-displeasing_followup/scored_data.csv') %>%
+  select("M.H1_1":"M.H35_1")
+
+cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H17_1","M.H18_1","M.H20_1","M.H23_1","M.H24_1","M.H29_1","M.H30_1",
+                  "M.H32_1")
+MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+```
+#check in corrplot
+```{r}
+cor(MH,na.rm=TRUE)
+corrplot(as.matrix(cor(MH,use="complete.obs")), method="number")
+
+KMO(r=cor(MH,use="complete.obs" ))
+
+cortest.bartlett(MH)
+
+det(cor(MH,use="complete.obs" ))
+```
+
+#determine how many factors to use
+```{r}
+fafitfree <- fa(MH,nfactors = ncol(MH), rotate = "none")
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red")
+
+parallel <- fa.parallel(MH)
+
+
+fa.none <- fa(r=MH, 
+ nfactors = 7, 
+  covar = FALSE, SMC = TRUE,
+ fm="pa", 
+ max.iter=100,  
+ rotate="varimax") # none rotation
+ 
+ 
+print(fa.none)
+
+fa.diagram(fa.none)
+```

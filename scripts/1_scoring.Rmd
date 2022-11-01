@@ -12,7 +12,7 @@ source("reverseCode.R")
 
 #read in data
 ```{r}
-survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_October 25, 2022_12.41.csv")
+survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_October 31, 2022_11.34.csv")
 ```
 
 # QUIC (childhood + adolescence)
@@ -244,11 +244,15 @@ MH <- survey %>%
   select("M.H1_1":"M.H35_1")
 
 # Reverse code
+MH$M.H1_1
 #double check with Laurel and Psyche which ones should be reverse coded in ones we changed 
-cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H13_1")
+cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H17_1","M.H18_1","M.H20_1","M.H23_1","M.H24_1","M.H29_1","M.H30_1",
+                  "M.H32_1")
 MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
  
 survey$MH_total <- apply(MH,1,sum)
+
+hist(survey$MH_total)
 ```
 
 #STAI
@@ -257,8 +261,14 @@ survey$MH_total <- apply(MH,1,sum)
 STAI <- survey %>%
   select("STAI1_1":"STAI20_1")
 
+
+cols_reverse <- c("STAI1_1","STAI3_1","STAI6_1","STAI7_1","STAI10_1","STAI13_1","STAI14_1","STAI16_1","STAI19_1")
+STAI[cols_reverse] <- lapply(STAI[cols_reverse], reverseCode, min=1, max=4)
+
+
 #if it is a simple subscore (i.e. no reverse coding or anything)
 survey$STAI_total <- apply(STAI,1,sum)
+hist(survey$STAI_total)
 ```
 
 #CD-RISC
@@ -268,6 +278,7 @@ CD.RISC <- survey %>%
   select("CD.RISC1_1":"CD.RISC10_1")
 
 survey$CD.RISC_total <- apply(CD.RISC,1,sum)
+hist(survey$CD.RISC_total)
 ```
 
 #TIPI
