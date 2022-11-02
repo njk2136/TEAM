@@ -9,6 +9,7 @@ library(tidyverse)
 library(lme4)
 library(mediation)
 library(lmerTest)
+library(performance)
 ```
 
 #read in data
@@ -75,52 +76,47 @@ names(matched_data)[3] <- "ID"
 all_scored <- merge(master, scored_data, by.x="ID", by.y="ID")
 digital <-merge(derived_plsdispls, scored_data, by.x="ID", by.y="ID")
 digital_pleasing <- subset(digital, stim_name=="Pleasing")
-digital_displeasing <- subset(digital, stim_name="Displeasing")
+digital_displeasing <- subset(digital, stim_name=="Displeasing")
 IADS<-merge(IADS_plsdispls, scored_data, by.x="ID", by.y="ID")
 IADS_pleasing <- subset(IADS, stim_name=="Pleasing")
-IADS_displeasing <- subset(IADS, stim_name="Displeasing")
+IADS_displeasing <- subset(IADS, stim_name=="Displeasing")
 envi <- merge(envi_plsdispls, scored_data, by.x="ID", by.y="ID")
 envi_pleasing <- subset(envi, stim_name=="Pleasing")
-envi_displeasing <- subset(envi, stim_name="Displeasing")
+envi_displeasing <- subset(envi, stim_name=="Displeasing")
 matched_data <- merge(matched_data, scored_data, by.x="ID", by.y="ID")
 ```
 
 #H1
 ```{r}
 m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=digital_pleasing)
+#update to use this f(x) for other multicollinearity checks
+check_collinearity(m1)
 summary(m1)
 
 m2 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=digital_displeasing)
 summary(m2)
 
-m3 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+m3 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum  + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+#try mediation model w/ CDRISC
 summary(m3)
 #timing follow-up
 m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+vif(m3t)
 summary(m3t)
-
 #mediation
-m3m <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+m3m <- lmer(rating ~ QUIC_sum  + deprivation_sum + Threat_sum + PASS_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 summary(m3m)
 ## need to figure out what the correct treatment variable is
 mediation <- mediate(m3,m3m, treat="Threat_sum",mediator = "PASS_total",boot=TRUE)
 summary(mediation)
 
-
 m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=IADS_displeasing)
 summary(m4)
-#timing follow-up
-m4t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_displeasing)
-summary(m4t)
 
-#mediation
-m4m <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + STAI_total + (1 | ID) + (1 | soundID), data=IADS_displeasing)
-summary(m4m)
-
-m5 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=envi_displeasing)
+m5 <- lmer(rating ~ QUIC_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=envi_pleasing)
 summary(m5)
 
-m6 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=envi_pleasing)
+m6 <- lmer(rating ~ QUIC_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=envi_displeasing)
 summary(m6)
 ```
 
@@ -128,24 +124,27 @@ summary(m6)
 ```{r}
 m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
+m1 <- lm(MBEA_total ~ CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
 #timing follow-up
 m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
-##check covariance
+vif(m1t)
 summary(m1t)
 
 m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
 #timing follow-up
 m2t <- lm(BAT_total ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
+vif(m2t)
 summary(m2t)
 ```
 
 #H3
 ```{r}
-m1 <- lm(BMRQ_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+m1 <- lm(BMRQ_total ~ QUIC_sum  + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
 
-m1m <- lm(BMRQ_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total, data=all_scored)
+m1m <- lm(BMRQ_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1m)
 ## need to figure out what the correct treatment variable is
 mediation <- mediate(m1,m1m, treat="QUIC_sum",mediator = "PASS_total")
@@ -158,11 +157,13 @@ summary(m2t)
 #exploratory
 ```{r}
 ## eBMRQ subscales + ELA measures
-cor.test(all_scored$BMRQ_musicseek, all_scored$QUIC_sum)
+cor.test(all_scored$CHAOS_sum, all_scored$Threat_sum)
 
+m1 <- lm(BMRQ_socialreward ~ unpredictability_total  + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
 
 #HUMS - both adolescent + current
-m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+m1 <- lm(HUMS_adolescence_unhealthy ~ unpredictability_total + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
 
 m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total, data=all_scored)
@@ -174,7 +175,8 @@ summary(m1)
 m1t <- lm(HUMS_adolescence_unhealthy ~ QUIC_Adolescence_total + QUIC_child_total, data=all_scored)
 summary(m1t)
 
-m2 <- lm(HUMS_adult_unhealthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+m2 <- lm(HUMS_adult_unhealthy ~ QUIC_sum  + deprivation_sum + Threat_sum, data=all_scored)
+m2 <- lm(HUMS_adult_unhealthy ~ CHAOS_sum  + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
 
 m2 <- lm(HUMS_adult_unhealthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)

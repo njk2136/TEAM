@@ -1,0 +1,214 @@
+---
+title: "4_plotting"
+author: "Nick Kathios"
+date: '2022-11-02'
+output: html_document
+---
+#load in packages
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lmerTest)
+library(MuMIn)
+library(AICcmodavg)
+```
+
+#read in data
+```{r}
+#UPDATE THIS FOR A BETTER PIPELINE
+```
+
+#IADS pleasing sounds ~ threat
+```{r}
+IADS_pleasing_model <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+summary(IADS_pleasing_model)
+
+newdata <- expand.grid(
+  Threat_sum=seq(40,154,1),
+  QUIC_sum=0,
+  deprivation_sum=0,
+  CHAOS_sum=0
+)
+
+predictions<- predictSE(IADS_pleasing_model, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions)
+pred$upper <- (pred$fit + pred$se.fit)
+pred$lower <- (pred$fit - pred$se.fit)
+
+ggplot(data=pred, aes(x=Threat_sum,y=fit)) +
+  geom_line() +
+  geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
+  ylab('Pleasantness Rating') +
+  xlab('Threat Sum Score') +
+  theme_classic() +
+   theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+  ) +
+  geom_point(aes(y=rating), data=IADS_pleasing,alpha=0.2)
+ # stat_summary(fun.data = 'mean_cl_normal', geom = 'errorbar',aes(y=rating), width = 0.2, data=IADS_pleasing, alpha=0.2) +
+#  stat_summary(fun.data = 'mean_cl_normal', geom = 'pointrange', aes(y=rating), data=IADS_pleasing, alpha=0.2)
+```
+
+#MBEA ~ CHAOS
+```{r}
+MBEA_model <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(MBEA_model)
+
+newdata <- expand.grid(
+  Threat_sum=0,
+  QUIC_sum=0,
+  deprivation_sum=0,
+  CHAOS_sum=seq(12,55,1)
+)
+
+predictions<- predict(MBEA_model, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions[["fit"]],predictions[["se.fit"]] )
+names(pred)[5:6] <- c("fit", "se.fit")
+pred$upper <- (pred$fit + pred$se.fit)
+pred$lower <- (pred$fit - pred$se.fit)
+
+ggplot(data=pred, aes(x=CHAOS_sum,y=fit)) +
+  geom_line() +
+  geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
+  ylab('MBEA Score') +
+  xlab('CHAOS Sum Score') +
+  theme_classic() +
+   theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+  ) +
+  geom_point(aes(y=MBEA_total), data=all_scored,alpha=0.2)
+
+#timing
+MBEA_model_timing <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
+
+newdata_child<- expand.grid(
+  CHAOS_child_total=seq(6,29,1),
+  CHAOS_Adolescence_total=0
+)
+
+child_predictions<- predict(MBEA_model_timing, newdata_child, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+child_pred <- cbind(newdata_child, child_predictions[["fit"]],child_predictions[["se.fit"]] )
+names(child_pred)[1] <- "CHAOS_total"
+names(child_pred)[3:4] <- c("fit", "se.fit")
+child_pred<-child_pred[-c(2)]
+child_pred$timing <- "Childhood"
+child_pred$upper <- (child_pred$fit + child_pred$se.fit)
+child_pred$lower <- (child_pred$fit - child_pred$se.fit)
+
+newdata_adol<- expand.grid(
+  CHAOS_child_total=0,
+  CHAOS_Adolescence_total=seq(6,29,1)
+)
+
+adol_predictions<- predict(MBEA_model_timing, newdata_adol, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+adol_pred <- cbind(newdata_adol, adol_predictions[["fit"]],adol_predictions[["se.fit"]] )
+names(adol_pred)[2] <- "CHAOS_total"
+names(adol_pred)[3:4] <- c("fit", "se.fit")
+adol_pred<-adol_pred[-c(1)]
+adol_pred$timing <- "Adolescence"
+adol_pred$upper <- (adol_pred$fit + adol_pred$se.fit)
+adol_pred$lower <- (adol_pred$fit - adol_pred$se.fit)
+timing_pred <- rbind(child_pred, adol_pred)
+
+color_code <- all_scored %>%
+  subset(select=c(289,700,701)) %>%
+  pivot_longer(CHAOS_child_total:CHAOS_Adolescence_total, names_to = "timing", values_to = "CHAOS_total")
+
+color_code$timing <- ifelse(color_code$timing=="CHAOS_Adolescence_total", "Adolescence", "Childhood")
+  
+ggplot(data=timing_pred, aes(x=CHAOS_total,y=fit)) +
+  geom_line(aes(color=timing)) +
+  geom_ribbon(aes(ymin=upper, ymax=lower,fill=timing),alpha=0.1) +
+  ylab('MBEA Score') +
+  xlab('CHAOS Sum Score') +
+  theme_classic() +
+   theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+  ) +
+  geom_point(aes(y=MBEA_total,color=timing), data=color_code,alpha=0.3) +
+  facet_grid(~timing) +
+  theme(legend.position = "none")
+```
+
+#BAT ~ CHAOS
+```{r}
+BAT_model <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(BAT_model)
+
+newdata <- expand.grid(
+  Threat_sum=0,
+  QUIC_sum=seq(0,44,1),
+  deprivation_sum=0,
+  CHAOS_sum=0
+)
+
+predictions<- predict(BAT_model, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions[["fit"]],predictions[["se.fit"]] )
+names(pred)[5:6] <- c("fit", "se.fit")
+pred$upper <- (pred$fit + pred$se.fit)
+pred$lower <- (pred$fit - pred$se.fit)
+
+ggplot(data=pred, aes(x=QUIC_sum,y=fit)) +
+  geom_line() +
+  geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
+  ylab('BAT Score') +
+  xlab('QUIC Sum Score') +
+  theme_classic() +
+   theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+  ) +
+  geom_point(aes(y=BAT_total), data=all_scored,alpha=0.2)
+
+BAT_model_timing <- lm(BAT_total ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
+
+newdata<- expand.grid(
+  QUIC_child_total=0,
+  QUIC_Adolescence_total=seq(0,222,1)
+)
+
+predictions<- predict(BAT_model_timing, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions[["fit"]],predictions[["se.fit"]] )
+names(pred)[3:4] <- c("fit", "se.fit")
+pred<-pred[-c(2)]
+pred$upper <- (pred$fit + pred$se.fit)
+pred$lower <- (pred$fit - pred$se.fit)
+
+#think about showing childhood predictions alongside these although N.S.
+## (also, should this be an interaction analysis?)
+ggplot(data=pred, aes(x=QUIC_sum,y=fit)) +
+  geom_line() +
+  geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
+  ylab('BAT Score') +
+  xlab('QUIC Adolescent Score') +
+  theme_classic() +
+   theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+  ) +
+  geom_point(aes(y=BAT_total), data=all_scored,alpha=0.3)
+```
