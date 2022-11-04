@@ -104,10 +104,11 @@ m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID
 vif(m3t)
 summary(m3t)
 #mediation
-m3m <- lmer(rating ~ QUIC_sum  + deprivation_sum + Threat_sum + PASS_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+m3 <- lmer(rating ~ QUIC_sum  + deprivation_sum + Threat_sum + (1 | ID), data=IADS_pleasing)
 summary(m3m)
+m3m <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum  + CD.RISC_total + (1 | ID), data=IADS_pleasing)
 ## need to figure out what the correct treatment variable is
-mediation <- mediate(m3,m3m, treat="Threat_sum",mediator = "PASS_total",boot=TRUE)
+mediation <- mediate(m3,m3m, treat="Threat_sum",mediator = "CD.RISC_total",boot=TRUE)
 summary(mediation)
 
 m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=IADS_displeasing)
@@ -128,8 +129,10 @@ m1 <- lm(MBEA_total ~ CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
 #timing follow-up
 m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
-vif(m1t)
+check_collinearity(m1t)
 summary(m1t)
+all_scored$CD.RISC_total
+m1t <- lm(MBEA_total ~  CHAOS_Adolescence_total, data=all_scored)
 
 m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
@@ -154,16 +157,94 @@ m2t <- lm(BMRQ_total ~ threat_childhood_total + threat_adolescence_total, data=a
 summary(m2t)
 ```
 
-#exploratory
+#exploratory -- bmrq subscale analyses
 ```{r}
-## eBMRQ subscales + ELA measures
-cor.test(all_scored$CHAOS_sum, all_scored$Threat_sum)
+##cor tests for bmrq total
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_total)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_total)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_total)
+cor.test(all_scored$deprivation_sum, all_scored$BMRQ_total)
 
-m1 <- lm(BMRQ_socialreward ~ unpredictability_total  + deprivation_sum + Threat_sum, data=all_scored)
+## eBMRQ subscales + ELA measures
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_absorption)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_absorption)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_absorption)
+cor.test(all_scored$deprivation_sum, all_scored$BMRQ_absorption)
+m1 <-lm(BMRQ_absorption ~ CHAOS_sum  + QUIC_sum +  + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1) 
+
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_emotion)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_emotion)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_emotion)
+cor.test(all_scored$deprivation_sum, all_scored$CHAOS_child_total)
+m1 <-lm(BMRQ_emotion ~ CHAOS_sum  + QUIC_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1) 
+
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_socialreward)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_socialreward)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_socialreward)
+cor.test(all_scored$deprivation_sum, all_scored$BMRQ_socialreward)
 summary(m1)
 
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_musicseek)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_musicseek)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_musicseek)
+cor.test(all_scored$deprivation_sum, all_scored$BMRQ_musicseek)
+
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_moodreg)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_moodreg)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_moodreg)
+cor.test(all_scored$deprivation_sum, all_scored$BMRQ_moodreg)
+
+
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_sensorimotor)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_sensorimotor)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_sensorimotor)
+cor.test(all_scored$deprivation_sum, all_scored$BMRQ_sensorimotor)
+
+## childhood measures
+cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_absorption)
+cor.test(all_scored$QUIC_child_total, all_scored$BMRQ_absorption)
+cor.test(all_scored$threat_childhood_total, all_scored$BMRQ_absorption)
+cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_absorption)
+m1 <-lm(BMRQ_absorption ~ CHAOS_sum  + QUIC_sum +  + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1) 
+
+cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_emotion)
+cor.test(all_scored$QUIC_child_total, all_scored$BMRQ_emotion)
+cor.test(all_scored$threat_childhood_total, all_scored$BMRQ_emotion)
+cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_emotion)
+m1 <-lm(BMRQ_emotion ~ CHAOS_sum  + QUIC_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1) 
+
+cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_socialreward)
+cor.test(all_scored$QUIC_child_total, all_scored$BMRQ_socialreward)
+cor.test(all_scored$threat_childhood_total, all_scored$BMRQ_socialreward)
+cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_socialreward)
+summary(m1)
+
+cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_musicseek)
+cor.test(all_scored$QUIC_child_total, all_scored$BMRQ_musicseek)
+cor.test(all_scored$threat_childhood_total, all_scored$BMRQ_musicseek)
+cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_musicseek)
+
+cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_moodreg)
+cor.test(all_scored$QUIC_child_total, all_scored$BMRQ_moodreg)
+cor.test(all_scored$threat_childhood_total, all_scored$BMRQ_moodreg)
+cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_moodreg)
+
+cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_sensorimotor)
+cor.test(all_scored$QUIC_child_total, all_scored$BMRQ_sensorimotor)
+cor.test(all_scored$threat_childhood_total, all_scored$BMRQ_sensorimotor)
+cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_sensorimotor)
+```
+
+```{r}
 #HUMS - both adolescent + current
-m1 <- lm(HUMS_adolescence_unhealthy ~ unpredictability_total + deprivation_sum + Threat_sum, data=all_scored)
+m1 <- lm(HUMS_adolescence_unhealthy ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum, data=all_scored)
+summary(m1)
+
+m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
 summary(m1)
 
 m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total, data=all_scored)
@@ -175,8 +256,7 @@ summary(m1)
 m1t <- lm(HUMS_adolescence_unhealthy ~ QUIC_Adolescence_total + QUIC_child_total, data=all_scored)
 summary(m1t)
 
-m2 <- lm(HUMS_adult_unhealthy ~ QUIC_sum  + deprivation_sum + Threat_sum, data=all_scored)
-m2 <- lm(HUMS_adult_unhealthy ~ CHAOS_sum  + deprivation_sum + Threat_sum, data=all_scored)
+m2 <- lm(HUMS_adult_unhealthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
 
 m2 <- lm(HUMS_adult_unhealthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)

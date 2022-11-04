@@ -10,6 +10,9 @@ library(tidyverse)
 library(lmerTest)
 library(MuMIn)
 library(AICcmodavg)
+library(sjPlot)
+library(corrplot)
+library(psych)
 ```
 
 #read in data
@@ -17,10 +20,65 @@ library(AICcmodavg)
 #UPDATE THIS FOR A BETTER PIPELINE
 ```
 
-#IADS pleasing sounds ~ threat
+#digitally generated sounds
 ```{r}
-IADS_pleasing_model <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+DG_pleasing <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=digital_pleasing)
+
+DG_pleasing_coefficients <-
+plot_model(DG_pleasing, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.1, .1) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=DG_pleasing_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/DG_pleasing_coefficients.png',width=10)
+
+DG_displeasing <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=digital_displeasing)
+
+DG_displeasing_coefficents <- 
+plot_model(DG_displeasing, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=DG_displeasing_coefficents, '../figures/pleasing:displeasing_followup/lab_presentation/DG_displeasing_coefficents.png',width=10)
+
+```
+
+
+#DG + IADS pleasing sounds ~ threat
+```{r}
+IADS_pleasing_model <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+
 summary(IADS_pleasing_model)
+
+IADS_coefficients <-
+  plot_model(IADS_pleasing_model, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=IADS_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/IADS_pleasing_coefficients.png',width=10)
 
 newdata <- expand.grid(
   Threat_sum=seq(40,154,1),
@@ -36,6 +94,7 @@ pred <- cbind(newdata, predictions)
 pred$upper <- (pred$fit + pred$se.fit)
 pred$lower <- (pred$fit - pred$se.fit)
 
+IADS_pleasing_threat <- 
 ggplot(data=pred, aes(x=Threat_sum,y=fit)) +
   geom_line() +
   geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
@@ -51,12 +110,29 @@ ggplot(data=pred, aes(x=Threat_sum,y=fit)) +
   geom_point(aes(y=rating), data=IADS_pleasing,alpha=0.2)
  # stat_summary(fun.data = 'mean_cl_normal', geom = 'errorbar',aes(y=rating), width = 0.2, data=IADS_pleasing, alpha=0.2) +
 #  stat_summary(fun.data = 'mean_cl_normal', geom = 'pointrange', aes(y=rating), data=IADS_pleasing, alpha=0.2)
+
+ggsave(plot=IADS_pleasing_threat, '../figures/pleasing:displeasing_followup/lab_presentation/IADS_pleasing.png')
 ```
 
 #MBEA ~ CHAOS
 ```{r}
-MBEA_model <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+MBEA_model <- lm(scale(MBEA_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum), data=all_scored)
 summary(MBEA_model)
+
+MBEA_coef <- 
+plot_model(MBEA_model, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=MBEA_coef, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_coef.png', width=10)
 
 newdata <- expand.grid(
   Threat_sum=0,
@@ -73,6 +149,7 @@ names(pred)[5:6] <- c("fit", "se.fit")
 pred$upper <- (pred$fit + pred$se.fit)
 pred$lower <- (pred$fit - pred$se.fit)
 
+MBEA_chaos <- 
 ggplot(data=pred, aes(x=CHAOS_sum,y=fit)) +
   geom_line() +
   geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
@@ -87,8 +164,26 @@ ggplot(data=pred, aes(x=CHAOS_sum,y=fit)) +
   ) +
   geom_point(aes(y=MBEA_total), data=all_scored,alpha=0.2)
 
+ggsave(plot=MBEA_chaos, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_chaos.png')
+
 #timing
-MBEA_model_timing <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
+MBEA_model_timing <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(CHAOS_Adolescence_total), data=all_scored)
+
+MBEA_CHAOS_timing_coef<-
+plot_model(MBEA_model_timing, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("QUIC Adolescence", "QUIC Childhood"))
+
+ggsave(plot=MBEA_CHAOS_timing_coef, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_CHAOS_timing_coef.png',width=10)
+
 
 newdata_child<- expand.grid(
   CHAOS_child_total=seq(6,29,1),
@@ -128,7 +223,16 @@ color_code <- all_scored %>%
   pivot_longer(CHAOS_child_total:CHAOS_Adolescence_total, names_to = "timing", values_to = "CHAOS_total")
 
 color_code$timing <- ifelse(color_code$timing=="CHAOS_Adolescence_total", "Adolescence", "Childhood")
-  
+
+color_code$timing <-
+  factor(color_code$timing,
+         levels = c("Childhood", "Adolescence"))
+
+timing_pred$timing <- 
+  factor(timing_pred$timing,
+         levels = c("Childhood", "Adolescence"))
+
+MBEA_chaos_timing <- 
 ggplot(data=timing_pred, aes(x=CHAOS_total,y=fit)) +
   geom_line(aes(color=timing)) +
   geom_ribbon(aes(ymin=upper, ymax=lower,fill=timing),alpha=0.1) +
@@ -140,16 +244,35 @@ ggplot(data=timing_pred, aes(x=CHAOS_total,y=fit)) +
     axis.title.y = element_text(family="Arial",size=22),
     axis.text.x = element_text(family="Arial", size=20),
     axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20)
   ) +
   geom_point(aes(y=MBEA_total,color=timing), data=color_code,alpha=0.3) +
   facet_grid(~timing) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+
+  scale_x_continuous(breaks=c(5,10,15,20,25))
+
+ggsave(plot=MBEA_chaos_timing, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_chaos_timing.png',width=12)
 ```
 
-#BAT ~ CHAOS
+#BAT ~ QUIC
 ```{r}
-BAT_model <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+BAT_model <- lm(scale(BAT_total) ~  scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum), data=all_scored)
 summary(BAT_model)
+
+BAT_coefficients<-
+  plot_model(BAT_model, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=BAT_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/BAT_coefficients.png',width=10)  
 
 newdata <- expand.grid(
   Threat_sum=0,
@@ -166,6 +289,7 @@ names(pred)[5:6] <- c("fit", "se.fit")
 pred$upper <- (pred$fit + pred$se.fit)
 pred$lower <- (pred$fit - pred$se.fit)
 
+BAT_QUIC <- 
 ggplot(data=pred, aes(x=QUIC_sum,y=fit)) +
   geom_line() +
   geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
@@ -180,29 +304,237 @@ ggplot(data=pred, aes(x=QUIC_sum,y=fit)) +
   ) +
   geom_point(aes(y=BAT_total), data=all_scored,alpha=0.2)
 
-BAT_model_timing <- lm(BAT_total ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
+ggsave(plot=BAT_QUIC, '../figures/pleasing:displeasing_followup/lab_presentation/BAT_QUIC.png')
 
-newdata<- expand.grid(
-  QUIC_child_total=0,
-  QUIC_Adolescence_total=seq(0,222,1)
+
+BAT_model_timing <- lm(scale(BAT_total) ~ scale(QUIC_child_total) + scale(QUIC_Adolescence_total), data=all_scored)
+summary(BAT_model_timing)
+
+BAT_QUIC_timing_coef<-
+plot_model(BAT_model_timing, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.6, .6) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("QUIC Adolescence", "QUIC Childhood"))
+
+ggsave(plot=BAT_QUIC_timing_coef, '../figures/pleasing:displeasing_followup/lab_presentation/BAT_QUIC_timing_coef.png',width=10) 
+
+
+newdata_child<- expand.grid(
+  QUIC_child_total=seq(0,22,1),
+  QUIC_Adolescence_total=0
 )
 
-predictions<- predict(BAT_model_timing, newdata, se.fit = TRUE, print.matrix =
+child_predictions<- predict(BAT_model_timing, newdata_child, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+child_pred <- cbind(newdata_child, child_predictions[["fit"]],child_predictions[["se.fit"]] )
+names(child_pred)[1] <- "QUIC_total"
+names(child_pred)[3:4] <- c("fit", "se.fit")
+child_pred<-child_pred[-c(2)]
+child_pred$timing <- "Childhood"
+child_pred$upper <- (child_pred$fit + child_pred$se.fit)
+child_pred$lower <- (child_pred$fit - child_pred$se.fit)
+check_collinearity(BAT_model_timing)
+test <- subset(all_scored,select=c(691,695))
+
+
+newdata_adol<- expand.grid(
+  QUIC_child_total=0,
+  QUIC_Adolescence_total=seq(0,22,1)
+)
+
+adol_predictions<- predict(BAT_model_timing, newdata_adol, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+adol_pred <- cbind(newdata_adol, adol_predictions[["fit"]],adol_predictions[["se.fit"]] )
+names(adol_pred)[2] <- "QUIC_total"
+names(adol_pred)[3:4] <- c("fit", "se.fit")
+adol_pred<-adol_pred[-c(1)]
+adol_pred$timing <- "Adolescence"
+adol_pred$upper <- (adol_pred$fit + adol_pred$se.fit)
+adol_pred$lower <- (adol_pred$fit - adol_pred$se.fit)
+timing_pred <- rbind(child_pred, adol_pred)
+
+color_code <- all_scored %>%
+  subset(select=c(290,691,695)) %>%
+  pivot_longer(QUIC_child_total:QUIC_Adolescence_total, names_to = "timing", values_to = "QUIC_total")
+
+color_code$timing <- ifelse(color_code$timing=="QUIC_Adolescence_total", "Adolescence", "Childhood")
+
+color_code$timing <-
+  factor(color_code$timing,
+         levels = c("Childhood", "Adolescence"))
+
+timing_pred$timing <- 
+  factor(timing_pred$timing,
+         levels = c("Childhood", "Adolescence"))
+
+BAT_QUIC_timing <- 
+ggplot(data=timing_pred, aes(x=QUIC_total,y=fit)) +
+  geom_line(aes(color=timing)) +
+  geom_ribbon(aes(ymin=upper, ymax=lower,fill=timing),alpha=0.1) +
+  ylab('BAT Score') +
+  xlab('QUIC Score') +
+  theme_classic() +
+   theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20)
+  ) +
+  geom_point(aes(y=BAT_total,color=timing), data=color_code,alpha=0.3)+
+  facet_grid(~timing) +
+  theme(legend.position = "none")
+
+ggsave(plot=BAT_QUIC_timing, '../figures/pleasing:displeasing_followup/lab_presentation/BAT_QUIC_timing.png',width=10)
+```
+
+#eBMRQ ~ ELA
+```{r}
+eBMRQ <- lm(scale(BMRQ_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum), data=all_scored)
+summary(eBMRQ)
+
+eBMRQ_coefficients <-
+  plot_model(eBMRQ, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+ scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+  
+ggsave(plot=eBMRQ_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/eBMRQ_coefficients.png',width=10)
+```
+
+#corr plot of subscores + ELA measures
+```{r}
+#generate correlation matrix
+#gather variables of interest
+variables = dplyr::select(all_scored, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor, QUIC_sum, 
+                          CHAOS_sum, deprivation_sum, Threat_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+
+pdf(file = "../figures/pleasing:displeasing_followup/lab_presentation/BMRQ_corrplot_totals.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#childhood
+variables = dplyr::select(all_scored, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor, QUIC_child_total, 
+                          CHAOS_child_total, deprivation_child_total, threat_childhood_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+pdf(file = "../figures/pleasing:displeasing_followup/lab_presentation/BMRQ_corrplot_childhood.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+
+#adolescence
+variables = dplyr::select(all_scored, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor, QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, threat_adolescence_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+
+pdf(file = "../figures/pleasing:displeasing_followup/lab_presentation/BMRQ_corrplot_adolescence.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+m <- lm(data=all_scored, BMRQ_absorption ~ QUIC_child_total + QUIC_Adolescence_total)
+summary(m)
+```
+
+#HUMS Results
+```{r}
+HUMS_adolescence_QUIC <- lm((HUMS_adolescence_unhealthy) ~ (QUIC_sum) + (CHAOS_sum) + (deprivation_sum) + (Threat_sum), data=all_scored)
+
+HUMS_adolescence_coef<-
+plot_model(HUMS_adolescence_QUIC, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.75, .75) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+ scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=HUMS_adolescence_coef, '../figures/pleasing:displeasing_followup/lab_presentation/HUMS_adolescence_coef.png',width=10)
+
+#model predictions
+newdata <- expand.grid(
+  Threat_sum=0,
+  QUIC_sum=seq(0,44,1),
+  deprivation_sum=0,
+  CHAOS_sum=0
+)
+
+predictions<- predict(HUMS_adolescence_QUIC, newdata, se.fit = TRUE, print.matrix =
         TRUE, level = 0)
 
 pred <- cbind(newdata, predictions[["fit"]],predictions[["se.fit"]] )
-names(pred)[3:4] <- c("fit", "se.fit")
-pred<-pred[-c(2)]
+names(pred)[5:6] <- c("fit", "se.fit")
 pred$upper <- (pred$fit + pred$se.fit)
 pred$lower <- (pred$fit - pred$se.fit)
 
-#think about showing childhood predictions alongside these although N.S.
-## (also, should this be an interaction analysis?)
+HUMS_unhealthy_adolescence_QUIC <- 
 ggplot(data=pred, aes(x=QUIC_sum,y=fit)) +
   geom_line() +
   geom_ribbon(aes(ymin=upper, ymax=lower),alpha=0.1) +
-  ylab('BAT Score') +
-  xlab('QUIC Adolescent Score') +
+  ylab('HUMS-Unhealthy Score') +
+  xlab('QUIC Sum Score') +
   theme_classic() +
    theme(
     axis.title.x = element_text(family="Arial", size=22),
@@ -210,5 +542,7 @@ ggplot(data=pred, aes(x=QUIC_sum,y=fit)) +
     axis.text.x = element_text(family="Arial", size=20),
     axis.text.y = element_text(family="Arial",size=20),
   ) +
-  geom_point(aes(y=BAT_total), data=all_scored,alpha=0.3)
+  geom_point(aes(y=HUMS_adolescence_unhealthy), data=all_scored,alpha=0.2)
+
+ggsave(plot=HUMS_unhealthy_adolescence_QUIC, '../figures/pleasing:displeasing_followup/lab_presentation/HUMS_unhealthy_adolescence_QUIC.png',width=10)
 ```
