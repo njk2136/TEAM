@@ -1,0 +1,59 @@
+---
+title: "stimuli_selection"
+author: "Nick Kathios"
+date: '2022-11-10'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(MatchIt)
+```
+
+#define tertiles
+```{r}
+vTert = quantile(stimuli$PerceivedComplexity, c(0:3/3))
+
+
+#classify tertile class
+stimuli$tert = with(stimuli, 
+               cut(PerceivedComplexity, 
+                   vTert, 
+                   include.lowest = T, 
+                   labels = c("Low", "Intermediate", 
+                              "High")))
+
+low <- subset(stimuli, tert=="Low") %>%
+  subset(PerceivedComplexity<0.8)
+intermediate <- subset(stimuli, tert=="Intermediate")
+high <- subset(stimuli, tert=="High")
+first <- rbind(low,intermediate)
+```
+
+#match it
+```{r}
+first$tert = ifelse(first$tert == 'Low', 1, 0)
+first$tert <- as.factor(first$tert)
+
+matched <- MatchIt::matchit(tert ~ Duration + LoudnessRMS + OnsetsTotal + InitialTempoBPM, data=first, method='nearest', ratio=1)
+summary(matched)
+df.match <- MatchIt::match.data(matched)[1:ncol(first)]
+
+df.match$tert = ifelse(df.match$tert == '0', "Intermediate", "Low")
+
+intermediate <- subset(df.match, tert=="Intermediate")
+second<-rbind(intermediate,high)
+second$tert = ifelse(second$tert == 'Intermediate', 1, 0)
+second$tert <- as.factor(second$tert)
+matched <- MatchIt::matchit(tert ~ Duration + LoudnessRMS + OnsetsTotal + InitialTempoBPM, data=second, method='nearest', ratio=1)
+summary(matched)
+df.match2 <- MatchIt::match.data(matched)[1:ncol(first)]
+df.match2$tert = ifelse(df.match2$tert == '0', "High", "Intermediate")
+
+dfmatch2<-subset(df.match2,tert=="High")
+
+chosen <- rbind(df.match,dfmatch2)
+
+aov <- aov(data=chosen,  InitialTempoBPM ~ tert)
+summary(aov)
+```
