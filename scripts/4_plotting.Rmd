@@ -180,7 +180,7 @@ plot_model(MBEA_model_timing, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("QUIC Adolescence", "QUIC Childhood"))
+  scale_x_discrete(labels=c("CHAOS Adolescence", "CHAOS Childhood"))
 
 ggsave(plot=MBEA_CHAOS_timing_coef, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_CHAOS_timing_coef.png',width=10)
 

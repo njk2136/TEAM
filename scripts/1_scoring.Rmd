@@ -12,7 +12,7 @@ source("reverseCode.R")
 
 #read in data
 ```{r}
-survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_October 31, 2022_11.34.csv")
+survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_November 15, 2022_19.53.csv")
 ```
 
 # QUIC (childhood + adolescence)
@@ -221,7 +221,7 @@ survey$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
 
 #AES
 ```{r}
-#AES Scoring
+#AES Scoring --> update to do factor structure according to Sachs (2016)
 AES <- survey %>%
   select("AES1_1":"AES10_1")
 
