@@ -10,6 +10,7 @@ library(lme4)
 library(mediation)
 library(lmerTest)
 library(performance)
+library(sjPlot)
 ```
 
 #read in data
@@ -89,17 +90,25 @@ matched_data <- merge(matched_data, scored_data, by.x="ID", by.y="ID")
 #H1
 ```{r}
 m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=digital_pleasing)
-#update to use this f(x) for other multicollinearity checks
+
+#multicollinearity checks
 check_collinearity(m1)
 summary(m1)
 
-m2 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=digital_displeasing)
-check_collinearity(m2)
+m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=digital_displeasing)
 summary(m2)
-#timing check
+#plot results
+plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("Displeasing Digitally-Generated")
+
+#timing follow-up
 m2t <- lmer(rating ~ CHAOS_Adolescence_total + CHAOS_child_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
 check_collinearity(m2t)
 summary(m2t)
+#plot results
+plot_model(m2t, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("Displeasing Digitally-Generated")
+
 
 m3 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum  + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 #try mediation model w/ CDRISC
