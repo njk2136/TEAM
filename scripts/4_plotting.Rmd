@@ -436,7 +436,7 @@ colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation',
 rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
                            'Sensorimotor', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
 
-pdf(file = "../figures/pleasing:displeasing_followup/lab_presentation/BMRQ_corrplot_totals.pdf")
+pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
@@ -458,7 +458,7 @@ colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation',
                            'Sensorimotor', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
 rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
                            'Sensorimotor', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
-pdf(file = "../figures/pleasing:displeasing_followup/lab_presentation/BMRQ_corrplot_childhood.pdf")
+pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_childhood.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
@@ -482,7 +482,7 @@ colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation',
 rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
                            'Sensorimotor', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
 
-pdf(file = "../figures/pleasing:displeasing_followup/lab_presentation/BMRQ_corrplot_adolescence.pdf")
+pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_adolescence.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 

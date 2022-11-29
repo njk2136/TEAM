@@ -110,20 +110,15 @@ plot_model(m2t, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Displeasing Digitally-Generated")
 
 
-m3 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum  + (1 | ID) + (1 | soundID), data=IADS_pleasing)
-#try mediation model w/ CDRISC
+m3 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum)  + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+#plot results
+plot_model(m3, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("Pleasing IADS Sounds")
 summary(m3)
 #timing follow-up
 m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 check_collinearity(m3t)
 summary(m3t)
-#mediation
-m3 <- lmer(rating ~ Threat_sum + (1 | ID), data=IADS_pleasing)
-summary(m3m)
-m3m <- lmer(rating ~ Threat_sum  + CD.RISC_total + (1 | ID), data=IADS_pleasing)
-## need to figure out what the correct treatment variable is
-mediation <- mediate(m3,m3m, treat="Threat_sum",mediator = "CD.RISC_total",boot=TRUE)
-summary(mediation)
 
 m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=IADS_displeasing)
 summary(m4)
@@ -139,27 +134,36 @@ summary(m6)
 ```{r}
 m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1)
+#plot results
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
 #timing follow-up
 m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
 check_collinearity(m1t)
 summary(m1t)
+#plot results
+plot_model(m1t, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
 
 m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
-#timing follow-up
-m2t <- lm(BAT_total ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
-check_collinearity(m2t)
-summary(m2t)
 ```
 
 #H3
 ```{r}
-m1 <- lm(BMRQ_total ~ QUIC_sum  + deprivation_sum + Threat_sum, data=all_scored)
+m1 <- lm(BMRQ_total ~ QUIC_sum  + deprivation_sum + Threat_sum + CHAOS_sum, data=all_scored)
 summary(m1)
 ```
 
 #exploratory -- bmrq subscale analyses
 ```{r}
+cor.test(all_scored$What.is.your.age., all_scored$AES_total)
+ggplot(all_scored, aes(x=What.is.your.age., y=AES_total)) +
+  geom_point() +
+  geom_smooth(method="lm") +
+  theme_light()+
+  ylab("AES Total Score") +
+  xlab("Age")
 ##cor tests for bmrq total
 cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_total)
 cor.test(all_scored$QUIC_sum, all_scored$BMRQ_total)
