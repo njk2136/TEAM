@@ -94,37 +94,39 @@ names(matched_data)[3] <- "ID"
 #merge the datasets
 ```{r}
 all_scored <- merge(master, scored_data, by.x="ID", by.y="ID")
-digital <-merge(derived_plsdispls, scored_data, by.x="ID", by.y="ID")
+digital <-merge(derived_plsdispls, all_scored, by.x="ID", by.y="ID")
 digital_pleasing <- subset(digital, stim_name=="Pleasing")
 digital_displeasing <- subset(digital, stim_name=="Displeasing")
-IADS<-merge(IADS_plsdispls, scored_data, by.x="ID", by.y="ID")
-IADS_pleasing <- subset(IADS, stim_name=="Pleasing")
+IADS<-merge(IADS_plsdispls, all_scored, by.x="ID", by.y="ID")
+IADS_pleasing <- subset(IADS, all_scored=="Pleasing")
 IADS_displeasing <- subset(IADS, stim_name=="Displeasing")
-envi <- merge(envi_plsdispls, scored_data, by.x="ID", by.y="ID")
+envi <- merge(envi_plsdispls, all_scored, by.x="ID", by.y="ID")
 envi_pleasing <- subset(envi, stim_name=="Pleasing")
 envi_displeasing <- subset(envi, stim_name=="Displeasing")
-matched_data <- merge(matched_data, scored_data, by.x="ID", by.y="ID")
+matched_data <- merge(matched_data, all_scored, by.x="ID", by.y="ID")
 
 write.csv(all_scored, "../data/all_scored.csv")
-cor.test(all_scored$CHAOS_child_total, all_scored$MBEA_total)
 ```
 
 #H1
 ```{r}
-m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID) + (1 | soundID), data=digital_pleasing)
+m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
+m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + STAI_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
 
 #multicollinearity checks
 check_collinearity(m1)
 summary(m1)
 
-m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=digital_displeasing)
+m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(PASS_total) + (1 | ID) + (1 | soundID), data=digital_displeasing)
+m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(STAI_total) + (1 | ID) + (1 | soundID), data=digital_displeasing)
 summary(m2)
+
 #plot results
 plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Displeasing Digitally-Generated")
 
 #timing follow-up
-m2t <- lmer(rating ~ CHAOS_Adolescence_total + CHAOS_child_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
+m2t <- lmer(rating ~ CHAOS_Adolescence_total + CHAOS_child_total +(1 | ID) + (1 | soundID), data=digital_displeasing)
 check_collinearity(m2t)
 summary(m2t)
 #plot results
