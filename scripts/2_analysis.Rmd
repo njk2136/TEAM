@@ -106,6 +106,7 @@ envi_displeasing <- subset(envi, stim_name=="Displeasing")
 matched_data <- merge(matched_data, scored_data, by.x="ID", by.y="ID")
 
 write.csv(all_scored, "../data/all_scored.csv")
+cor.test(all_scored$CHAOS_child_total, all_scored$MBEA_total)
 ```
 
 #H1
@@ -273,7 +274,7 @@ cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_sensorimotor)
 ```
 
 ```{r}
-m1 <- lm(BMRQ_moodreg ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total, data=all_scored)
+m1 <- lm(BMRQ_moodreg ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + BMRQ_absorption, data=all_scored)
 summary(m1)
 #HUMS - both adolescent + current
 cor.test(all_scored$PASS_total, all_scored$STAI_total)
