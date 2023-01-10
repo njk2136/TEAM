@@ -11,6 +11,8 @@ library(mediation)
 library(lmerTest)
 library(performance)
 library(sjPlot)
+install.packages("multilevelmediation")
+library(boot)
 ```
 
 #read in data
@@ -18,6 +20,23 @@ library(sjPlot)
 scored_data <- read.csv(file="../data/pleasing-displeasing_followup/scored_data.csv")
 master <- read.csv(file="../data/pleasing-displeasing_followup/pleasing_displeasing_scored.csv")
 matched_data <- read.csv("../data/pleasing-displeasing_followup/matched_data.csv")
+```
+
+#histograms
+```{r}
+scored_data$threat_adolescence_total
+ggplot(scored_data, aes(x=threat_adolescence_total)) +
+         geom_histogram() +
+  xlab("Threat Adolescent Score") +
+  ylab("Frequency")
+
+ggplot(scored_data, aes(x=threat_childhood_total, y= threat_adolescence_total)) +
+  geom_point()+
+  geom_smooth(method="lm") +
+  xlab("Childhood Threat Score") +
+  ylab("Adolescent Threat Score")
+
+cor.test(scored_data$threat_childhood_total, scored_data$threat_adolescence_total, na.rm=TRUE)
 ```
 
 #cleaning original data before merge
@@ -85,6 +104,8 @@ envi <- merge(envi_plsdispls, scored_data, by.x="ID", by.y="ID")
 envi_pleasing <- subset(envi, stim_name=="Pleasing")
 envi_displeasing <- subset(envi, stim_name=="Displeasing")
 matched_data <- merge(matched_data, scored_data, by.x="ID", by.y="ID")
+
+write.csv(all_scored, "../data/all_scored.csv")
 ```
 
 #H1
@@ -132,8 +153,9 @@ summary(m6)
 
 #H2
 ```{r}
-m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
-summary(m1)
+m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored_allSMH)
+summary(m1m)
+all_scored$Gold_musicaltraining
 #plot results
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
@@ -144,6 +166,10 @@ summary(m1t)
 #plot results
 plot_model(m1t, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
+all_scored_allSMH <- all_scored[complete.cases(all_scored$MH_caregiverbeliefs),]
+m1m <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + MH_caregiverbeliefs, data=all_scored_allSMH)
+mediate <- mediate(m1, m1m, boot = TRUE, treat = "CHAOS_sum", mediator = "MH_caregiverbeliefs")
+summary(mediate)
 
 m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
@@ -157,13 +183,15 @@ summary(m1)
 
 #exploratory -- bmrq subscale analyses
 ```{r}
-cor.test(all_scored$What.is.your.age., all_scored$AES_total)
+cor.test(all_scored$MH_total, all_scored$QUIC_child_total)
+
 ggplot(all_scored, aes(x=What.is.your.age., y=AES_total)) +
   geom_point() +
   geom_smooth(method="lm") +
   theme_light()+
   ylab("AES Total Score") +
   xlab("Age")
+
 ##cor tests for bmrq total
 cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_total)
 cor.test(all_scored$QUIC_sum, all_scored$BMRQ_total)
@@ -245,21 +273,33 @@ cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_sensorimotor)
 ```
 
 ```{r}
-#HUMS - both adolescent + current
-m1 <- lm(HUMS_adolescence_unhealthy ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum, data=all_scored)
+m1 <- lm(BMRQ_moodreg ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total, data=all_scored)
 summary(m1)
+#HUMS - both adolescent + current
+cor.test(all_scored$PASS_total, all_scored$STAI_total)
+all_scored$Gold_musicaltraining
+#use this code below when there's missing data and mediation can't run:
+all_scored_allSTAI <- all_scored[complete.cases(all_scored$STAI_total),]
+all_scored_allCDRISC <- all_scored[complete.cases(all_scored$CD.RISC_total),]
+all_scored_allPASS <- all_scored[complete.cases(all_scored$PASS_total),]
+m1 <- lm(HUMS_adolescence_unhealthy ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum, data=all_scored_allPASS)
+summary(m1)
+m1m <- lm(HUMS_adolescence_unhealthy ~ CHAOS_sum + QUIC_sum + (deprivation_sum) + (Threat_sum) + (PASS_total), data=all_scored_allPASS)
+fit.mediator=lm((CD.RISC_total)~(QUIC_sum),all_scored_allCDRISC)
+summary(fit.mediator)
 
-m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
+summary(m1m)
+mediate <- mediate(m1, m1m, boot = TRUE, treat = "QUIC_sum", mediator = "PASS_total")
+summary(mediate)
+
+m1t <- lm(HUMS_adolescence_unhealthy ~ QUIC_child_total + QUIC_Adolescence_total, data=all_scored)
 summary(m1)
 
 m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total, data=all_scored)
-summary(m1)
+summary(m1t)
 
 m1 <- lm(HUMS_adolescence_unhealthy ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total, data=all_scored)
 summary(m1)
-
-m1t <- lm(HUMS_adolescence_unhealthy ~ QUIC_Adolescence_total + QUIC_child_total, data=all_scored)
-summary(m1t)
 
 m2 <- lm(HUMS_adult_unhealthy ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m2)
@@ -295,7 +335,7 @@ anhedonics <- matched_data %>%
 matched_controls <- matched_data %>%
   subset(group=="Matched Controls")
 
-t.test(anhedonics$MH_total, matched_controls$MH_total)
+t.test(anhedonics$deprivation_Adolescence_emotional, matched_controls$deprivation_Adolescence_emotional)
 
 ## separate timing / dimensionality modeling stuff with other hypotheses ##
 ## DIGITALLY GENERATED SOUDNS
@@ -323,9 +363,6 @@ summary(m1)
 m1 <- lmer(rating ~ CHAOS_child_total + CHAOS_Adolescence_total  + (1 | ID) + (1 | soundID), data=digital_displeasing)
 summary(m1)
 
-## one big model ##
-m1 <- lmer(rating ~ QUIC_Adolescence_total + CHAOS_Adolescence_total + deprivation_Adolescence_total + threat_adolescence_total + QUIC_child_total + CHAOS_child_total + deprivation_child_total + threat_childhood_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
-summary(m1)
 
 ### IADS SOUNDS
 #pleasing

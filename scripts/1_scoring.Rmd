@@ -243,14 +243,31 @@ survey$ASRS_total <- apply(ASRS,1,sum)
 MH <- survey %>%
   select("M.H1_1":"M.H35_1")
 
+#removing check questions
+MH <- MH[-c(32:34)]
+
+#removing items from FA
+MH <- dplyr::select(MH, -c("M.H13_1","M.H15_1","M.H17_1","M.H18_1","M.H19_1", "M.H20_1","M.H22_1", "M.H23_1","M.H24_1","M.H27_1","M.H31_1",
+                                       ))
+
 # Reverse code
-MH$M.H1_1
-#double check with Laurel and Psyche which ones should be reverse coded in ones we changed 
-cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H17_1","M.H18_1","M.H20_1","M.H23_1","M.H24_1","M.H29_1","M.H30_1",
+cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H29_1","M.H30_1",
                   "M.H32_1")
+
 MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+
+cols_caregiverbeliefs <- c("M.H1_1", "M.H2_1","M.H3_1", "M.H4_1")
+cols_caregiversinging <- c("M.H9_1","M.H10_1","M.H12_1","M.H16_1")
+cols_childhoodattitude <- c("M.H29_1", "M.H30_1", "M.H32_1")
+cols_homemusiclistening <- c("M.H21_1", "M.H25_1","M.H26_1","M.H28_1")
+cols_musicmaking <- c("M.H5_1", "M.H6_1", "M.H7_1", "M.H8_1", "M.H14_1")
  
 survey$MH_total <- apply(MH,1,sum)
+survey$MH_caregiverbeliefs <- apply(MH[cols_caregiverbeliefs], 1,sum)
+survey$MH_caregiversinging <- apply(MH[cols_caregiversinging], 1,sum)
+survey$MH_childhoodattitude <- apply(MH[cols_childhoodattitude], 1,sum)
+survey$MH_homemusiclistening <- apply(MH[cols_homemusiclistening], 1,sum)
+survey$MH_musicmaking <- apply(MH[cols_musicmaking], 1,sum)
 
 hist(survey$MH_total)
 ```

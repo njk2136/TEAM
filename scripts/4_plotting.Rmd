@@ -54,7 +54,24 @@ plot_model(DG_displeasing, show.values = TRUE,vline.color = "lightgrey") +
   ) +
   scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
 
-ggsave(plot=DG_displeasing_coefficents, '../figures/pleasing:displeasing_followup/lab_presentation/DG_displeasing_coefficents.png',width=10)
+ggsave(plot=DG_displeasing_coefficents, '../figures/pleasing:displeasing_followup/full_sample/DG_displeasing_coefficents.png',width=10)
+
+DG_timing <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + (1 | ID) + (1 | soundID), data=digital_displeasing)
+
+DG_timing <- 
+plot_model(DG_timing, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Adolescent CHAOS", "Childhood CHAOS"))
+
+ggsave(plot=DG_timing, '../figures/pleasing:displeasing_followup/full_sample/DG_timing.png',width=10)
 
 ```
 
@@ -78,7 +95,7 @@ IADS_coefficients <-
   ) +
   scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
 
-ggsave(plot=IADS_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/IADS_pleasing_coefficients.png',width=10)
+ggsave(plot=IADS_coefficients, '../figures/pleasing:displeasing_followup/full_sample/IADS_pleasing_coefficients.png',width=10)
 
 newdata <- expand.grid(
   Threat_sum=seq(40,154,1),
@@ -132,7 +149,7 @@ plot_model(MBEA_model, show.values = TRUE,vline.color = "lightgrey") +
   ) +
   scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
 
-ggsave(plot=MBEA_coef, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_coef.png', width=10)
+ggsave(plot=MBEA_coef, '../figures/pleasing:displeasing_followup/full_sample/MBEA_coef.png', width=10)
 
 newdata <- expand.grid(
   Threat_sum=0,
@@ -182,7 +199,7 @@ plot_model(MBEA_model_timing, show.values = TRUE,vline.color = "lightgrey") +
   ) +
   scale_x_discrete(labels=c("CHAOS Adolescence", "CHAOS Childhood"))
 
-ggsave(plot=MBEA_CHAOS_timing_coef, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_CHAOS_timing_coef.png',width=10)
+ggsave(plot=MBEA_CHAOS_timing_coef, '../figures/pleasing:displeasing_followup/full_sample/MBEA_CHAOS_timing_coef.png',width=10)
 
 
 newdata_child<- expand.grid(
@@ -272,7 +289,7 @@ BAT_coefficients<-
   ) +
   scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
 
-ggsave(plot=BAT_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/BAT_coefficients.png',width=10)  
+ggsave(plot=BAT_coefficients, '../figures/pleasing:displeasing_followup/full_sample/BAT_coefficients.png',width=10)  
 
 newdata <- expand.grid(
   Threat_sum=0,
@@ -415,7 +432,7 @@ eBMRQ_coefficients <-
   ) +
  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
   
-ggsave(plot=eBMRQ_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/eBMRQ_coefficients.png',width=10)
+ggsave(plot=eBMRQ_coefficients, '../figures/pleasing:displeasing_followup/full_sample/eBMRQ_coefficients.png',width=10)
 ```
 
 #corr plot of subscores + ELA measures
@@ -500,7 +517,7 @@ HUMS_adolescence_QUIC <- lm((HUMS_adolescence_unhealthy) ~ (QUIC_sum) + (CHAOS_s
 
 HUMS_adolescence_coef<-
 plot_model(HUMS_adolescence_QUIC, show.values = TRUE,vline.color = "lightgrey") + 
-  ylim(-.75, .75) +
+  ylim(-.5, .5) +
   ggtitle("Standardized Beta Coefficient Estimates") +
   theme_light() +
   theme(title=element_text(family="Arial", size=20),
@@ -511,7 +528,7 @@ plot_model(HUMS_adolescence_QUIC, show.values = TRUE,vline.color = "lightgrey") 
   ) +
  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
 
-ggsave(plot=HUMS_adolescence_coef, '../figures/pleasing:displeasing_followup/lab_presentation/HUMS_adolescence_coef.png',width=10)
+ggsave(plot=HUMS_adolescence_coef, '../figures/pleasing:displeasing_followup/full_sample/HUMS_adolescence_coef.png',width=10)
 
 #model predictions
 newdata <- expand.grid(
@@ -545,4 +562,55 @@ ggplot(data=pred, aes(x=QUIC_sum,y=fit)) +
   geom_point(aes(y=HUMS_adolescence_unhealthy), data=all_scored,alpha=0.2)
 
 ggsave(plot=HUMS_unhealthy_adolescence_QUIC, '../figures/pleasing:displeasing_followup/lab_presentation/HUMS_unhealthy_adolescence_QUIC.png',width=10)
+
+HUMS_adolescence_QUIC <- lm((HUMS_adolescence_healthy) ~ (QUIC_sum) + (CHAOS_sum) + (deprivation_sum) + (Threat_sum), data=all_scored)
+
+HUMS_adolescence_coef<-
+plot_model(HUMS_adolescence_QUIC, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+ scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=HUMS_adolescence_coef, '../figures/pleasing:displeasing_followup/full_sample/HUMS_adolescence_healthy_coef.png',width=10)
+
+HUMS_adult_QUIC <- lm((HUMS_adult_healthy) ~ (QUIC_sum) + (CHAOS_sum) + (deprivation_sum) + (Threat_sum), data=all_scored)
+
+HUMS_adult_QUIC<-
+plot_model(HUMS_adult_QUIC, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+ scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=HUMS_adult_QUIC, '../figures/pleasing:displeasing_followup/full_sample/HUMS_adult_healthy_coef.png',width=10)
+
+HUMS_adult_QUIC <- lm((HUMS_adult_unhealthy) ~ (QUIC_sum) + (CHAOS_sum) + (deprivation_sum) + (Threat_sum), data=all_scored)
+
+HUMS_adult_QUIC<-
+plot_model(HUMS_adult_QUIC, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+ scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+
+ggsave(plot=HUMS_adult_QUIC, '../figures/pleasing:displeasing_followup/full_sample/HUMS_adult_unhealthy_coef.png',width=10)
 ```
