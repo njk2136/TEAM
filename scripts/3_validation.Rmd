@@ -301,15 +301,15 @@ dev.off()
 
 #M@HR + ELA measures
 variables = dplyr::select(full, 
-                          g, F1, F2, F3, F4, F5, QUIC_sum, 
-                          CHAOS_sum, deprivation_sum, Threat_sum)
+                          g, F1, F2, F3, F4, F5, QUIC_child_total, 
+                          CHAOS_child_total, deprivation_child_total, threat_childhood_total)
 output = corr.test(variables)
 
 corr_matrix = output$r
 p_matrix <- output$p
 
-colnames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singingg', 'Attitude to Childhood Music', 'Home Music Associations', 'Music-Making Tendencies', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
-rownames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singingg', 'Attitude to Childhood Music', 'Home Music Associations', 'Music-Making Tendencies', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+colnames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singingg', 'Attitude to Childhood Music', 'Home Music Associations', 'Music-Making Tendencies', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+rownames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singingg', 'Attitude to Childhood Music', 'Home Music Associations', 'Music-Making Tendencies', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
 
 pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
 

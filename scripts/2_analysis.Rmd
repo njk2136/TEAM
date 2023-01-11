@@ -36,7 +36,7 @@ ggplot(scored_data, aes(x=threat_childhood_total, y= threat_adolescence_total)) 
   xlab("Childhood Threat Score") +
   ylab("Adolescent Threat Score")
 
-cor.test(scored_data$threat_childhood_total, scored_data$threat_adolescence_total, na.rm=TRUE)
+cor.test(all_scored$Gold_perceptualabilities, all_scored$THre_sum, na.rm=TRUE)
 ```
 
 #cleaning original data before merge
