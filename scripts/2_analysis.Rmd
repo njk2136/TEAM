@@ -126,7 +126,7 @@ plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Displeasing Digitally-Generated")
 
 #timing follow-up
-m2t <- lmer(rating ~ CHAOS_Adolescence_total + CHAOS_child_total +(1 | ID) + (1 | soundID), data=digital_displeasing)
+m2t <- lmer(rating ~ CHAOS_Adolescence_total + CHAOS_child_total + STAI_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
 check_collinearity(m2t)
 summary(m2t)
 #plot results
