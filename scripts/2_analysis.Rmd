@@ -225,19 +225,20 @@ summary(m2t)
 
 ## updated streamline
 #CHAOS childhood negative correlation
-m1 <- lm(MBEA_total ~ CHAOS_child_total + threat_childhood_total + deprivation_child_total + QUIC_child_total + PASS_total + Gold_musicaltraining, data=all_scored)
+m1 <- lm(MBEA_total ~ CHAOS_child_total + threat_childhood_total + deprivation_child_total + QUIC_child_total + PASS_total +STAI_total + Gold_musicaltraining, data=all_scored)
 check_collinearity(m1)
 summary(m1)
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
 
-m1 <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total + PASS_total + Gold_musicaltraining, data=all_scored)
+m1 <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total + threat_adolescence_total + threat_childhood_total + PASS_total + STAI_total + Gold_musicaltraining, data=all_scored)
 summary(m1)
+check_collinearity(m1)
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
 
 #Threat adolescent positive correlation
-m1 <- lm(MBEA_total ~  CHAOS_Adolescence_total + threat_adolescence_total + deprivation_Adolescence_total + QUIC_Adolescence_total + PASS_total + Gold_musicaltraining, data=all_scored)
+m1 <- lm(MBEA_total ~  CHAOS_Adolescence_total + threat_adolescence_total + deprivation_Adolescence_total + QUIC_Adolescence_total + PASS_total + STAI_total + Gold_musicaltraining, data=all_scored)
 summary(m1)
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
@@ -258,7 +259,8 @@ summary(m1)
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
 
-cor.test(all_scored$CHAOS_Adolescence_total, all_scored$threat_adolescence_total)
+m1 <- lm(BAT_total ~ STAI_total + Gold_musicaltraining, data=all_scored)
+summary(m1)
 ```
 
 #H3
@@ -269,7 +271,7 @@ summary(m1)
 
 #exploratory -- bmrq subscale analyses
 ```{r}
-cor.test(all_scored$MH_total, all_scored$QUIC_child_total)
+cor.test(all_scored$QUIC_Adolescence_total, all_scored$STAI_total)
 
 ggplot(all_scored, aes(x=What.is.your.age., y=AES_total)) +
   geom_point() +
@@ -326,7 +328,7 @@ cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_absorption)
 cor.test(all_scored$QUIC_child_total, all_scored$BMRQ_absorption)
 cor.test(all_scored$threat_childhood_total, all_scored$BMRQ_absorption)
 cor.test(all_scored$deprivation_child_total, all_scored$BMRQ_absorption)
-m1 <-lm(BMRQ_absorption ~ CHAOS_sum  + QUIC_sum +  + deprivation_sum + Threat_sum, data=all_scored)
+m1 <-lm(BMRQ_absorption ~ CHAOS_sum  + QUIC_sum + deprivation_sum + Threat_sum, data=all_scored)
 summary(m1) 
 
 cor.test(all_scored$CHAOS_child_total, all_scored$BMRQ_emotion)
