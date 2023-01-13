@@ -98,7 +98,8 @@ digital <-merge(derived_plsdispls, all_scored, by.x="ID", by.y="ID")
 digital_pleasing <- subset(digital, stim_name=="Pleasing")
 digital_displeasing <- subset(digital, stim_name=="Displeasing")
 IADS<-merge(IADS_plsdispls, all_scored, by.x="ID", by.y="ID")
-IADS_pleasing <- subset(IADS, all_scored=="Pleasing")
+IADS_pleasing <- subset(IADS, stim_name=="Pleasing")
+names(IADS_pleasing)[2] <-"PASS_total"
 IADS_displeasing <- subset(IADS, stim_name=="Displeasing")
 envi <- merge(envi_plsdispls, all_scored, by.x="ID", by.y="ID")
 envi_pleasing <- subset(envi, stim_name=="Pleasing")
@@ -111,40 +112,70 @@ write.csv(all_scored, "../data/all_scored.csv")
 #H1
 ```{r}
 m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
-m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + STAI_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
+#multicollinearity checks
+check_collinearity(m1)
+summary(m1)
 
+m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + STAI_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
 #multicollinearity checks
 check_collinearity(m1)
 summary(m1)
 
 m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(PASS_total) + (1 | ID) + (1 | soundID), data=digital_displeasing)
-m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(STAI_total) + (1 | ID) + (1 | soundID), data=digital_displeasing)
+#multicollinearity checks
+check_collinearity(m2)
+summary(m2)
+#plot results
+plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("Displeasing Digitally-Generated")
+
+m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
 summary(m2)
 
 #plot results
 plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Displeasing Digitally-Generated")
 
-#timing follow-up
-m2t <- lmer(rating ~ CHAOS_Adolescence_total + CHAOS_child_total + STAI_total + (1 | ID) + (1 | soundID), data=digital_displeasing)
+#timing follow-up - PAS
+m2t <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + scale(PASS_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
 check_collinearity(m2t)
 summary(m2t)
 #plot results
 plot_model(m2t, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Displeasing Digitally-Generated")
 
+#timing follow-up - STAI
+m2t <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+check_collinearity(m2t)
+summary(m2t)
+#plot results
+plot_model(m2t, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("Displeasing Digitally-Generated")
 
-m3 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum)  + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+m3 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum)+ scale(PASS_total)+ (1 | ID) + (1 | soundID), data=IADS_pleasing)
+summary(m3)
 #plot results
 plot_model(m3, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Pleasing IADS Sounds")
+
+m3 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum)+ scale(STAI_total)+ (1 | ID) + (1 | soundID), data=IADS_pleasing)
 summary(m3)
+#plot results
+plot_model(m3, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("Pleasing IADS Sounds")
+
 #timing follow-up
-m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + PASS_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 check_collinearity(m3t)
 summary(m3t)
 
-m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=IADS_displeasing)
+m3t <- lmer(rating ~ threat_childhood_total + threat_adolescence_total + STAI_total + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+check_collinearity(m3t)
+summary(m3t)
+
+m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total.x+ (1 | ID)+ (1 | soundID), data=IADS_displeasing)
+summary(m4)
+m4 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + STAI_total+ (1 | ID)+ (1 | soundID), data=IADS_displeasing)
 summary(m4)
 
 m5 <- lmer(rating ~ QUIC_sum + deprivation_sum + Threat_sum + (1 | ID)+ (1 | soundID), data=envi_pleasing)
@@ -156,26 +187,78 @@ summary(m6)
 
 #H2
 ```{r}
-m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored_allSMH)
-summary(m1m)
-all_scored$Gold_musicaltraining
+#MBEA
+m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total, data=all_scored)
+summary(m1)
 #plot results
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
+
+m1 <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + STAI_total, data=all_scored)
+summary(m1)
+#plot results
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+all_scored$Gold_
 #timing follow-up
-m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total, data=all_scored)
+m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total + threat_childhood_total + threat_adolescence_total + PASS_total, data=all_scored)
+check_collinearity(m1t)
+summary(m1t)
+
+#plot results
+plot_model(m1t, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+m1t <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total + threat_childhood_total + threat_adolescence_total + STAI_total + Gold_musicaltraining, data=all_scored)
 check_collinearity(m1t)
 summary(m1t)
 #plot results
 plot_model(m1t, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA Scores")
-all_scored_allSMH <- all_scored[complete.cases(all_scored$MH_caregiverbeliefs),]
-m1m <- lm(MBEA_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + MH_caregiverbeliefs, data=all_scored_allSMH)
-mediate <- mediate(m1, m1m, boot = TRUE, treat = "CHAOS_sum", mediator = "MH_caregiverbeliefs")
-summary(mediate)
 
-m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum, data=all_scored)
+m2 <- lm(BAT_total ~  QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total, data=all_scored)
 summary(m2)
+check_collinearity(m2)
+
+m2t <- lm(BAT_total ~ CHAOS_child_total + CHAOS_Adolescence_total + STAI_total, data=all_scored)
+summary(m2t)
+
+
+## updated streamline
+#CHAOS childhood negative correlation
+m1 <- lm(MBEA_total ~ CHAOS_child_total + threat_childhood_total + deprivation_child_total + QUIC_child_total + PASS_total + Gold_musicaltraining, data=all_scored)
+check_collinearity(m1)
+summary(m1)
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+
+m1 <- lm(MBEA_total ~ CHAOS_child_total + CHAOS_Adolescence_total + PASS_total + Gold_musicaltraining, data=all_scored)
+summary(m1)
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+
+#Threat adolescent positive correlation
+m1 <- lm(MBEA_total ~  CHAOS_Adolescence_total + threat_adolescence_total + deprivation_Adolescence_total + QUIC_Adolescence_total + PASS_total + Gold_musicaltraining, data=all_scored)
+summary(m1)
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+
+m1 <- lm(MBEA_total ~ threat_childhood_total + threat_adolescence_total +PASS_total + Gold_musicaltraining, data=all_scored)
+summary(m1)
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+
+#QUIC Adolescent positive correlation
+m1 <- lm(BAT_total ~ CHAOS_child_total + threat_childhood_total + deprivation_child_total + QUIC_child_total + PASS_total + Gold_musicaltraining, data=all_scored)
+summary(m1)
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+
+m1 <- lm(MBEA_total ~  CHAOS_Adolescence_total + threat_adolescence_total + deprivation_Adolescence_total + QUIC_Adolescence_total + PASS_total + Gold_musicaltraining, data=all_scored)
+summary(m1)
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
+  ggtitle("MBEA Scores")
+
+cor.test(all_scored$CHAOS_Adolescence_total, all_scored$threat_adolescence_total)
 ```
 
 #H3
