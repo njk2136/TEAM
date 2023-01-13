@@ -79,6 +79,27 @@ IADS_coefficients <-
 
 ggsave(plot=IADS_coefficients, '../figures/pleasing:displeasing_followup/full_sample/IADS_pleasing_coefficients_Adolescent.png',width=10)
 
+#timing follow-up
+IADS_timing <- lmer(scale(rating) ~ scale(threat_adolescence_total) + scale(threat_childhood_total) + scale(PASS_total) + scale(STAI_total) +(1 | ID) + (1 | soundID), data=IADS_pleasing)
+
+summary(IADS_timing)
+
+DG_timing <- 
+plot_model(DG_timing, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Ratings of Displeasing Digitally Generated Sounds") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("STAI", "PAS","Childhood CHAOS", "Adolescent CHAOS"))
+
+ggsave(plot=DG_timing, '../figures/pleasing:displeasing_followup/full_sample/DG_timing.png',width=10)
+
 newdata <- expand.grid(
   Threat_sum=seq(40,154,1),
   QUIC_sum=0,
@@ -115,13 +136,14 @@ ggsave(plot=IADS_pleasing_threat, '../figures/pleasing:displeasing_followup/lab_
 
 #MBEA ~ CHAOS
 ```{r}
-MBEA_model <- lm(scale(MBEA_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum), data=all_scored)
-summary(MBEA_model)
+#childhood
+MBEA_child <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
 
-MBEA_coef <- 
-plot_model(MBEA_model, show.values = TRUE,vline.color = "lightgrey") + 
+MBEA_coef_child <- 
+plot_model(MBEA_child, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.5, .5) +
-  ggtitle("Standardized Beta Coefficient Estimates") +
+  ggtitle("MBEA1 Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
   theme_light() +
   theme(title=element_text(family="Arial", size=20),
     axis.title.x = element_text(family="Arial", size=18),
@@ -129,9 +151,50 @@ plot_model(MBEA_model, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+  scale_x_discrete(labels=c("GoldMSI Musical Training", "STAI","PAS","Childhood QUIC", "Childhood Deprivation", "Childhood Threat", "Childhood CHAOS"))
 
-ggsave(plot=MBEA_coef, '../figures/pleasing:displeasing_followup/full_sample/MBEA_coef.png', width=10)
+ggsave(plot=MBEA_coef_child, '../figures/pleasing:displeasing_followup/full_sample/MBEA_coef_child.png', width=10)
+
+#adolescence
+MBEA_adol <- lm(scale(MBEA_total) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+
+
+MBEA_adol_coef <- 
+plot_model(MBEA_adol, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("MBEA1 Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("GoldMSI Musical Training", "STAI","PAS","Adolescent QUIC", "Adolescent Deprivation", "Adolescent Threat", "Adolescent CHAOS"))
+
+ggsave(plot=MBEA_adol_coef, '../figures/pleasing:displeasing_followup/full_sample/MBEA_adol_coef.png', width=10)
+
+#timing check
+MBEA_timing <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(CHAOS_Adolescence_total) + scale(threat_childhood_total) + scale(threat_adolescence_total)  + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+summary(MBEA_timing)
+
+MBEA_timing_coef <- 
+plot_model(MBEA_timing, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("MBEA1 Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("GoldMSI Musical Training", "STAI","PAS","Adolescent Threat", "Childhood Threat", "Adolescent CHAOS", "Childhood CHAOS"))
+
+ggsave(plot=MBEA_timing_coef, '../figures/pleasing:displeasing_followup/full_sample/MBEA_timing_coef.png', width=10)
+
 
 newdata <- expand.grid(
   Threat_sum=0,
@@ -164,104 +227,17 @@ ggplot(data=pred, aes(x=CHAOS_sum,y=fit)) +
   geom_point(aes(y=MBEA_total), data=all_scored,alpha=0.2)
 
 ggsave(plot=MBEA_chaos, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_chaos.png')
-
-#timing
-MBEA_model_timing <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(CHAOS_Adolescence_total), data=all_scored)
-
-MBEA_CHAOS_timing_coef<-
-plot_model(MBEA_model_timing, show.values = TRUE,vline.color = "lightgrey") + 
-  ylim(-.5, .5) +
-  ggtitle("Standardized Beta Coefficient Estimates") +
-  theme_light() +
-  theme(title=element_text(family="Arial", size=20),
-    axis.title.x = element_text(family="Arial", size=18),
-    axis.title.y = element_text(family="Arial",size=18),
-    axis.text.x = element_text(family="Arial", size=16),
-    axis.text.y = element_text(family="Arial",size=16),
-  ) +
-  scale_x_discrete(labels=c("CHAOS Adolescence", "CHAOS Childhood"))
-
-ggsave(plot=MBEA_CHAOS_timing_coef, '../figures/pleasing:displeasing_followup/full_sample/MBEA_CHAOS_timing_coef.png',width=10)
-
-
-newdata_child<- expand.grid(
-  CHAOS_child_total=seq(6,29,1),
-  CHAOS_Adolescence_total=0
-)
-
-child_predictions<- predict(MBEA_model_timing, newdata_child, se.fit = TRUE, print.matrix =
-        TRUE, level = 0)
-
-child_pred <- cbind(newdata_child, child_predictions[["fit"]],child_predictions[["se.fit"]] )
-names(child_pred)[1] <- "CHAOS_total"
-names(child_pred)[3:4] <- c("fit", "se.fit")
-child_pred<-child_pred[-c(2)]
-child_pred$timing <- "Childhood"
-child_pred$upper <- (child_pred$fit + child_pred$se.fit)
-child_pred$lower <- (child_pred$fit - child_pred$se.fit)
-
-newdata_adol<- expand.grid(
-  CHAOS_child_total=0,
-  CHAOS_Adolescence_total=seq(6,29,1)
-)
-
-adol_predictions<- predict(MBEA_model_timing, newdata_adol, se.fit = TRUE, print.matrix =
-        TRUE, level = 0)
-
-adol_pred <- cbind(newdata_adol, adol_predictions[["fit"]],adol_predictions[["se.fit"]] )
-names(adol_pred)[2] <- "CHAOS_total"
-names(adol_pred)[3:4] <- c("fit", "se.fit")
-adol_pred<-adol_pred[-c(1)]
-adol_pred$timing <- "Adolescence"
-adol_pred$upper <- (adol_pred$fit + adol_pred$se.fit)
-adol_pred$lower <- (adol_pred$fit - adol_pred$se.fit)
-timing_pred <- rbind(child_pred, adol_pred)
-
-color_code <- all_scored %>%
-  subset(select=c(289,700,701)) %>%
-  pivot_longer(CHAOS_child_total:CHAOS_Adolescence_total, names_to = "timing", values_to = "CHAOS_total")
-
-color_code$timing <- ifelse(color_code$timing=="CHAOS_Adolescence_total", "Adolescence", "Childhood")
-
-color_code$timing <-
-  factor(color_code$timing,
-         levels = c("Childhood", "Adolescence"))
-
-timing_pred$timing <- 
-  factor(timing_pred$timing,
-         levels = c("Childhood", "Adolescence"))
-
-MBEA_chaos_timing <- 
-ggplot(data=timing_pred, aes(x=CHAOS_total,y=fit)) +
-  geom_line(aes(color=timing)) +
-  geom_ribbon(aes(ymin=upper, ymax=lower,fill=timing),alpha=0.1) +
-  ylab('MBEA Score') +
-  xlab('CHAOS Sum Score') +
-  theme_classic() +
-   theme(
-    axis.title.x = element_text(family="Arial", size=22),
-    axis.title.y = element_text(family="Arial",size=22),
-    axis.text.x = element_text(family="Arial", size=20),
-    axis.text.y = element_text(family="Arial",size=20),
-    strip.text.x = element_text(family="Arial",size=20)
-  ) +
-  geom_point(aes(y=MBEA_total,color=timing), data=color_code,alpha=0.3) +
-  facet_grid(~timing) +
-  theme(legend.position = "none")+
-  scale_x_continuous(breaks=c(5,10,15,20,25))
-
-ggsave(plot=MBEA_chaos_timing, '../figures/pleasing:displeasing_followup/lab_presentation/MBEA_chaos_timing.png',width=12)
 ```
 
 #BAT ~ QUIC
 ```{r}
-BAT_model <- lm(scale(BAT_total) ~  scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum), data=all_scored)
-summary(BAT_model)
+BAT_model_child <- lm(scale(BAT_total) ~  scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
 
-BAT_coefficients<-
-  plot_model(BAT_model, show.values = TRUE,vline.color = "lightgrey") + 
+BAT_model_child_coef<-
+  plot_model(BAT_model_child, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.5, .5) +
-  ggtitle("Standardized Beta Coefficient Estimates") +
+  ggtitle("BAT Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
   theme_light() +
   theme(title=element_text(family="Arial", size=20),
     axis.title.x = element_text(family="Arial", size=18),
@@ -269,9 +245,9 @@ BAT_coefficients<-
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+  scale_x_discrete(labels=c("GoldMSI Musical Training", "STAI","PAS","Childhood QUIC", "Childhood Deprivation", "Childhood Threat", "Childhood CHAOS"))
 
-ggsave(plot=BAT_coefficients, '../figures/pleasing:displeasing_followup/full_sample/BAT_coefficients.png',width=10)  
+ggsave(plot=BAT_model_child_coef, '../figures/pleasing:displeasing_followup/full_sample/BAT_model_child_coef.png',width=10)  
 
 newdata <- expand.grid(
   Threat_sum=0,
@@ -544,6 +520,97 @@ p_matrix <- output$p
 
 colnames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
 rownames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+
+pdf(file = "../figures/pleasing:displeasing_followup/perception_corrplot_adolescence.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#HUMS + ELA sum
+variables = dplyr::select(all_scored, 
+                          HUMS_adolescence_unhealthy, HUMS_adult_unhealthy,
+                          HUMS_adolescence_healthy, HUMS_adult_healthy,
+                          QUIC_sum, 
+                          CHAOS_sum, deprivation_sum, Threat_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+rownames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+
+pdf(file = "../figures/pleasing:displeasing_followup/perception_corrplot_adolescence.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#HUMS + ELA child
+variables = dplyr::select(all_scored, 
+                          HUMS_adolescence_unhealthy, HUMS_adult_unhealthy,
+                          HUMS_adolescence_healthy, HUMS_adult_healthy,
+                          QUIC_child_total, 
+                          CHAOS_child_total, deprivation_child_total, threat_childhood_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+rownames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+
+pdf(file = "../figures/pleasing:displeasing_followup/perception_corrplot_adolescence.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#HUMS + ELA adolescence
+variables = dplyr::select(all_scored, 
+                          HUMS_adolescence_unhealthy, HUMS_adult_unhealthy,
+                          HUMS_adolescence_healthy, HUMS_adult_healthy,
+                          QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, threat_adolescence_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+rownames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+
+pdf(file = "../figures/pleasing:displeasing_followup/perception_corrplot_adolescence.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#HUMS, eBMRQ, Mental Health
+variables = dplyr::select(all_scored, 
+                          HUMS_adolescence_unhealthy, HUMS_adult_unhealthy,
+                          HUMS_adolescence_healthy, HUMS_adult_healthy,
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor,PASS_total,
+                          STAI_total, CD.RISC_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor',"PAS", "STAI", "CDRISC")
+rownames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "PAS", "STAI", "CDRISC")
 
 pdf(file = "../figures/pleasing:displeasing_followup/perception_corrplot_adolescence.pdf")
 
