@@ -17,35 +17,17 @@ library(psych)
 
 #read in data
 ```{r}
-#UPDATE THIS FOR A BETTER PIPELINE
 all_scored <- read.csv('../data/all_scored.csv')
 ```
 
 #digitally generated sounds
 ```{r}
-DG_pleasing <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=digital_pleasing)
-
-DG_pleasing_coefficients <-
-plot_model(DG_pleasing, show.values = TRUE,vline.color = "lightgrey") + 
-  ylim(-.1, .1) +
-  ggtitle("Standardized Beta Coefficient Estimates") +
-  theme_light() +
-  theme(title=element_text(family="Arial", size=20),
-    axis.title.x = element_text(family="Arial", size=18),
-    axis.title.y = element_text(family="Arial",size=18),
-    axis.text.x = element_text(family="Arial", size=16),
-    axis.text.y = element_text(family="Arial",size=16),
-  ) +
-  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
-
-ggsave(plot=DG_pleasing_coefficients, '../figures/pleasing:displeasing_followup/lab_presentation/DG_pleasing_coefficients.png',width=10)
-
-DG_displeasing <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=digital_displeasing)
-
-DG_displeasing_coefficents <- 
-plot_model(DG_displeasing, show.values = TRUE,vline.color = "lightgrey") + 
+DG_displeasing_child <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + (1 | ID) + (1 | soundID), data=digital_displeasing)
+DG_displeasing_coefficents_child <- 
+plot_model(DG_displeasing_child, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.25, .25) +
-  ggtitle("Standardized Beta Coefficient Estimates") +
+  ggtitle("Ratings of Displeasing Digitally Generated Sounds") +
+  ylab("Standardized Beta Coefficient Estimates")+
   theme_light() +
   theme(title=element_text(family="Arial", size=20),
     axis.title.x = element_text(family="Arial", size=18),
@@ -53,16 +35,17 @@ plot_model(DG_displeasing, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+  scale_x_discrete(labels=c("STAI","PAS", "Childhood QUIC", "Childhood Deprivation","Childhood Threat","Childhood CHAOS" ))
 
-ggsave(plot=DG_displeasing_coefficents, '../figures/pleasing:displeasing_followup/full_sample/DG_displeasing_coefficents.png',width=10)
+ggsave(plot=DG_displeasing_coefficents_child, '../figures/pleasing:displeasing_followup/full_sample/DG_displeasing_coefficents_child.png',width=10)
 
-DG_timing <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + (1 | ID) + (1 | soundID), data=digital_displeasing)
+DG_timing <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + scale(PASS_total) + scale(STAI_total) +(1 | ID) + (1 | soundID), data=digital_displeasing)
 
 DG_timing <- 
 plot_model(DG_timing, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.25, .25) +
-  ggtitle("Standardized Beta Coefficient Estimates") +
+  ggtitle("Ratings of Displeasing Digitally Generated Sounds") +
+  ylab("Standardized Beta Coefficient Estimates")+
   theme_light() +
   theme(title=element_text(family="Arial", size=20),
     axis.title.x = element_text(family="Arial", size=18),
@@ -70,23 +53,21 @@ plot_model(DG_timing, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Adolescent CHAOS", "Childhood CHAOS"))
+  scale_x_discrete(labels=c("STAI", "PAS","Childhood CHAOS", "Adolescent CHAOS"))
 
 ggsave(plot=DG_timing, '../figures/pleasing:displeasing_followup/full_sample/DG_timing.png',width=10)
-
 ```
 
 
 #DG + IADS pleasing sounds ~ threat
 ```{r}
-IADS_pleasing_model <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + (1 | ID) + (1 | soundID), data=IADS_pleasing)
-
-summary(IADS_pleasing_model)
+IADS_pleasing_model <- lmer(scale(rating) ~ scale(QUIC_Adolescence_total) + scale(CHAOS_Adolescence_total) + scale(deprivation_Adolescence_total) + scale(threat_adolescence_total) + scale(PASS_total) + scale(STAI_total) + (1 | ID) + (1 | soundID), data=IADS_pleasing)
 
 IADS_coefficients <-
   plot_model(IADS_pleasing_model, show.values = TRUE,vline.color = "lightgrey") + 
-  ylim(-.25, .25) +
-  ggtitle("Standardized Beta Coefficient Estimates") +
+  ylim(-.15, .15) +
+   ggtitle("Ratings of Pleasing IADS Sounds") +
+  ylab("Standardized Beta Coefficient Estimates")+
   theme_light() +
   theme(title=element_text(family="Arial", size=20),
     axis.title.x = element_text(family="Arial", size=18),
@@ -94,9 +75,9 @@ IADS_coefficients <-
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Threat Sum", "Deprivation Sum", "CHAOS Sum", "QUIC Sum"))
+  scale_x_discrete(labels=c("STAI", "PAS", "Adolescent Threat", "Adolescent Deprivation", "Adolescent CHAOS", "Adolescent QUIC"))
 
-ggsave(plot=IADS_coefficients, '../figures/pleasing:displeasing_followup/full_sample/IADS_pleasing_coefficients.png',width=10)
+ggsave(plot=IADS_coefficients, '../figures/pleasing:displeasing_followup/full_sample/IADS_pleasing_coefficients_Adolescent.png',width=10)
 
 newdata <- expand.grid(
   Threat_sum=seq(40,154,1),

@@ -11,7 +11,6 @@ library(mediation)
 library(lmerTest)
 library(performance)
 library(sjPlot)
-install.packages("multilevelmediation")
 library(boot)
 ```
 
@@ -111,6 +110,8 @@ write.csv(all_scored, "../data/all_scored.csv")
 
 #H1
 ```{r}
+m1 <- lmer(rating ~ CHAOS_Adolescence_total + threat_adolescence_total + deprivation_Adolescence_total + QUIC_Adolescence_total + PASS_total.x + (1 | ID) + (1 | soundID), data=IADS_displeasing)
+
 m1 <- lmer(rating ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + (1 | ID) + (1 | soundID), data=digital_pleasing)
 #multicollinearity checks
 check_collinearity(m1)
@@ -129,7 +130,10 @@ summary(m2)
 plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Displeasing Digitally-Generated")
 
-m2 <- lmer(scale(rating) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+m2 <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(STAI_total) + scale(PASS_total.x) + (1| ID) + (1 | soundID), data=IADS_displeasing)
+summary(m2)
+
+m2 <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(STAI_total) + scale(PASS_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
 summary(m2)
 
 #plot results
@@ -137,7 +141,7 @@ plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("Displeasing Digitally-Generated")
 
 #timing follow-up - PAS
-m2t <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + scale(PASS_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+m2t <- lmer((rating) ~ (CHAOS_Adolescence_total) + (CHAOS_child_total) + (PASS_total) + STAI_total+ (1| ID) + (1 | soundID), data=digital_displeasing)
 check_collinearity(m2t)
 summary(m2t)
 #plot results
