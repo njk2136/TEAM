@@ -28,18 +28,18 @@ names(IADS_displeasing)[3] <- "PASS_total"
 #ratings of digitally-generated sounds
 ```{r}
 #D-G pleasing childhood dimensions
-m1 <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(STAI_total) + scale(PASS_total) + (1| ID) + (1 | soundID), data=digital_pleasing)
+m1 <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(STAI_total) + scale(PASS_total) + scale(Gold_musicaltraining) + (1| ID) + (1 | soundID), data=digital_pleasing)
 summary(m1)
 #multicollinearity checks
 check_collinearity(m1)
 
 #D-G pleasing adolescent dimensions
-m2 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_pleasing)
+m2 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + + scale(Gold_musicaltraining) +(1| ID) + (1 | soundID), data=digital_pleasing)
 summary(m2)
 check_collinearity(m2)
 
 #D-G displeasing childhood dimensions
-m3 <-lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+m3 <-lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining) + (1| ID) + (1 | soundID), data=digital_displeasing)
 summary(m3)
 
 #plot
@@ -55,16 +55,16 @@ plot_model(m3, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("STAI", "PAS","Childhood QUIC", "Childhood Deprivation","Childhood Threat","Childhood CHAOS" ))
+  scale_x_discrete(labels=c("GoldMSI - Musical Training", "STAI", "PAS","Childhood QUIC", "Childhood Deprivation","Childhood Threat","Childhood CHAOS" ))
 
-ggsave(plot=DG_displeasing_coefficents_child, '../../figures/pleasing:displeasing_followup/full_sample/DG_displeasing_coefficents_child.png',width=10)
+ggsave(plot=DG_displeasing_coefficents_child, '../../figures/pleasing:displeasing_followup/full_sample/DG_displeasing_coefficents_child.png',width=12)
 
 #D-G displeasing adolescent dimensions
-m4 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+m4 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining) + (1| ID) + (1 | soundID), data=digital_displeasing)
 summary(m4)
 
 #D-G displeasing timing check
-m5 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+m5 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining) + (1| ID) + (1 | soundID), data=digital_displeasing)
 summary(m5)
 check_collinearity(m5)
 
@@ -80,9 +80,9 @@ plot_model(m5, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("STAI", "PAS","Childhood CHAOS", "Adolescent CHAOS"))
+  scale_x_discrete(labels=c("GoldMSI - Musical Training","STAI", "PAS","Childhood CHAOS", "Adolescent CHAOS"))
 
-ggsave(plot=DG_timing, '../../figures/pleasing:displeasing_followup/full_sample/DG_timing.png',width=10)
+ggsave(plot=DG_timing, '../../figures/pleasing:displeasing_followup/full_sample/DG_timing.png',width=12)
 ```
 
 #IADS Sounds
