@@ -1,0 +1,279 @@
+---
+title: "2_EFA"
+author: "Nick Kathios"
+date: '2022-10-31'
+output: html_document
+---
+#load packages
+```{r}
+library(tidyverse)
+library(psych)
+library(corrplot)
+library(moments)
+source("../reverseCode.R")
+library(psych)
+library(EFAtools)
+library(EFA.dimensions)
+library(corrplot)
+```
+
+#read in data
+```{r}
+data<-read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
+
+data <- data[complete.cases(data[199:229]),]
+
+MH <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') %>%
+  dplyr::select("M.H1_1":"M.H35_1")
+
+#removing check questions
+MH <- MH[-c(32:34)]
+
+cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H17_1","M.H18_1","M.H20_1","M.H23_1","M.H29_1","M.H30_1",
+                  "M.H32_1")
+MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+
+updateMH <- MH[complete.cases(MH),]
+```
+
+#determine how many factors to use
+```{r}
+#initial determination of factor structure
+#Kaiser's criterion
+fafitfree <- fa(updateMH,nfactors = ncol(updateMH), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100)
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red")
+
+#parallel analysis
+parallel <- fa.parallel(updateMH)
+
+#MAP
+MAP <- vss(updateMH) #suggests 5 factors
+MAP <- MAP[["map"]]
+print(MAP)
+
+#McDonald Omega Test on 5 + 6 factors
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 5, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=1000,  
+ rotate="oblimin") # no rotation
+
+print(fa.none)
+
+fa.diagram(fa.none)
+
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[1]]
+
+omega <-omega(SL_transformation, nfactors=5,n.iter=1,p=.05,poly=FALSE,key=NULL,
+    flip=TRUE,digits=2, title="Omega",sl=TRUE,labels=NULL,
+    plot=TRUE)
+
+summary(omega)
+
+#extracting factors
+#FA w/ one factor
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 1, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="varimax")
+
+#parallel analysis on residual to find factor #
+residual <- fa.none[["residual"]]
+parallel <- fa.parallel(residual) #suggests 4 factors
+MAP <- vss(residual) #suggests 5 factors
+MAP <- MAP[["map"]]
+print(MAP)
+
+fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100)
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red")
+
+#item reduction on this factor structure
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 7, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="oblimin") # no rotation
+summary(fa.none)
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[2]]
+SL_transformation
+
+#remove items
+updateMH <- dplyr::select(updateMH, -c("M.H17_1", "M.H20_1", "M.H18_1","M.H19_1","M.H13_1","M.H27_1","M.H23_1"))
+
+#determine new no. of factors
+#FA w/ one factor
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 1, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="varimax")
+
+#parallel analysis on residual to find factor #
+residual <- fa.none[["residual"]]
+parallel <- fa.parallel(residual)
+MAP <- vss(residual)
+MAP <- MAP[["map"]]
+print(MAP)
+
+fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100)
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red")
+
+#item reduction on this factor structure
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 6, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="oblimin") # no rotation
+summary(fa.none)
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[2]]
+SL_transformation
+
+#run again
+updateMH <- dplyr::select(updateMH, -c("M.H15_1", "M.H24_1"))
+
+#determine new no. of factors
+#FA w/ one factor
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 1, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="varimax")
+
+#parallel analysis on residual to find factor #
+residual <- fa.none[["residual"]]
+parallel <- fa.parallel(residual)
+MAP <- vss(residual)
+MAP <- MAP[["map"]]
+print(MAP)
+
+fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100)
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red") #suggests 7 factors
+
+#item reduction on this factor structure
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 7, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="oblimin") # no rotation
+summary(fa.none)
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[2]]
+SL_transformation
+
+#run again
+updateMH <- dplyr::select(updateMH, -c("M.H22_1", "M.H31_1"))
+
+#determine new no. of factors
+#FA w/ one factor
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 1, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="varimax")
+
+#parallel analysis on residual to find factor #
+residual <- fa.none[["residual"]]
+parallel <- fa.parallel(residual)
+MAP <- vss(residual)
+MAP <- MAP[["map"]]
+print(MAP)
+
+fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100)
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red")
+
+#item reduction on this factor structure
+fa.none <- psych::fa(r=updateMH, 
+ nfactors = 5, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="oblimin") # no rotation
+summary(fa.none)
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[2]]
+SL_transformation
+
+scores <- factor.scores(as.matrix(updateMH), SL_transformation, method="components")
+scores <- scores$scores
+scores <- cbind(data[20], scores)
+names(scores)[1] <- "ID"
+
+write.csv(scores, file =  "../../data/m@hr/efa_factorscores.csv")
+```

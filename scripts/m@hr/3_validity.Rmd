@@ -1,0 +1,116 @@
+---
+title: "3_validity"
+author: "Nick Kathios"
+date: '2023-01-17'
+output: html_document
+---
+
+#load packages
+```{r}
+library(tidyverse)
+library(corrplot)
+library(corrplot)
+```
+
+#read in data
+```{r}
+scored_data<-read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
+scores <- read.csv(file =  "../../data/m@hr/efa_factorscores.csv")
+master <- read.csv(file="../../data/pleasing-displeasing_followup/pleasing_displeasing_scored.csv")
+
+names(scores)[2] <- "ID"
+names(scored_data)[20] <- "ID"
+master <- master[-1]
+names(master)[1] <- "ID"
+
+full <- merge(scored_data, master,by.x="ID", by.y="ID")
+full <- merge(full, scores,by.x="ID", by.y="ID")
+
+#removing anyone missing ELA measures
+full <- full[complete.cases(full[391:418]),]
+```
+
+#corr matrices
+```{r}
+#M@HR + GoldMSI
+variables = dplyr::select(full, 
+                          g, F1, F2, F3, F4, F5, 
+                          Gold_activeengagement, Gold_perceptualabilities, Gold_musicaltraining, Gold_singingabilities, 
+                          Gold_emotion, Gold_musicalsophistication)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies',
+                           'GoldMSI Active Engagement', "GoldMSI Perceptual Abilities", "GoldMSI Musical Training", "GoldMSI Singing Abilities", "GoldMSI Emotion", "GoldMSI Musical Sophistication")
+rownames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singingg', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies',
+                           'GoldMSI Active Engagement', "GoldMSI Perceptual Abilities", "GoldMSI Musical Training", "GoldMSI Singing Abilities", "GoldMSI Emotion", "GoldMSI Musical Sophistication")
+
+pdf(file = "../../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+dev.off()
+
+#M@HR + eBMRQ
+#generate correlation matrix
+#gather variables of interest
+variables = dplyr::select(full, 
+                          g, F1, F2, F3, F4, F5, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies','Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor')
+rownames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies','Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor')
+
+pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#M@HR + ELA measures
+variables = dplyr::select(full, 
+                          g, F1, F2, F3, F4, F5, QUIC_child_total, 
+                          CHAOS_child_total, deprivation_child_total, threat_childhood_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+rownames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+
+pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+```
+
+#modeling stuff
+```{r}
+m1 <- lm(data=full, BMRQ_socialreward ~ F1 + F2 + F3 + F4 + F5)
+summary(m1)
+
+m1 <- lm(data=full, BMRQ_total ~ F1 + F2 + F3 + F4 + F5)
+summary(m1)
+
+m1 <- lm(data=full, HUMS_adult_healthy ~ F1 + F2 + F3 + F4 + F5)
+summary(m1)
+
+m1 <- lm(data=full, HUMS_adult_unhealthy ~ F1 + F2 + F3 + F4 + F5)
+summary(m1)
+```

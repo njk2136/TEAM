@@ -1,0 +1,266 @@
+---
+title: "3_analysis"
+author: "Nick Kathios"
+date: '2023-01-16'
+output: html_document
+---
+#load packages
+```{r}
+library(tidyverse)
+library(lmerTest)
+library(MuMIn)
+library(AICcmodavg)
+library(sjPlot)
+library(corrplot)
+library(psych)
+```
+
+#read in data
+```{r}
+all_scored <- read.csv("../../data/pleasing-displeasing_followup/perception/all_scored.csv")
+digital_pleasing <- read.csv("../../data/pleasing-displeasing_followup/perception/digital_pleasing.csv")
+digital_displeasing <-read.csv("../../data/pleasing-displeasing_followup/perception/digital_displeasing.csv")
+IADS_pleasing <- read.csv("../../data/pleasing-displeasing_followup/perception/IADS_pleasing.csv")
+IADS_displeasing <- read.csv("../../data/pleasing-displeasing_followup/perception/IADS_displeasing.csv")
+names(IADS_displeasing)[3] <- "PASS_total"
+```
+
+#ratings of digitally-generated sounds
+```{r}
+#D-G pleasing childhood dimensions
+m1 <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(STAI_total) + scale(PASS_total) + (1| ID) + (1 | soundID), data=digital_pleasing)
+summary(m1)
+#multicollinearity checks
+check_collinearity(m1)
+
+#D-G pleasing adolescent dimensions
+m2 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_pleasing)
+summary(m2)
+check_collinearity(m2)
+
+#D-G displeasing childhood dimensions
+m3 <-lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+summary(m3)
+
+#plot
+DG_displeasing_coefficents_child <- 
+plot_model(m3, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Ratings of Displeasing Digitally Generated Sounds") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("STAI", "PAS","Childhood QUIC", "Childhood Deprivation","Childhood Threat","Childhood CHAOS" ))
+
+ggsave(plot=DG_displeasing_coefficents_child, '../../figures/pleasing:displeasing_followup/full_sample/DG_displeasing_coefficents_child.png',width=10)
+
+#D-G displeasing adolescent dimensions
+m4 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+summary(m4)
+
+#D-G displeasing timing check
+m5 <- lmer(scale(rating) ~ scale(CHAOS_Adolescence_total) + scale(CHAOS_child_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=digital_displeasing)
+summary(m5)
+check_collinearity(m5)
+
+DG_timing <- 
+plot_model(m5, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.25, .25) +
+  ggtitle("Ratings of Displeasing Digitally Generated Sounds") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("STAI", "PAS","Childhood CHAOS", "Adolescent CHAOS"))
+
+ggsave(plot=DG_timing, '../../figures/pleasing:displeasing_followup/full_sample/DG_timing.png',width=10)
+```
+
+#IADS Sounds
+```{r}
+#IADS pleasing - childhood dimensions
+m1 <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=IADS_pleasing)
+summary(m1)
+
+#adolescent dimensions
+m2 <- lmer(scale(rating) ~ scale(QUIC_Adolescence_total) + scale(CHAOS_Adolescence_total) + scale(deprivation_Adolescence_total) + scale(threat_adolescence_total) + scale(PASS_total) + scale(STAI_total) + (1 | ID) + (1 | soundID), data=IADS_pleasing)
+summary(m2)
+
+IADS_coefficients <-
+  plot_model(m2, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.15, .15) +
+   ggtitle("Ratings of Pleasing IADS Sounds") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("STAI", "PAS", "Adolescent Threat", "Adolescent Deprivation", "Adolescent CHAOS", "Adolescent QUIC"))
+
+ggsave(plot=IADS_coefficients, '../../figures/pleasing:displeasing_followup/full_sample/IADS_pleasing_coefficients_Adolescent.png',width=10)
+
+#IADS pleasing timing check
+m3 <- lmer(scale(rating) ~ scale(threat_childhood_total) + scale(threat_adolescence_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=IADS_pleasing)
+summary(m3)
+
+#IADS displeasing - childhood dimensions
+m4 <- lmer(scale(rating) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + (1| ID) + (1 | soundID), data=IADS_displeasing)
+summary(m4)
+
+#adolescent dimensions
+m5 <- lmer(scale(rating) ~ scale(QUIC_Adolescence_total) + scale(CHAOS_Adolescence_total) + scale(deprivation_Adolescence_total) + scale(threat_adolescence_total)+ (1 | ID) + (1 | soundID), data=IADS_displeasing)
+summary(m5)
+``` 
+#correlation matrices w/ perception outcomes + ELA
+```{r}
+#perception + sum ELA
+variables = dplyr::select(all_scored, 
+                          MBEA_total, BAT_total,
+                          QUIC_sum, 
+                          CHAOS_sum, deprivation_sum, Threat_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+rownames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+
+pdf(file = "../../figures/pleasing:displeasing_followup/full_sample/perception_corrplot_sum.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#perception + ELA childhood
+variables = dplyr::select(all_scored, 
+                          MBEA_total, BAT_total,
+                          QUIC_child_total, 
+                          CHAOS_child_total, deprivation_child_total, threat_childhood_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+rownames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+
+pdf(file = "../../figures/pleasing:displeasing_followup/full_sample/perception_corrplot_childhood.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#perception + ELA adolescence
+variables = dplyr::select(all_scored, 
+                          MBEA_total, BAT_total,
+                          QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, threat_adolescence_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+rownames(corr_matrix) <- c('MBEA Score', 'BAT Score', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+
+pdf(file = "../../figures/pleasing:displeasing_followup/full_sample/perception_corrplot_adolescence.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+```
+#MBEA1 modeling
+```{r}
+#CHAOS childhood negative correlation (MBEA childhood dimensions)
+m1 <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+summary(m1)
+check_collinearity(m1)
+
+#plot
+MBEA_coef_child <- 
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("MBEA1 Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("GoldMSI Musical Training", "STAI","PAS","Childhood QUIC", "Childhood Deprivation", "Childhood Threat", "Childhood CHAOS"))
+
+ggsave(plot=MBEA_coef_child, '../../figures/pleasing:displeasing_followup/full_sample/MBEA_coef_child.png', width=10)
+
+#Threat adolescent positive correlation (MBEA adolescent dimensions)
+m2 <- lm(scale(MBEA_total) ~  scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+summary(m2)
+check_collinearity(m2)
+
+#plot
+MBEA_adol_coef <- 
+plot_model(m2, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("MBEA1 Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("GoldMSI Musical Training", "STAI","PAS","Adolescent QUIC", "Adolescent Deprivation", "Adolescent Threat", "Adolescent CHAOS"))
+
+ggsave(plot=MBEA_adol_coef, '../../figures/pleasing:displeasing_followup/full_sample/MBEA_adol_coef.png', width=10)
+
+#MBEA timing follow-up
+m3 <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(CHAOS_Adolescence_total) + scale(threat_childhood_total) + scale(threat_adolescence_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+summary(m3)
+check_collinearity(m3)
+
+MBEA_timing_coef <- 
+plot_model(m3, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("MBEA1 Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("GoldMSI Musical Training", "STAI","PAS","Adolescent Threat", "Childhood Threat", "Adolescent CHAOS", "Childhood CHAOS"))
+
+ggsave(plot=MBEA_timing_coef, '../../figures/pleasing:displeasing_followup/full_sample/MBEA_timing_coef.png', width=10)
+```
+
+#BAT models
+```{r}
+m1 <- lm(scale(BAT_total) ~ scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+summary(m1)
+
+m2 <- lm(scale(BAT_total) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+summary(m2)
+```
