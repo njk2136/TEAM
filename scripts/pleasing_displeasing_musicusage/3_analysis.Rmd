@@ -56,6 +56,10 @@ summary(m1)
 
 m1 <- lm(scale(HUMS_adult_healthy) ~ scale(BMRQ_socialreward) + scale(BMRQ_emotion) + scale(BMRQ_moodreg) + scale(BMRQ_sensorimotor) + scale(BMRQ_musicseek) + scale(BMRQ_absorption), data=all_scored)
 summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
 #plot
 
 eBMRQ_HUMS_coef <- 
@@ -151,10 +155,25 @@ dev.off()
 ```{r}
 m1 <- lm(CHAOS_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption , data=all_scored)
 summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
+
 m1 <- lm(QUIC_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption, data=all_scored)
 summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
+
 m1 <- lm(deprivation_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption, data=all_scored)
 summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
+
 m1 <- lm(Threat_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption, data=all_scored)
 summary(m1)
 

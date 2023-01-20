@@ -13,6 +13,7 @@ library(AICcmodavg)
 library(sjPlot)
 library(corrplot)
 library(psych)
+library(stats)
 ```
 
 #read in data
@@ -192,7 +193,10 @@ dev.off()
 ```{r}
 #CHAOS childhood negative correlation (MBEA childhood dimensions)
 m1 <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
-summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "bonferroni", n = length(p))
 check_collinearity(m1)
 
 #plot
@@ -214,7 +218,10 @@ ggsave(plot=MBEA_coef_child, '../../figures/pleasing:displeasing_followup/full_s
 
 #Threat adolescent positive correlation (MBEA adolescent dimensions)
 m2 <- lm(scale(MBEA_total) ~  scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(QUIC_Adolescence_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
-summary(m2)
+summary <- summary(m2)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "bonferroni", n = length(p))
 check_collinearity(m2)
 
 #plot
@@ -237,6 +244,10 @@ ggsave(plot=MBEA_adol_coef, '../../figures/pleasing:displeasing_followup/full_sa
 #MBEA timing follow-up
 m3 <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(CHAOS_Adolescence_total) + scale(threat_childhood_total) + scale(threat_adolescence_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
 summary(m3)
+summary <- summary(m3)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "bonferroni", n = length(p))
 check_collinearity(m3)
 
 MBEA_timing_coef <- 
