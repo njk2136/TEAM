@@ -1,0 +1,322 @@
+---
+title: "1_scoring"
+author: "Nick Kathios"
+date: '2022-10-04'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+source("reverseCode.R")
+```
+
+#read in data
+```{r}
+survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_November 16, 2022_18.21.csv")
+```
+
+# QUIC (childhood + adolescence)
+```{r}
+### CHILDHOOD ###
+#QUIC Scoring
+QUIC_child <- survey %>%
+  select("QUIC_Child_2":"QUIC_Child_38")
+
+#recode verbal responses (if not numbers)
+QUIC_child[QUIC_child == "Yes"] <- as.numeric(1)
+QUIC_child[QUIC_child == "No"] <- as.numeric(0)
+QUIC_child[1:22] <- as.numeric(unlist(QUIC_child[1:22]))
+
+cols_reverse <- c("QUIC_Child_8", "QUIC_Child_15", "QUIC_Child_17", "QUIC_Child_36")
+
+cols_parentalpredictability <- c("QUIC_Child_2", "QUIC_Child_8","QUIC_Child_11", "QUIC_Child_12", "QUIC_Child_15","QUIC_Child_16", "QUIC_Child_17","QUIC_Child_31","QUIC_Child_32","QUIC_Child_33", "QUIC_Child_34","QUIC_Child_35")
+
+cols_physiscalenvironment <- c("QUIC_Child_13", "QUIC_Child_20",  "QUIC_Child_26", "QUIC_Child_27", "QUIC_Child_36", "QUIC_Child_37", "QUIC_Child_38")
+
+cols_safetyandsecurity <- c("QUIC_Child_23", "QUIC_Child_24", "QUIC_Child_25")
+
+# Reverse code
+QUIC_child[cols_reverse] <- lapply(QUIC_child[cols_reverse], reverseCode, min=0, max=1)
+
+#scoring
+survey$QUIC_child_total <- apply(QUIC_child,1, sum)
+survey$QUIC_child_parentalpredictability <- apply(QUIC_child[cols_parentalpredictability], 1,sum)
+survey$QUIC_child_physiscalenvironment <- apply(QUIC_child[cols_physiscalenvironment], 1,sum)
+survey$QUIC_child_safetyandsecurity <- apply(QUIC_child[cols_safetyandsecurity], 1,sum)
+hist(survey$QUIC_child_total)
+
+
+### ADOLESCENCE ###
+#QUIC Scoring
+QUIC_Adolescence <- survey %>%
+  select("QUIC_Adolescence_2":"QUIC_Adolescence_38")
+
+#recode verbal responses (if not numbers)
+QUIC_Adolescence[QUIC_Adolescence == "Yes"] <- as.numeric(1)
+QUIC_Adolescence[QUIC_Adolescence == "No"] <- as.numeric(0)
+QUIC_Adolescence[1:22] <- as.numeric(unlist(QUIC_Adolescence[1:22]))
+
+cols_reverse <- c("QUIC_Adolescence_8", "QUIC_Adolescence_15", "QUIC_Adolescence_17", "QUIC_Adolescence_36")
+
+cols_parentalpredictability <- c("QUIC_Adolescence_2", "QUIC_Adolescence_8","QUIC_Adolescence_11", "QUIC_Adolescence_12", "QUIC_Adolescence_15","QUIC_Adolescence_16", "QUIC_Adolescence_17","QUIC_Adolescence_31","QUIC_Adolescence_32","QUIC_Adolescence_33", "QUIC_Adolescence_34","QUIC_Adolescence_35")
+
+cols_physiscalenvironment <- c("QUIC_Adolescence_13", "QUIC_Adolescence_20",  "QUIC_Adolescence_26", "QUIC_Adolescence_27", "QUIC_Adolescence_36", "QUIC_Adolescence_37", "QUIC_Adolescence_38")
+
+cols_safetyandsecurity <- c("QUIC_Adolescence_23", "QUIC_Adolescence_24", "QUIC_Adolescence_25")
+
+# Reverse code
+QUIC_Adolescence[cols_reverse] <- lapply(QUIC_Adolescence[cols_reverse], reverseCode, min=0, max=1)
+
+#scoring
+survey$QUIC_Adolescence_total <- apply(QUIC_Adolescence,1, sum)
+survey$QUIC_Adolescence_parentalpredictability <- apply(QUIC_Adolescence[cols_parentalpredictability], 1,sum)
+survey$QUIC_Adolescence_physiscalenvironment <- apply(QUIC_Adolescence[cols_physiscalenvironment], 1,sum)
+survey$QUIC_Adolescence_safetyandsecurity <- apply(QUIC_Adolescence[cols_safetyandsecurity], 1,sum)
+hist(survey$QUIC_Adolescence_total)
+
+cor.test(survey$QUIC_child_total, survey$QUIC_Adolescence_total)
+ggplot(data=survey, aes(x=QUIC_child_total, y=QUIC_Adolescence_total)) + geom_point()
+
+survey$QUIC_sum <- survey$QUIC_child_total + survey$QUIC_Adolescence_total
+```
+
+#CHAOS (childhood + adolescence)
+```{r}
+### CHILDHOOD ###
+#CHAOS Scoring
+CHAOS_child <- survey %>%
+  select("CHAOS_Child_1_1":"CHAOS_Child_6_1")
+
+cols_reverse <- c("CHAOS_Child_1_1", "CHAOS_Child_5_1", "CHAOS_Child_6_1")
+
+# Reverse code
+CHAOS_child[cols_reverse] <- lapply(CHAOS_child[cols_reverse], reverseCode, min=1, max=5)
+
+survey$CHAOS_child_total <- apply(CHAOS_child,1, sum)
+hist(survey$CHAOS_child_total)
+
+### ADOLESCENCE ###
+#CHAOS Scoring
+CHAOS_Adolescence <- survey %>%
+  select("CHAOS_Adolescence_1_1":"CHAOS_Adolescence_6_1")
+
+cols_reverse <- c("CHAOS_Adolescence_1_1", "CHAOS_Adolescence_5_1", "CHAOS_Adolescence_6_1")
+
+# Reverse code
+CHAOS_Adolescence[cols_reverse] <- lapply(CHAOS_Adolescence[cols_reverse], reverseCode, min=1, max=5)
+
+survey$CHAOS_Adolescence_total <- apply(CHAOS_Adolescence,1, sum)
+hist(survey$CHAOS_Adolescence_total)
+cor.test(survey$CHAOS_child_total, survey$CHAOS_Adolescence_total)
+ggplot(data=survey, aes(x=CHAOS_child_total, y=CHAOS_Adolescence_total)) + geom_point()
+
+survey$CHAOS_sum <- survey$CHAOS_child_total + survey$CHAOS_Adolescence_total
+```
+
+#DT (childhood + adolescence)
+```{r}
+### CHILDHOOD ###
+#Deprivation Scoring
+deprivation_child <- survey %>%
+  select("DT1c_1":"DT25c_1")
+
+cols_reverse <- c("DT1c_1", "DT2c_1", "DT3c_1", "DT4c_1", "DT5c_1", "DT6c_1", "DT7c_1", "DT10c_1")
+
+cols_emotionaldeprivation <- c("DT1c_1", "DT2c_1", "DT3c_1", "DT4c_1", "DT5c_1", "DT6c_1", "DT7c_1")
+
+cols_physicaldeprivation <- c("DT10c_1", "DT11c_1", "DT12c_1", "DT13c_1", "DT14c_1", "DT15c_1", "DT16c_1", "DT17c_1")
+
+cols_cognitivedeprivation <- c("DT18c_1", "DT19c_1", "DT20c_1", "DT21c_1", "DT22c_1", "DT23c_1", "DT24c_1", "DT25c_1")
+
+# Reverse code
+deprivation_child[cols_reverse] <- lapply(deprivation_child[cols_reverse], reverseCode, min=1, max=4)
+
+#scoring
+survey$deprivation_child_total <- apply(deprivation_child,1, sum)
+survey$deprivation_child_emotional <- apply(deprivation_child[cols_emotionaldeprivation], 1,sum)
+survey$deprivation_child_physical <- apply(deprivation_child[cols_physicaldeprivation], 1,sum)
+survey$deprivation_child_cognitive <- apply(deprivation_child[cols_cognitivedeprivation], 1,sum)
+hist(survey$deprivation_child_total)
+
+### ADOLESCENCE ###
+#Deprivation Scoring
+deprivation_Adolescence <- survey %>%
+  select("DT1a_1":"DT25a_1")
+
+cols_reverse <- c("DT1a_1", "DT2a_1", "DT3a_1", "DT4a_1", "DT5a_1", "DT6a_1", "DT7a_1", "DT10a_1")
+
+cols_emotionaldeprivation <- c("DT1a_1", "DT2a_1", "DT3a_1", "DT4a_1", "DT5a_1", "DT6a_1", "DT7a_1")
+
+cols_physicaldeprivation <- c("DT10a_1", "DT11a_1", "DT12a_1", "DT13a_1", "DT14a_1", "DT15a_1", "DT16a_1", "DT17a_1")
+
+cols_cognitivedeprivation <- c("DT18a_1", "DT19a_1", "DT20a_1", "DT21a_1", "DT22a_1", "DT23a_1", "DT24a_1", "DT25a_1")
+
+# Reverse code
+deprivation_Adolescence[cols_reverse] <- lapply(deprivation_Adolescence[cols_reverse], reverseCode, min=1, max=4)
+
+#scoring
+survey$deprivation_Adolescence_total <- apply(deprivation_Adolescence,1, sum)
+survey$deprivation_Adolescence_emotional <- apply(deprivation_Adolescence[cols_emotionaldeprivation], 1,sum)
+survey$deprivation_Adolescence_physical <- apply(deprivation_Adolescence[cols_physicaldeprivation], 1,sum)
+survey$deprivation_Adolescence_cognitive <- apply(deprivation_Adolescence[cols_cognitivedeprivation], 1,sum)
+hist(survey$deprivation_Adolescence_total)
+cor.test(survey$deprivation_child_total, survey$CHAOS_child_total)
+
+survey$deprivation_sum <- survey$deprivation_child_total + survey$deprivation_Adolescence_total
+
+### CHILDHOOD ###
+#Threat Scoring
+threat_child <- survey %>%
+  select("T1c_1":"T2.8c_1")
+
+cols_home_threat <- c("T1c_1","T2c_1","T3c_1","T4c_1","T5c_1","T6c_1","T7c_1","T8c_1","T9c_1","T10c_1","T11c_1","T12c_1")
+cols_neighborhood_threat <- c("T2.1c_1","T2.2c_1","T2.3c_1","T2.4c_1","T2.5c_1","T2.6c_1","T2.7c_1","T2.8c_1")
+survey$threat_childhood_total <- apply(threat_child,1, sum)
+survey$threat_childhood_home <- apply(threat_child[cols_home_threat], 1,sum)
+survey$threat_childhood_neighborhood <- apply(threat_child[cols_neighborhood_threat], 1,sum)
+hist(survey$threat_childhood_total)
+
+### ADOLESCENCE ###
+#Threat Scoring
+threat_adolescence <- survey %>%
+  select("T1a_1":"T2.8a_1")
+
+cols_home_threat <- c("T1a_1","T2a_1","T3a_1","T4a_1","T5a_1","T6a_1","T7a_1","T8a_1","T9a_1","T10a_1","T11a_1","T12a_1")
+cols_neighborhood_threat <- c("T2.1a_1","T2.2a_1","T2.3a_1","T2.4a_1","T2.5a_1","T2.6a_1","T2.7a_1","T2.8a_1")
+survey$threat_adolescence_total <- apply(threat_adolescence,1, sum)
+survey$threat_adolescence_home <- apply(threat_adolescence[cols_home_threat], 1,sum)
+survey$threat_adolescence_neighborhood <- apply(threat_adolescence[cols_neighborhood_threat], 1,sum)
+hist(survey$threat_adolescence_total)
+ggplot(data=survey, aes(x=threat_childhood_total, y=threat_adolescence_total)) + geom_point()+
+  geom_smooth()
+
+survey$Threat_sum <- survey$threat_childhood_total + survey$threat_adolescence_total
+```
+
+#HUMS (adolescent + current)
+```{r}
+### ADOLESCENT ###
+#HUMS Scoring
+HUMS_adolescent <- survey %>%
+  select("HUMS_a1_1":"HUMS_a13_1")
+
+cols_healthy <- c("HUMS_a3_1","HUMS_a5_1","HUMS_a6_1","HUMS_a9_1","HUMS_a13_1")
+cols_unhealthy <- c("HUMS_a1_1","HUMS_a2_1","HUMS_a4_1","HUMS_a7_1","HUMS_a8_1","HUMS_a10_1","HUMS_a11_1","HUMS_a12_1")
+
+survey$HUMS_adolescence_healthy <- apply(HUMS_adolescent[cols_healthy], 1,sum)
+survey$HUMS_adolescence_unhealthy <- apply(HUMS_adolescent[cols_unhealthy], 1,sum)
+
+
+### ADULT ###
+#HUMS Scoring
+HUMS_adult <- survey %>%
+  select("HUMS1_1":"HUMS13_1")
+
+cols_healthy <- c("HUMS3_1","HUMS5_1","HUMS6_1","HUMS9_1","HUMS13_1")
+cols_unhealthy <- c("HUMS1_1","HUMS2_1","HUMS4_1","HUMS7_1","HUMS8_1","HUMS10_1","HUMS11_1","HUMS12_1")
+
+survey$HUMS_adult_healthy <- apply(HUMS_adult[cols_healthy], 1,sum)
+survey$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
+```
+
+#AES
+```{r}
+#AES Scoring --> update to do factor structure according to Sachs (2016)
+AES <- survey %>%
+  select("AES1_1":"AES10_1")
+
+survey$AES_total <- apply(AES,1,sum)
+```
+
+#ASRS
+```{r}
+#ASRS-v1.1 Scoring
+ASRS <- survey %>%
+  select("ASRS1_1":"ASRS6_1")
+
+survey$ASRS_total <- apply(ASRS,1,sum)
+```
+
+#M@H
+```{r}
+ ## COLUMN NAMES FOR M@H SURVEY ## 
+MH <- survey %>%
+  select("M.H1_1":"M.H35_1")
+
+#removing check questions
+MH <- MH[-c(32:34)]
+
+#removing items from FA
+MH <- dplyr::select(MH, -c("M.H13_1","M.H15_1","M.H17_1","M.H18_1","M.H19_1", "M.H20_1","M.H22_1", "M.H23_1","M.H24_1","M.H27_1","M.H31_1",
+                                       ))
+
+# Reverse code
+cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H29_1","M.H30_1",
+                  "M.H32_1")
+
+MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+
+cols_caregiverbeliefs <- c("M.H1_1", "M.H2_1","M.H3_1", "M.H4_1")
+cols_caregiversinging <- c("M.H9_1","M.H10_1","M.H12_1","M.H16_1")
+cols_childhoodattitude <- c("M.H29_1", "M.H30_1", "M.H32_1")
+cols_socialcontexts <- c("M.H21_1", "M.H25_1","M.H26_1","M.H28_1")
+cols_musicmaking <- c("M.H5_1", "M.H6_1", "M.H7_1", "M.H8_1", "M.H14_1")
+ 
+survey$MH_total <- apply(MH,1,sum)
+survey$MH_caregiverbeliefs <- apply(MH[cols_caregiverbeliefs], 1,sum)
+survey$MH_caregiversinging <- apply(MH[cols_caregiversinging], 1,sum)
+survey$MH_childhoodattitude <- apply(MH[cols_childhoodattitude], 1,sum)
+survey$MH_socialcontexts <- apply(MH[cols_socialcontexts], 1,sum)
+survey$MH_musicmaking <- apply(MH[cols_musicmaking], 1,sum)
+
+hist(survey$MH_total)
+```
+
+#STAI
+```{r}
+#isolate survey you're scoring
+STAI <- survey %>%
+  select("STAI1_1":"STAI20_1")
+
+
+cols_reverse <- c("STAI1_1","STAI3_1","STAI6_1","STAI7_1","STAI10_1","STAI13_1","STAI14_1","STAI16_1","STAI19_1")
+STAI[cols_reverse] <- lapply(STAI[cols_reverse], reverseCode, min=1, max=4)
+
+
+#if it is a simple subscore (i.e. no reverse coding or anything)
+survey$STAI_total <- apply(STAI,1,sum)
+hist(survey$STAI_total)
+```
+
+#CD-RISC
+```{r}
+#CD-RISC Scoring
+CD.RISC <- survey %>%
+  select("CD.RISC1_1":"CD.RISC10_1")
+
+survey$CD.RISC_total <- apply(CD.RISC,1,sum)
+hist(survey$CD.RISC_total)
+```
+
+#TIPI
+```{r}
+#TIPI Scoring
+TIPI <- survey %>%
+  select("Q3.1_1":"Q3.1_10")
+
+survey$TIPI_total <- apply(TIPI,1,sum)
+```
+
+#STOMP
+```{r}
+#STOMP Scoring
+STOMP <- survey %>%
+  select("STOMP_1":"STOMP_10")
+
+survey$STOMP_total <- apply(STOMP,1,sum)
+```
+
+#write scored survey df to .csv
+```{r}
+write.csv(file='../data/pleasing-displeasing_followup/scored_data.csv', survey)
+```

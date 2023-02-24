@@ -1,0 +1,33 @@
+---
+title: "2_cleaning"
+author: "Nick Kathios"
+date: '2023-01-16'
+output: html_document
+---
+#load packages
+```{r}
+library(tidyverse)
+```
+
+#read in data
+```{r}
+scored_data <- read.csv(file="../../data/pleasing-displeasing_followup/scored_data.csv")
+master <- read.csv(file="../../data/pleasing-displeasing_followup/pleasing_displeasing_scored.csv")
+```
+
+#clean data
+```{r}
+#removing Ps without ELA + HUMs
+scored_data <- scored_data[complete.cases(scored_data[ , 391:422]),]
+#removing Ps without STAI
+scored_data <- scored_data[complete.cases(scored_data[ , 431]),]
+```
+
+#merge dataframes
+```{r}
+names(scored_data)[20] <- "ID"
+master <- master[-1]
+names(master)[1] <- "ID"
+all_scored <- merge(master, scored_data, by.x="ID", by.y="ID")
+write.csv(all_scored, "../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
+```

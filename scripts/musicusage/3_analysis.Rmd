@@ -1,0 +1,202 @@
+---
+title: "3_analysis"
+author: "Nick Kathios"
+date: '2023-01-16'
+output: html_document
+---
+
+#load packages
+```{r}
+library(tidyverse)
+library(lmerTest)
+library(MuMIn)
+library(AICcmodavg)
+library(sjPlot)
+library(corrplot)
+library(psych)
+```
+
+#read in data
+```{r}
+all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
+```
+
+#HUMS, eBMRQ, Mental Health corr matrix
+```{r}
+#HUMS, eBMRQ, Mental Health
+variables = dplyr::select(all_scored, 
+                          HUMS_adolescence_unhealthy, HUMS_adult_unhealthy,
+                          HUMS_adolescence_healthy, HUMS_adult_healthy,
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor,PASS_total,
+                          STAI_total, CD.RISC_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor',"PAS", "STAI", "CDRISC")
+rownames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult Music Usage','Healthy Adolescent Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "PAS", "STAI", "CDRISC")
+
+pdf(file = "../../figures/pleasing:displeasing_followup/full_sample/eBMRQ_HUMS_mentalhealth.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+```
+
+#HUMS ~ eBMRQ
+```{r}
+m1 <- lm(HUMS_adult_unhealthy ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption, data=all_scored)
+summary(m1)
+
+m1 <- lm(scale(HUMS_adult_healthy) ~ scale(BMRQ_socialreward) + scale(BMRQ_emotion) + scale(BMRQ_moodreg) + scale(BMRQ_sensorimotor) + scale(BMRQ_musicseek) + scale(BMRQ_absorption), data=all_scored)
+summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
+#plot
+
+eBMRQ_HUMS_coef <- 
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.6, .6) +
+  ggtitle("Healthy Music Usage Scores") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Absorption", "Music Seeking","Sensorimotor","Mood Regulation", "Emotion Evocation", "Social Reward"))
+
+ggsave(plot=eBMRQ_HUMS_coef, '../../figures/pleasing:displeasing_followup/full_sample/eBMRQ_HUMS_coef.png',width=10)
+```
+
+#corrplots
+```{r}
+#eBMRQ + ELA Sum
+variables = dplyr::select(all_scored, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor, QUIC_sum, 
+                          CHAOS_sum, deprivation_sum, Threat_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Sum", "CHAOS Sum", "Deprivation Sum", "Threat Sum")
+
+pdf(file = "../../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#childhood
+variables = dplyr::select(all_scored, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor, QUIC_child_total, 
+                          CHAOS_child_total, deprivation_child_total, threat_childhood_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
+pdf(file = "../../figures/pleasing:displeasing_followup/BMRQ_corrplot_childhood.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+
+#adolescence
+variables = dplyr::select(all_scored, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
+                          BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor, QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, threat_adolescence_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
+                           'Sensorimotor', "QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence", "Threat Adolescence")
+
+pdf(file = "../../figures/pleasing:displeasing_followup/BMRQ_corrplot_adolescence.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+```
+
+#is absorption related to ELA above and beyond other measures?
+```{r}
+m1 <- lm(CHAOS_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption , data=all_scored)
+summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
+
+m1 <- lm(QUIC_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption, data=all_scored)
+summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
+
+m1 <- lm(deprivation_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption, data=all_scored)
+summary(m1)
+summary <- summary(m1)
+summary <- as.data.frame(summary[["coefficients"]])
+p <- summary$`Pr(>|t|)`
+p.adjust(p, method = "fdr", n = length(p))
+
+m1 <- lm(Threat_sum ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption, data=all_scored)
+summary(m1)
+
+#is there evidence that absorption is adaptive?
+cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
+cor.test(all_scored$BMRQ_absorption, all_scored$HUMS_adult_healthy)
+cor.test(all_scored$BMRQ_absorption, all_scored$HUMS_adult_unhealthy)
+```
+
+#is any dimension of ELA related to music reward sensitivity? or healthy / unhealthy music usage?
+```{r}
+m1 <- lm(BMRQ_total ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
+summary(m1)
+
+m2 <- lm(HUMS_adult_healthy ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
+summary(m2)
+
+m3 <- lm(HUMS_adult_unhealthy ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
+summary(m3)
+```
+
+#is one dimenions of ELA associated w/ abs?
+```{r}
+m1 <- lm(BMRQ_absorption ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
+summary(m1)
+```
