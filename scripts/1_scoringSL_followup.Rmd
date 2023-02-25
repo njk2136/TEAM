@@ -8,17 +8,30 @@ library(tidyverse)
 source("reverseCode.R")
 ```
 
-#still need code for full CHAOS, Escapism, SRQ, AIMS, AES-M
+#still need code for AES-M
 
 #read in data
 ```{r}
-ogsurveyresponses <- read.csv(file='../data/SL_followup/survey_responsesOGrun.csv') #score PAS, BMRQ, & GoldMSI
+ogsurveyresponses <- read.csv(file='../data/SL_followup/survey_responsesOGrun.csv') #score PAS
 MET <- read.csv(file='../data/SL_followup/data_exp_106990-v4_task-sv8h.csv') #clean & score MET
-followup <- read.csv(file='../data/SL_followup/Groove)_February 24, 2023_14.13.csv') #score everything
+followup <- read.csv(file='../data/SL_followup/Groove)_February 25, 2023_12.54.csv') #score everything
+ogBMRQ_goldMSI <- read.csv(file='../data/SL_followup/across_studies_bmrq_msi.csv')
+```
+
+#getting raw BMRQ
+```{r}
+ogBMRQ_goldMSI$bmrq_all <- ogBMRQ_goldMSI$bmrq_all * 20
+
+ogBMRQ_goldMSI$bmrq_ms <- ogBMRQ_goldMSI$bmrq_ms * 4
+ogBMRQ_goldMSI$bmrq_ee <- ogBMRQ_goldMSI$bmrq_ee * 4
+ogBMRQ_goldMSI$bmrq_sm <- ogBMRQ_goldMSI$bmrq_sm * 4
+ogBMRQ_goldMSI$bmrq_sw <- ogBMRQ_goldMSI$bmrq_sw * 4
+ogBMRQ_goldMSI$bmrq_mr <- ogBMRQ_goldMSI$bmrq_mr * 4
 ```
 
 #MET cleaning/scoring
 ```{r}
+#double check this is accurate
 MET_cleaned <- MET %>%
   select(Participant.Public.ID, Response, Correct, display) %>%
   subset(Response != "AUDIO PLAY REQUESTED") %>%
@@ -169,159 +182,6 @@ ogsurveyresponses$PASS_general <- apply(PASS[cols_general],1, sum)
 ogsurveyresponses$PASS_smell <- apply(PASS[cols_smell],1, sum)
 ```
 
-#BMRQ Scoring - update once timing clicks are gone
-```{r}
-bmrq <- df %>%
-  select("When.I.share.music.with.someone.I.feel.a.special.connection.with.that.person....Completely.Disagree.Completely.Agree":"X25..When.listening.to.great.music.I.sometimes.feel.as.if.I.am.being.lifted.into.the.air....Completely.Disagree.Completely.Agree")
-
-bmrq$X21..Mark..Completely.Agree..for.this.question....Completely.Disagree.Completely.Agree <- NULL
-
-# BMRQ columns to reverse code and sub-score
-cols_reverse <- c("X2..In.my.free.time.I.hardly.listen.to.music....Completely.Disagree.Completely.Agree",
-                  "X5..I.don.t.like.to.dance..not.even.with.music.I.like....Completely.Disagree.Completely.Agree")
-
-cols_emotion <- c("X3..I.like.listen.to.music.that.contains.emotion....Completely.Disagree.Completely.Agree",
-  "X8..I.get.emotional.listening.to.certain.pieces.of.music....Completely.Disagree.Completely.Agree",
-  "X12..I.can.become.tearful.or.cry.when.I.listen.to.a.melody.that.I.like.very.much....Completely.Disagree.Completely.Agree",
-  "X18..I.sometimes.feel.chills.when.I.hear.a.melody.that.I.like....Completely.Disagree.Completely.Agree")
-
-cols_sensorimotor <-c("X5..I.don.t.like.to.dance..not.even.with.music.I.like....Completely.Disagree.Completely.Agree",
-  "X10..Music.often.makes.me.dance....Completely.Disagree.Completely.Agree",
-  "X15..I.can.t.help.humming.or.singing.along.to.music.that.I.like....Completely.Disagree.Completely.Agree",
-  "X20..When.I.hear.a.tune.I.like.a.lot.I.can.t.help.tapping.or.moving.to.its.beat....Completely.Disagree.Completely.Agree")
-                      
-cols_moodreg <- c("X4..Music.keeps.me.company.when.I.m.alone....Completely.Disagree.Completely.Agree",
-  "X9..Music.calms.and.relaxes.me....Completely.Disagree.Completely.Agree",
-  "X14..Music.helps.me.chill.out....Completely.Disagree.Completely.Agree",
-  "X19..Music.comforts.me....Completely.Disagree.Completely.Agree")
-
-cols_musicseek <- c("X2..In.my.free.time.I.hardly.listen.to.music....Completely.Disagree.Completely.Agree",
-  "X7..I.inform.myself.about.music.I.like....Completely.Disagree.Completely.Agree",
-  "X11..I.m.always.looking.for.new.music....Completely.Disagree.Completely.Agree",
-  "X17..I.spend.quite.a.bit.of.money.on.music.and.related.items....Completely.Disagree.Completely.Agree")
-
-cols_socialreward <-c("X1..When.I.share.music.with.someone.I.feel.a.special.connection.with.that.person....Completely.Disagree.Completely.Agree",
-  "X6..Music.makes.me.bond.with.other.people....Completely.Disagree.Completely.Agree",
-  "X13..I.like.to.sing.or.play.an.instrument.with.other.people....Completely.Disagree.Completely.Agree",
-                     "X16..At.a.concert.I.feel.connected.to.the.performers.and.the.audience....Completely.Disagree.Completely.Agree")
-
-cols_absorption <- c("X22..I.sometimes.feel.like.I.am..one..with.the.music....Completely.Disagree.Completely.Agree", "X23..While.listening.to.music..I.may.become.so.involved.that.I.may.forget.about.myself.and.my.surroundings....Completely.Disagree.Completely.Agree", "X24..It.is.sometimes.possible.for.me.to.be.completely.immersed.in.music.and.to.feel.as.if.my.whole.state.of.consciousness.has.been.temporarily.altered....Completely.Disagree.Completely.Agree", "X25..When.listening.to.great.music.I.sometimes.feel.as.if.I.am.being.lifted.into.the.air....Completely.Disagree.Completely.Agree")
-
-# Reverse code
-bmrq[cols_reverse] <- lapply(bmrq[cols_reverse], reverseCode)
-
-
-# Add sub-scores and total to main df
-df$BMRQ_total <- apply(bmrq,1, sum) # total BMRQ scores
-df$BMRQ_emotion <- apply(bmrq[cols_emotion], 1,sum)
-df$BMRQ_sensorimotor <- apply(bmrq[cols_sensorimotor],1, sum)
-df$BMRQ_moodreg <-apply(bmrq[cols_moodreg],1, sum)
-df$BMRQ_musicseek <- apply(bmrq[cols_musicseek],1, sum)
-df$BMRQ_socialreward <- apply(bmrq[cols_socialreward],1, sum)
-df$BMRQ_absorption <- apply(bmrq[cols_absorption],1, sum)
-
-quantile(df$BMRQ_total, probs = c(.1), na.rm=TRUE)
-
-df$BMRQ_total_scaled <- scale(df$BMRQ_total)
-```
-
-#GoldMSI Scoring - update once timing columns removed
-```{r}
-Gold <- df %>%
-  select("X1..I.spend.a.lot.of.my.free.time.doing.music.related.activities....Completely.Disagree.Completely.Agree":"X38..I.listen.attentively.to.music.for.___.per.day.")
-
-#delete atttention checking question
-Gold$Mark..2..for.this.question. <- NULL
-
-
-# GoldMSI columns to reverse code and sub-score (for these questions, the correct answer (ie the more positive answer) is a higher number. Negative questions are reverse coded.) 
-
-cols_reverse <- c("X21..I.don.t.spend.much.of.my.disposable.income.on.music....Completely.Disagree.Completely.Agree" , 
-"X11..I.find.it.difficult.to.spot.mistakes.in.a.performance.of.a.song.even.if.I.know.the.tune....Completely.Disagree.Completely.Agree" , 
-"X13..I.have.trouble.recognizing.a.familiar.song.when.played.in.a.different.way.or.by.a.different.performer....Completely.Disagree.Completely.Agree" , 
-"X23..When.I.sing..I.have.no.idea.whether.I.m.in.tune.or.not....Completely.Disagree.Completely.Agree" , 
-"X14..I.have.never.been.complimented.for.my.talents.as.a.musical.performer....Completely.Disagree.Completely.Agree" , 
-"X27..I.would.not.consider.myself.a.musician....Completely.Disagree.Completely.Agree" , 
-"X17..I.am.not.able.to.sing.in.harmony.when.somebody.is.singing.a.familiar.tune....Completely.Disagree.Completely.Agree" , 
-"X25..I.don.t.like.singing.in.public.because.I.m.afraid.that.I.would.sing.wrong.notes....Completely.Disagree.Completely.Agree" , 
-"X9..Pieces.of.music.rarely.evoke.emotions.for.me....Completely.Disagree.Completely.Agree")
-
-cols_activeengagement <- c("X1..I.spend.a.lot.of.my.free.time.doing.music.related.activities....Completely.Disagree.Completely.Agree" , 
-"X3..I.enjoy.writing.about.music..for.example.on.blogs.and.forums....Completely.Disagree.Completely.Agree" , 
-"X8..I.m.intrigued.by.musical.styles.I.m.not.familiar.with.and.want.to.find.out.more....Completely.Disagree.Completely.Agree" , 
-"X15..I.often.read.or.search.the.internet.for.things.related.to.music....Completely.Disagree.Completely.Agree" , 
-"X21..I.don.t.spend.much.of.my.disposable.income.on.music....Completely.Disagree.Completely.Agree" , 
-"X24..Music.is.kind.of.an.addiction.for.me...I.couldn.t.live.without.it....Completely.Disagree.Completely.Agree" , 
-"X28..I.keep.track.of.new.music.that.I.come.across..e.g..new.artists.or.recordings.....Completely.Disagree.Completely.Agree" , 
-"X34..I.have.attended.___.live.music.events.as.an.audience.member.in.the.past.twelve.months." , 
-"X38..I.listen.attentively.to.music.for.___.per.day.")
-
-cols_perceptualabilities <- c("X5..I.am.able.to.judge.whether.someone.is.a.good.singer.or.not....Completely.Disagree.Completely.Agree" , 
-"X6..I.usually.know.when.I.m.hearing.a.song.for.the.first.time....Completely.Disagree.Completely.Agree" , "X11..I.find.it.difficult.to.spot.mistakes.in.a.performance.of.a.song.even.if.I.know.the.tune....Completely.Disagree.Completely.Agree" , 
-"X12..I.can.compare.and.discuss.differences.between.two.performances.or.versions.of.the.same.piece.of.music....Completely.Disagree.Completely.Agree" , 
-"X13..I.have.trouble.recognizing.a.familiar.song.when.played.in.a.different.way.or.by.a.different.performer....Completely.Disagree.Completely.Agree" , 
-"X18..I.can.tell.when.people.sing.or.play.out.of.time.with.the.beat....Completely.Disagree.Completely.Agree" , 
-"X22..I.can.tell.when.people.sing.or.play.out.of.tune....Completely.Disagree.Completely.Agree" , 
-"X23..When.I.sing..I.have.no.idea.whether.I.m.in.tune.or.not....Completely.Disagree.Completely.Agree" , 
-"X26..When.I.hear.a.music.I.can.usually.identify.its.genre....Completely.Disagree.Completely.Agree")
-
-cols_musicaltraining <- c("X14..I.have.never.been.complimented.for.my.talents.as.a.musical.performer....Completely.Disagree.Completely.Agree" , "X27..I.would.not.consider.myself.a.musician....Completely.Disagree.Completely.Agree", 
-"X32..I.engaged.in.regular..daily.practice.of.a.musical.instrument..including.voice..for.___.years." , 
-"X33..At.the.peak.of.my.interest..I.practiced.___.hours.per.day.on.my.primary.instrument." , 
-"X35..I.have.had.formal.training.in.music.theory.for.__.years" , 
-"X36..I.have.had.__.years.of.formal.training.on.a.musical.instrument..including.voice..during.my.lifetime." , 
-"X37..I.can.play.___.musical.instruments")
-
-
-cols_singingabilities <- c("X4..If.somebody.starts.singing.a.song.I.don.t.know..I.can.usually.join.in....Completely.Disagree.Completely.Agree" , 
-"X7..I.can.sing.or.play.music.from.memory....Completely.Disagree.Completely.Agree" , 
-"X10..I.am.able.to.hit.the.right.notes.when.I.sing.along.with.a.recording....Completely.Disagree.Completely.Agree" , 
-"X17..I.am.not.able.to.sing.in.harmony.when.somebody.is.singing.a.familiar.tune....Completely.Disagree.Completely.Agree" , 
-"X25..I.don.t.like.singing.in.public.because.I.m.afraid.that.I.would.sing.wrong.notes....Completely.Disagree.Completely.Agree" , 
-"X29..After.hearing.a.new.song.two.or.three.times..I.can.usually.sing.it.by.myself....Completely.Disagree.Completely.Agree" , 
-"X30..I.only.need.to.hear.a.new.tune.once.and.I.can.sing.it.back.hours.later....Completely.Disagree.Completely.Agree")
-
-cols_emotion <- c("X2..I.sometimes.choose.music.that.can.trigger.shivers.down.my.spine....Completely.Disagree.Completely.Agree" , 
-"X9..Pieces.of.music.rarely.evoke.emotions.for.me....Completely.Disagree.Completely.Agree" , 
-"X16..I.often.pick.certain.music.to.motivate.or.excite.me....Completely.Disagree.Completely.Agree" , 
-"X19..I.am.able.to.identify.what.is.special.about.a.given.musical.piece....Completely.Disagree.Completely.Agree" , 
-"X20..I.am.able.to.talk.about.the.emotions.that.a.piece.of.music.evokes.for.me....Completely.Disagree.Completely.Agree" , 
-"X31..Music.can.evoke.my.memories.of.past.people.and.places....Completely.Disagree.Completely.Agree")
-
-cols_musicalsophistication <- c("X1..I.spend.a.lot.of.my.free.time.doing.music.related.activities....Completely.Disagree.Completely.Agree" , 
-           "X3..I.enjoy.writing.about.music..for.example.on.blogs.and.forums....Completely.Disagree.Completely.Agree" , 
-"X4..If.somebody.starts.singing.a.song.I.don.t.know..I.can.usually.join.in....Completely.Disagree.Completely.Agree" , 
-"X7..I.can.sing.or.play.music.from.memory....Completely.Disagree.Completely.Agree" , 
-"X10..I.am.able.to.hit.the.right.notes.when.I.sing.along.with.a.recording....Completely.Disagree.Completely.Agree" , 
-"X12..I.can.compare.and.discuss.differences.between.two.performances.or.versions.of.the.same.piece.of.music....Completely.Disagree.Completely.Agree" , 
-"X14..I.have.never.been.complimented.for.my.talents.as.a.musical.performer....Completely.Disagree.Completely.Agree" , 
-"X15..I.often.read.or.search.the.internet.for.things.related.to.music....Completely.Disagree.Completely.Agree" , 
-"X17..I.am.not.able.to.sing.in.harmony.when.somebody.is.singing.a.familiar.tune....Completely.Disagree.Completely.Agree" , 
-"X19..I.am.able.to.identify.what.is.special.about.a.given.musical.piece....Completely.Disagree.Completely.Agree" , 
-"X23..When.I.sing..I.have.no.idea.whether.I.m.in.tune.or.not....Completely.Disagree.Completely.Agree" , 
-"X24..Music.is.kind.of.an.addiction.for.me...I.couldn.t.live.without.it....Completely.Disagree.Completely.Agree" , 
-"X25..I.don.t.like.singing.in.public.because.I.m.afraid.that.I.would.sing.wrong.notes....Completely.Disagree.Completely.Agree" , 
-"X27..I.would.not.consider.myself.a.musician....Completely.Disagree.Completely.Agree" , 
-"X29..After.hearing.a.new.song.two.or.three.times..I.can.usually.sing.it.by.myself....Completely.Disagree.Completely.Agree" , 
-"X32..I.engaged.in.regular..daily.practice.of.a.musical.instrument..including.voice..for.___.years." , 
-"X33..At.the.peak.of.my.interest..I.practiced.___.hours.per.day.on.my.primary.instrument." , "X37..I.can.play.___.musical.instruments")
-
-# Reverse code
-
-Gold[cols_reverse] <- lapply(Gold[cols_reverse], reverseCode, min=1, max=7)
-
-# Add sub-scores and total to main df
-
-df$Gold_total <- apply(Gold,1, sum)/38 # total GoldMSI score
-df$Gold_activeengagement <- apply(Gold[cols_activeengagement], 1,sum)/9
-df$Gold_perceptualabilities <- apply(Gold[cols_perceptualabilities],1, sum)/9
-df$Gold_musicaltraining <-apply(Gold[cols_musicaltraining],1, sum)/7
-df$Gold_singingabilities <- apply(Gold[cols_singingabilities],1, sum)/7
-df$Gold_emotion <- apply(Gold[cols_emotion],1, sum)/6
-df$Gold_musicalsophistication <- apply(Gold[cols_musicalsophistication],1, sum)/18
-```
-
-#QUIC Scoring
 # QUIC (childhood + adolescence)
 ```{r}
 ### CHILDHOOD ###
@@ -403,20 +263,20 @@ ggplot(data=followup, aes(x=QUIC_child_total, y=QUIC_Adolescence_total)) + geom_
 followup$QUIC_sum <- followup$QUIC_child_total + followup$QUIC_Adolescence_total
 ```
 
-#DT (childhood + adolescence) --> update based on survey naming convention
+#DT (childhood + adolescence)
 ```{r}
 ### CHILDHOOD ###
 #Deprivation Scoring
 deprivation_child <- followup %>%
-  select("cDT1_1":"cDT25_1")
+  select("DT_child1_1":"DT_child25_1")
 
-cols_reverse <- c("cDT1_1", "cDT2_1", "cDT3_1", "cDT4_1", "cDT5_1", "cDT6_1", "cDT7_1", "cDT10_1")
+cols_reverse <- c("DT_child1_1", "DT_child2_1", "DT_child3_1", "DT_child4_1", "DT_child5_1", "DT_child6_1", "DT_child7_1", "DT_child10_1")
 
-cols_emotionaldeprivation <- c("cDT1_1", "cDT2_1", "cDT3_1", "cDT4_1", "cDT5_1", "cDT6_1", "cDT7_1")
+cols_emotionaldeprivation <- c("DT_child1_1", "DT_child2_1", "DT_child3_1", "DT_child4_1", "DT_child5_1", "DT_child6_1", "DT_child7_1")
 
-cols_physicaldeprivation <- c("cDT10_1", "cDT11_1", "cDT12_1", "cDT13_1", "cDT14_1", "cDT15_1", "cDT16_1", "cDT17_1")
+cols_physicaldeprivation <- c("DT_child10_1", "DT_child11_1", "DT_child12_1", "DT_child13_1", "DT_child14_1", "DT_child15_1", "DT_child16_1", "DT_child17_1")
 
-cols_cognitivedeprivation <- c("cDT18_1", "cDT19_1", "cDT20_1", "cDT21_1", "cDT22_1", "cDT23_1", "cDT24_1", "cDT25_1")
+cols_cognitivedeprivation <- c("DT_child18_1", "DT_child19_1", "DT_child20_1", "DT_child21_1", "DT_child22_1", "DT_child23_1", "DT_child24_1", "DT_child25_1")
 
 # Reverse code
 deprivation_child[cols_reverse] <- lapply(deprivation_child[cols_reverse], reverseCode, min=1, max=4)
@@ -431,15 +291,15 @@ hist(followup$deprivation_child_total)
 ### ADOLESCENCE ###
 #Deprivation Scoring
 deprivation_Adolescence <- followup %>%
-  select("aDT1_1":"aDT25_1")
+  select("DT_adol1_1":"DT_adol25_1")
 
-cols_reverse <- c("aDT1_1", "aDT2_1", "aDT3_1", "aDT4_1", "aDT5_1", "aDT6_1", "aDT7_1", "aDT10_1")
+cols_reverse <- c("DT_adol1_1", "DT_adol2_1", "DT_adol3_1", "DT_adol4_1", "DT_adol5_1", "DT_adol6_1", "DT_adol7_1", "DT_adol10_1")
 
-cols_emotionaldeprivation <- c("aDT1_1", "aDT2_1", "aDT3_1", "aDT4_1", "aDT5_1", "aDT6_1", "aDT7_1")
+cols_emotionaldeprivation <- c("DT_adol1_1", "DT_adol2_1", "DT_adol3_1", "DT_adol4_1", "DT_adol5_1", "DT_adol6_1", "DT_adol7_1")
 
-cols_physicaldeprivation <- c("aDT10_1", "aDT11_1", "aDT12_1", "aDT13_1", "aDT14_1", "aDT15_1", "aDT16_1", "aDT17_1")
+cols_physicaldeprivation <- c("DT_adol10_1", "DT_adol11_1", "DT_adol12_1", "DT_adol13_1", "DT_adol14_1", "DT_adol15_1", "DT_adol16_1", "DT_adol17_1")
 
-cols_cognitivedeprivation <- c("aDT18_1", "aDT19_1", "aDT20_1", "aDT21_1", "aDT22_1", "aDT23_1", "aDT24_1", "aDT25_1")
+cols_cognitivedeprivation <- c("DT_adol18_1", "DT_adol19_1", "DT_adol20_1", "DT_adol21_1", "DT_adol22_1", "DT_adol23_1", "DT_adol24_1", "DT_adol25_1")
 
 # Reverse code
 deprivation_Adolescence[cols_reverse] <- lapply(deprivation_Adolescence[cols_reverse], reverseCode, min=1, max=4)
@@ -457,10 +317,10 @@ followup$deprivation_sum <- followup$deprivation_child_total + followup$deprivat
 ### CHILDHOOD ###
 #Threat Scoring
 threat_child <- followup %>%
-  select("cT1_1":"cT20_1")
+  select("DT_child26_1":"DT_child45_1")
 
-cols_home_threat <- c("cT1_1","cT2_1","cT3_1","cT4_1","cT5_1","cT6_1","cT7_1","cT8_1","cT9_1","cT10_1","cT11_1","cT12_1")
-cols_neighborhood_threat <- c("cT13_1","cT14_1","cT15_1","cT16_1","cT17_1","cT18_1","cT19_1","cT20_1")
+cols_home_threat <- c("DT_child26_1","DT_child27_1","DT_child28_1","DT_child29_1","DT_child30_1","DT_child31_1","DT_child32_1","DT_child33_1","DT_child34_1","DT_child35_1","DT_child36_1","DT_child37_1")
+cols_neighborhood_threat <- c("DT_child38_1","DT_child39_1","DT_child40_1","DT_child41_1","DT_child42_1","DT_child43_1","DT_child44_1","DT_child45_1")
 followup$threat_childhood_total <- apply(threat_child,1, sum)
 followup$threat_childhood_home <- apply(threat_child[cols_home_threat], 1,sum)
 followup$threat_childhood_neighborhood <- apply(threat_child[cols_neighborhood_threat], 1,sum)
@@ -469,10 +329,10 @@ hist(followup$threat_childhood_total)
 ### ADOLESCENCE ###
 #Threat Scoring
 threat_adolescence <- followup %>%
-  select("aT1_1":"aT19_1")
+  select("DT_adol26_1":"DT_adol45_1")
 
-cols_home_threat <- c("aT1_1","aT2_1","aT3_1","aT4_1","aT5_1","aT6_1","aT7_1","aT8_1","aT9_1","aT10_1","aT11_1","aT12_1")
-cols_neighborhood_threat <- c("aT13_1","aT14_1","aT15_1","aT16_1","aT17_1","aT18_1","aT19_1")
+cols_home_threat <- c("DT_adol26_1","DT_adol27_1","DT_adol28_1","DT_adol29_1","DT_adol30_1","DT_adol31_1","DT_adol32_1","DT_adol33_1","DT_adol34_1","DT_adol35_1","DT_adol36_1","DT_adol37_1")
+cols_neighborhood_threat <- c("DT_adol38_1","DT_adol39_1","DT_adol40_1","DT_adol41_1","DT_adol42_1","DT_adol43_1","DT_adol44_1","DT_adol45_1")
 followup$threat_adolescence_total <- apply(threat_adolescence,1, sum)
 followup$threat_adolescence_home <- apply(threat_adolescence[cols_home_threat], 1,sum)
 followup$threat_adolescence_neighborhood <- apply(threat_adolescence[cols_neighborhood_threat], 1,sum)
@@ -507,15 +367,15 @@ followup$CD.RISC_total <- apply(CD.RISC,1,sum)
 hist(followup$CD.RISC_total)
 ```
 
-#HUMS (adolescent + current) -- update based on naming convention
+#HUMS (adolescent + current)
 ```{r}
 ### ADOLESCENT ###
 #HUMS Scoring
 HUMS_adolescent <- followup %>%
-  select("HUMS_a1_1":"HUMS_a13_1")
+  select("HUMS_adol1_1":"HUMS_adol13_1")
 
-cols_healthy <- c("HUMS_a3_1","HUMS_a5_1","HUMS_a6_1","HUMS_a9_1","HUMS_a13_1")
-cols_unhealthy <- c("HUMS_a1_1","HUMS_a2_1","HUMS_a4_1","HUMS_a7_1","HUMS_a8_1","HUMS_a10_1","HUMS_a11_1","HUMS_a12_1")
+cols_healthy <- c("HUMS_adol3_1","HUMS_adol5_1","HUMS_adol6_1","HUMS_adol9_1","HUMS_adol13_1")
+cols_unhealthy <- c("HUMS_adol1_1","HUMS_adol2_1","HUMS_adol4_1","HUMS_adol7_1","HUMS_adol8_1","HUMS_adol10_1","HUMS_adol11_1","HUMS_adol12_1")
 
 followup$HUMS_adolescence_healthy <- apply(HUMS_adolescent[cols_healthy], 1,sum)
 followup$HUMS_adolescence_unhealthy <- apply(HUMS_adolescent[cols_unhealthy], 1,sum)
@@ -524,10 +384,10 @@ followup$HUMS_adolescence_unhealthy <- apply(HUMS_adolescent[cols_unhealthy], 1,
 ### ADULT ###
 #HUMS Scoring
 HUMS_adult <- followup %>%
-  select("HUMS1_1":"HUMS13_1")
+  select("HUMS_current1_1":"HUMS_current13_1")
 
-cols_healthy <- c("HUMS3_1","HUMS5_1","HUMS6_1","HUMS9_1","HUMS13_1")
-cols_unhealthy <- c("HUMS1_1","HUMS2_1","HUMS4_1","HUMS7_1","HUMS8_1","HUMS10_1","HUMS11_1","HUMS12_1")
+cols_healthy <- c("HUMS_current3_1","HUMS_current5_1","HUMS_current6_1","HUMS_current9_1","HUMS_current13_1")
+cols_unhealthy <- c("HUMS_current1_1","HUMS_current2_1","HUMS_current4_1","HUMS_current7_1","HUMS_current8_1","HUMS_current10_1","HUMS_current11_1","HUMS_current12_1")
 
 followup$HUMS_adult_healthy <- apply(HUMS_adult[cols_healthy], 1,sum)
 followup$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
@@ -540,28 +400,112 @@ followup$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
 CHAOS_child <- followup %>%
   select("CHAOS_child1_1":"CHAOS_child15_1")
 
-cols_reverse <- c("CHAOS_child1_1", "CHAOS_child5_1", "CHAOS_child6_1")
+cols_reverse <- c("CHAOS_child1_1", "CHAOS_child2_1", "CHAOS_child4_1", "CHAOS_child7_1",
+                   "CHAOS_child12_1", "CHAOS_child14_1","CHAOS_child15_1")
+
+cols_shortform <- c("CHAOS_child4_1", "CHAOS_child6_1", "CHAOS_child10_1", "CHAOS_child13_1",
+                   "CHAOS_child14_1", "CHAOS_child15_1")
 
 # Reverse code
 CHAOS_child[cols_reverse] <- lapply(CHAOS_child[cols_reverse], reverseCode, min=1, max=5)
 
-survey$CHAOS_child_total <- apply(CHAOS_child,1, sum)
-hist(survey$CHAOS_child_total)
+followup$CHAOS_child_total <- apply(CHAOS_child,1, sum)
+followup$CHAOS_child_shortform <- apply(CHAOS_child[cols_shortform],1, sum)
+hist(followup$CHAOS_child_total)
 
 ### ADOLESCENCE ###
 #CHAOS Scoring
-CHAOS_Adolescence <- survey %>%
-  select("CHAOS_Adolescence_1_1":"CHAOS_Adolescence_6_1")
+CHAOS_Adolescence <- followup %>%
+  select("CHAOS_Adolescence1_1":"CHAOS_Adolescence15_1")
 
-cols_reverse <- c("CHAOS_Adolescence_1_1", "CHAOS_Adolescence_5_1", "CHAOS_Adolescence_6_1")
+cols_reverse <- c("CHAOS_Adolescence1_1", "CHAOS_Adolescence2_1", "CHAOS_Adolescence4_1", "CHAOS_Adolescence7_1",
+                   "CHAOS_Adolescence12_1", "CHAOS_Adolescence14_1","CHAOS_Adolescence15_1")
 
 # Reverse code
 CHAOS_Adolescence[cols_reverse] <- lapply(CHAOS_Adolescence[cols_reverse], reverseCode, min=1, max=5)
 
-survey$CHAOS_Adolescence_total <- apply(CHAOS_Adolescence,1, sum)
-hist(survey$CHAOS_Adolescence_total)
-cor.test(survey$CHAOS_child_total, survey$CHAOS_Adolescence_total)
-ggplot(data=survey, aes(x=CHAOS_child_total, y=CHAOS_Adolescence_total)) + geom_point()
+followup$CHAOS_Adolescence_total <- apply(CHAOS_Adolescence,1, sum)
+hist(followup$CHAOS_Adolescence_total)
 
-survey$CHAOS_sum <- survey$CHAOS_child_total + survey$CHAOS_Adolescence_total
+cor.test(followup$CHAOS_child_total, followup$CHAOS_Adolescence_total)
+ggplot(data=followup, aes(x=CHAOS_child_total, y=CHAOS_Adolescence_total)) + geom_point()
+
+followup$CHAOS_sum <- followup$CHAOS_child_total + followup$CHAOS_Adolescence_total
+```
+
+#AIMS Scoring
+```{r}
+AIMS <- followup %>%
+  select("AIMS_current1_1":"AIMS_current34_1")
+
+followup$AIMS_current_total <- apply(AIMS,1, sum)
+
+cor.test(followup$AIMS_current_total, followup$QUIC_sum)
+hist(followup$AIMS_current_total)
+```
+
+#escapism scoring
+```{r}
+escapism_current <- followup %>%
+  select("Escapism_current1_1":"Escapism_current11_1")
+
+cols_positive_escapism_current <- c("Escapism_current1_1","Escapism_current2_1","Escapism_current3_1","Escapism_current4_1","Escapism_current5_1","Escapism_current6_1")
+  
+cols_negative_escapism_current <- c("Escapism_current7_1","Escapism_current8_1","Escapism_current9_1","Escapism_current10_1","Escapism_current11_1")
+
+followup$positive_escapism_current <- apply(escapism_current[cols_positive_escapism_current],1, sum)
+followup$negative_escapism_current <- apply(escapism_current[cols_negative_escapism_current],1, sum)
+hist(followup$positive_escapism_current)
+hist(followup$negative_escapism_current)
+cor.test(followup$AIMS_current_total, followup$negative_escapism_current)
+
+#adolescent
+escapism_adol <- followup %>%
+  select("Escampism_adol1_1":"Escapism_adol11_1")
+
+cols_positive_escapism_adol <- c("Escampism_adol1_1","Escapism_adol2_1","Escapism_adol3_1","Escapism_adol4_1","Escapism_adol5_1","Escapism_adol6_1")
+  
+cols_negative_escapism_adol <- c("Escapism_adol7_1","Escapism_adol8_1","Escapism_adol9_1","Escapism_adol10_1","Escapism_adol11_1")
+
+followup$positive_escapism_adol <- apply(escapism_adol[cols_positive_escapism_adol],1, sum)
+followup$negative_escapism_adol <- apply(escapism_adol[cols_negative_escapism_adol],1, sum)
+hist(followup$positive_escapism_adol)
+hist(followup$negative_escapism_adol)
+```
+#SRQ
+```{r}
+SRQ_current <- followup %>%
+  select("SRQ_current1_1":"SRQ_current8_1")
+
+cols_prosocialinteractions <- c("SRQ_current1_1","SRQ_current3_1","SRQ_current6_1","SRQ_current7_1","SRQ_current8_1")
+
+cols_sociability <- c("SRQ_current2_1","SRQ_current4_1","SRQ_current5_1")
+
+followup$SRQ_current_total <- apply(SRQ_current,1, sum)
+followup$SRQ_current_prosocialinteractions <- apply(SRQ_current[cols_prosocialinteractions],1, sum)
+followup$SRQ_current_sociability <- apply(SRQ_current[cols_sociability],1, sum)
+
+#adol
+SRQ_adol <- followup %>%
+  select("SQR_adol1_1":"SQR_adol8_1")
+
+cols_prosocialinteractions <- c("SQR_adol1_1","SQR_adol3_1","SQR_adol6_1","SQR_adol7_1","SQR_adol8_1")
+
+cols_sociability <- c("SQR_adol2_1","SQR_adol4_1","SQR_adol5_1")
+
+followup$SRQ_adol_total <- apply(SRQ_adol,1, sum)
+followup$SRQ_adol_prosocialinteractions <- apply(SRQ_adol[cols_prosocialinteractions],1, sum)
+followup$SRQ_adol_sociability <- apply(SRQ_adol[cols_sociability],1, sum)
+```
+
+#write master file
+```{r}
+names(followup)[18] <- "id"
+master <- merge(followup, ogBMRQ_goldMSI, by="id")
+#some missing values in the ogBMRQ_goldMSI df
+setdiff(followup$id,master$id)
+names(MET_scores)[1]<-"id"
+master <- merge(master,MET_scores)
+
+write.csv(master, file="../data/SLfollowupscored.csv")
 ```

@@ -1,0 +1,168 @@
+---
+title: "4_followupanalysis"
+author: "Nick Kathios"
+date: '2023-02-25'
+output: html_document
+---
+#load packages
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(emmeans)
+library(mediation)
+```
+
+#load data
+```{r}
+followup <- read.csv(file='../../data/SLfollowupscored.csv')
+liking <- read.csv(file='../../data/SL_followup/masterinteractionliking.csv')
+groove_stiminfo <- read.csv(file="../../stimuli/senn_stim/stim_information.csv")
+names(groove_stiminfo)[2] <- "stim"
+```
+
+#absorption mediation models
+```{r}
+followup$positive_escapism_current
+cor.test(followup$positive_escapism_current, followup$HUMS_adult_unhealthy)
+m1 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum)
+summary(m1)
+
+m2 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + positive_escapism_current)
+summary(m2)
+
+m3 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + negative_escapism_current)
+summary(m3)
+
+m2 <-lm(data=followup, negative_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum )
+summary(m2)
+```
+
+#SL results
+```{r}
+names(liking)[2] <- "id"
+SL_master <- merge(liking, followup, by="id")
+
+x=1:nrow(SL_master)
+for (i in x) {
+  if (SL_master$rep[i]<3) {
+  SL_master$rep_category[i]="low"
+  } else if (SL_master$rep[i]<9) {
+    SL_master$rep_category[i]="medium"
+  } else if (SL_master$rep[i]>8) {
+    SL_master$rep_category[i]="high"
+  }
+}
+
+SL_master$rep_category <- as.factor(SL_master$rep_category)
+SL_master <- within(SL_master, rep_category <- relevel(rep_category, ref = "medium"))
+
+m1 <- lmer(data=SL_master, liking ~ rep_category*outcome_type*QUIC_sum + deprivation_sum + Threat_sum +CHAOS_sum +
+             (1|id) + (1|clipnum))
+anova(m1)
+summary(m1)
+
+m1 <- lmer(data=SL_master, liking ~ QUIC_sum + deprivation_sum + Threat_sum + rep_category*CHAOS_sum*outcome_type +
+             (1|id) + (1|clipnum))
+anova(m1)
+summary(m1)
+
+m1 <- lmer(data=SL_master, liking ~ QUIC_sum + deprivation_sum + rep_category*Threat_sum*outcome_type + CHAOS_sum +
+             (1|id) + (1|clipnum))
+anova(m1)
+summary(m1)
+```
+
+#groove results
+```{r}
+groove_stiminfo$stim <- as.character(groove_stiminfo$stim)
+groove<- followup %>%
+  select("X1_move_1":"X39_pleasure_1")
+
+move_index <- seq(1,30,by=2)
+pleasure_index <- seq(2,30, by=2)
+
+move <- groove[move_index] %>%
+  cbind(followup[2]) %>%
+  pivot_longer(!id, names_to = "stim", values_to = "rating")
+
+x=1:nrow(move)
+for (i in x) {
+ move$stim[i] <- gsub("_move_1", "",move$stim[i])
+ move$stim[i] <- gsub("X", "",move$stim[i])
+}
+
+move <- merge(move, groove_stiminfo)
+move$tert <- as.factor(move$tert)
+
+##double check that for the contrasts, the weights are -1,2,-1 to low,intermediate, and high respectively
+move <- within(move, tert <- relevel(tert, ref = "Low"))
+
+m1 <- lmer(data=move, rating ~ tert + (tert|id) + (1|stim))
+summary(m1)
+
+m.emm <- emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 3435)
+
+contrast(m.emm, 'poly') %>%
+  broom::tidy() %>%
+  head(3)
+
+#check w/ perceived complexity ratings
+m1 <- lmer(data=move, rating ~ PerceivedComplexity + (PerceivedComplexity|id) + (1|stim))
+summary(m1)
+
+m2 <- lmer(data=move, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|id) + (1|stim))
+summary(m2)
+anova(m1,m2)
+
+pleasure <- groove[pleasure_index] %>%
+  cbind(followup[2]) %>%
+  pivot_longer(!id, names_to = "stim", values_to = "rating")
+
+x=1:nrow(pleasure)
+for (i in x) {
+ pleasure$stim[i] <- gsub("_pleasure_1", "",pleasure$stim[i])
+ pleasure$stim[i] <- gsub("X", "",pleasure$stim[i])
+}
+
+pleasure <- merge(pleasure, groove_stiminfo)
+pleasure$tert <- as.factor(pleasure$tert)
+pleasure <- within(pleasure, tert <- relevel(tert, ref = "Low"))
+
+m1 <- lmer(data=pleasure, rating ~ tert + (tert|id) + (1|stim))
+summary(m1)
+
+m.emm <- emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 3435)
+
+contrast(m.emm, 'poly') %>%
+  broom::tidy() %>%
+  head(3)
+
+#check w/ perceived complexity ratings
+m1 <- lmer(data=pleasure, rating ~ PerceivedComplexity + (PerceivedComplexity|id) + (1|stim))
+summary(m1)
+
+m2 <- lmer(data=pleasure, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|id) + (1|stim))
+summary(m2)
+anova(m1,m2)
+
+
+move_master <- merge(move, followup, by="id")
+m1 <- lmer(data=move_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|id) + (1|stim))
+summary(m1)
+performance::check_collinearity(m1)
+
+m1 <- lmer(data=move_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|id) + (1|stim))
+summary(m1)
+performance::check_collinearity(m1)
+
+
+pleasure_master <- merge(pleasure, followup, by="id")
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|id) + (1|stim))
+summary(m1)
+performance::check_collinearity(m1)
+
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|id) + (1|stim))
+summary(m1)
+performance::check_collinearity(m1)
+```

@@ -1,0 +1,55 @@
+---
+title: "4_followupanalysis"
+author: "Nick Kathios"
+date: '2023-02-25'
+output: html_document
+---
+#load packages
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+```
+
+#read data in
+```{r}
+followup <- read.csv(file='../../data/SLfollowupscored.csv')
+dg_conditions <- read.csv(file='../../data/SL_followup/dg_conditions.csv')
+```
+
+#cleaning
+```{r}
+dgratings<- followup %>%
+  dplyr::select("A_dgroughness_1":"L_dgpleasantness_1")
+
+roughness_index <- seq(1,24,by=2)
+pleasure_index <- seq(2,24, by=2)
+
+roughness <- dgratings[roughness_index] %>%
+  cbind(followup[2]) %>%
+  pivot_longer(!id, names_to = "stim", values_to = "rating")
+
+x=1:nrow(roughness)
+for (i in x) {
+ roughness$stim[i] <- gsub("_dgroughness_1", "",roughness$stim[i])
+}
+roughness_master <- merge(dg_conditions, roughness)
+
+roughnessdispleasing_master <- subset(roughness_master, condition=="displeasing")
+
+roughnessdispleasing_master <- merge(roughnessdispleasing_master, followup)
+
+pleasantness <- dgratings[pleasure_index] %>%
+  cbind(followup[2]) %>%
+  pivot_longer(!id, names_to = "stim", values_to = "rating")
+
+x=1:nrow(pleasantness)
+for (i in x) {
+ pleasantness$stim[i] <- gsub("_dgpleasantness_1", "",pleasantness$stim[i])
+}
+pleasantness_master <- merge(dg_conditions, pleasantness)
+
+pleasantnessdispleasing_master <- subset(pleasantness_master, condition=="displeasing")
+
+pleasantnessdispleasing_master <- merge(pleasantnessdispleasing_master, followup)
+```
