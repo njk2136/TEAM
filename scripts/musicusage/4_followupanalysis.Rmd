@@ -23,8 +23,8 @@ names(groove_stiminfo)[2] <- "stim"
 
 #absorption mediation models
 ```{r}
-followup$positive_escapism_current
-cor.test(followup$positive_escapism_current, followup$HUMS_adult_unhealthy)
+cor.test(followup$positive_escapism_current, followup$AIMS_current_total)
+
 m1 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum)
 summary(m1)
 
@@ -77,7 +77,7 @@ summary(m1)
 ```{r}
 groove_stiminfo$stim <- as.character(groove_stiminfo$stim)
 groove<- followup %>%
-  select("X1_move_1":"X39_pleasure_1")
+  dplyr::select("X1_move_1":"X39_pleasure_1")
 
 move_index <- seq(1,30,by=2)
 pleasure_index <- seq(2,30, by=2)
