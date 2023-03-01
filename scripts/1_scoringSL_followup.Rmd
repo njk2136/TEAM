@@ -12,22 +12,11 @@ source("reverseCode.R")
 
 #read in data
 ```{r}
-ogsurveyresponses <- read.csv(file='../data/SL_followup/survey_responsesOGrun.csv') #score PAS
+ogsurveyresponses <- read.csv(file='../data/SL_followup/survey_responsesOGrun.csv') #score PAS, BMRQ, and goldMSI
 MET <- read.csv(file='../data/SL_followup/data_exp_106990-v4_task-sv8h.csv') #clean & score MET
 followup <- read.csv(file='../data/SL_followup/Groove)_February 25, 2023_12.54.csv') #score everything
-ogBMRQ_goldMSI <- read.csv(file='../data/SL_followup/across_studies_bmrq_msi.csv')
 ```
 
-#getting raw BMRQ
-```{r}
-ogBMRQ_goldMSI$bmrq_all <- ogBMRQ_goldMSI$bmrq_all * 20
-
-ogBMRQ_goldMSI$bmrq_ms <- ogBMRQ_goldMSI$bmrq_ms * 4
-ogBMRQ_goldMSI$bmrq_ee <- ogBMRQ_goldMSI$bmrq_ee * 4
-ogBMRQ_goldMSI$bmrq_sm <- ogBMRQ_goldMSI$bmrq_sm * 4
-ogBMRQ_goldMSI$bmrq_sw <- ogBMRQ_goldMSI$bmrq_sw * 4
-ogBMRQ_goldMSI$bmrq_mr <- ogBMRQ_goldMSI$bmrq_mr * 4
-```
 
 #MET cleaning/scoring
 ```{r}
