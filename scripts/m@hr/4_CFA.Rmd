@@ -1,0 +1,111 @@
+---
+title: "4_CFA"
+author: "Nick Kathios"
+date: '2023-03-22'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+source("../reverseCode.R")
+library(psych)
+```
+
+#read in data
+```{r}
+first <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
+second <- read.csv(file='../../data/SL_followup/Groove)_March 22, 2023_07.53.csv')
+
+keep <- setdiff(second$Q158,first$Q158)
+
+MH <- second[second$Q158 %in% keep, ] %>%
+  select("M.H_child1_1":"M.H_child20_1")
+
+#MH <- MH[complete.cases(MH),]
+
+cols_reverse <- c("M.H_child6_1","M.H_child7_1","M.H_child11_1","M.H_child12_1","M.H_child18_1","M.H_child19_1","M.H_child20_1")
+MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+```
+
+#CFA
+```{r}
+fafitfree <- fa(MH,nfactors = ncol(MH), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100)
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red")
+
+
+fa.none <- psych::fa(r=MH, 
+ nfactors = 5, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=1000,  
+ rotate="oblimin") # no rotation
+
+print(fa.none)
+
+fa.diagram(fa.none)
+
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[1]]
+
+omega <-omega(SL_transformation, nfactors=5,n.iter=1,p=.05,poly=FALSE,key=NULL,
+    flip=TRUE,digits=2, title="Omega",sl=TRUE,labels=NULL,
+    plot=TRUE)
+
+summary(omega)
+
+
+fa.none <- psych::fa(r=MH, 
+ nfactors = 1, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="varimax")
+
+#parallel analysis on residual to find factor #
+residual <- fa.none[["residual"]]
+parallel <- fa.parallel(residual) #suggests 4 factors
+MAP <- vss(residual) #suggests 5 factors
+MAP <- MAP[["map"]]
+print(MAP)
+
+fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100)
+n_factors <- length(fafitfree$e.values)
+scree     <- data.frame(
+  Factor_n =  as.factor(1:n_factors), 
+  Eigenvalue = fafitfree$e.values)
+
+ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
+  geom_point() + geom_line() +
+  xlab("Number of factors") +
+  ylab("Initial eigenvalue") +
+  labs( title = "Scree Plot", 
+        subtitle = "(Based on the unreduced correlation matrix)")+
+  geom_line(y=1,color="red")
+
+#item redux
+fa.none <- psych::fa(r=MH, 
+ nfactors = 5, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="oblimin") # no rotation
+summary(fa.none)
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[2]]
+SL_transformation
+```

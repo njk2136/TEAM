@@ -15,7 +15,16 @@ library(lmerTest)
 ```{r}
 followup <- read.csv(file='../../data/SLfollowupscored.csv')
 dg_conditions <- read.csv(file='../../data/SL_followup/dg_conditions.csv')
+ogdata<-read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv')
+
+#removing individuals from the pleasing/displeasing study
+keep <- setdiff(followup$ID,ogdata$Q158)
+followup <- followup[followup$ID %in% keep, ] 
 ```
+
+#things to check for: probably don't want to include those from the original pls/displs study
+#if longform CHAOS doesn't work out, could try with shortform scores or questions that closely index auditory commotion
+#or, could try dimensionality reduction with the ratings?
 
 #cleaning
 ```{r}
@@ -27,7 +36,7 @@ pleasure_index <- seq(2,24, by=2)
 
 roughness <- dgratings[roughness_index] %>%
   cbind(followup[2]) %>%
-  pivot_longer(!id, names_to = "stim", values_to = "rating")
+  pivot_longer(!ID, names_to = "stim", values_to = "rating")
 
 x=1:nrow(roughness)
 for (i in x) {
@@ -41,7 +50,7 @@ roughnessdispleasing_master <- merge(roughnessdispleasing_master, followup)
 
 pleasantness <- dgratings[pleasure_index] %>%
   cbind(followup[2]) %>%
-  pivot_longer(!id, names_to = "stim", values_to = "rating")
+  pivot_longer(!ID, names_to = "stim", values_to = "rating")
 
 x=1:nrow(pleasantness)
 for (i in x) {

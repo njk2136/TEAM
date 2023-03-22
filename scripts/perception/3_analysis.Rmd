@@ -191,13 +191,51 @@ dev.off()
 ```
 #MBEA1 modeling
 ```{r}
+range(all_scored$QUIC_child_total)
 #CHAOS childhood negative correlation (MBEA childhood dimensions)
-m1 <- lm(scale(MBEA_total) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
+m1 <- lm((MBEA_total) ~ (CHAOS_child_total) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (PASS_total) + (STAI_total) + (Gold_musicaltraining), data=all_scored)
 summary <- summary(m1)
 summary <- as.data.frame(summary[["coefficients"]])
 p <- summary$`Pr(>|t|)`
 p.adjust(p, method = "bonferroni", n = length(p))
 check_collinearity(m1)
+
+newdata <- expand.grid(
+  CHAOS_child_total=seq(6,29,1),
+  threat_childhood_total=0,
+  deprivation_child_total=0,
+  QUIC_child_total=0,
+  PASS_total=0,
+  STAI_total=0,
+  Gold_musicaltraining=0
+)
+
+predictions <- predict(m1, newdata,se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions[["fit"]],predictions[["se.fit"]] )
+names(pred)[5:6] <- c("fit", "se.fit")
+pred$upper <- (pred$`predictions[["fit"]]` + pred$`predictions[["se.fit"]]`)
+pred$lower <- (pred$`predictions[["fit"]]` - pred$`predictions[["se.fit"]]`)
+
+#plot predictions
+CHAOSMBEApred <- ggplot(data=pred, aes(x=CHAOS_child_total, y=`predictions[["fit"]]`))+
+  geom_point(data=all_scored, aes(x=CHAOS_child_total, y=MBEA_total))+
+  geom_smooth(method="lm") +
+  geom_ribbon(aes(ymin=lower, ymax=upper), alpha=0.2)+
+  theme_classic() +
+  xlab("CHAOS Score") +
+  ylab("MBEA Score") +
+   theme(axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=18),
+    axis.text.y = element_text(family="Arial",size=18),
+  ) 
+
+ggsave(plot=CHAOSMBEApred, '../../figures/pleasing:displeasing_followup/full_sample/CHAOSMBEApred.png', width=10)
+
+
+
 
 #plot
 MBEA_coef_child <- 

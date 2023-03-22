@@ -6,7 +6,7 @@ output: html_document
 ---
 #load packages
 ```{r}
-library(tidyverse)
+library(tIDyverse)
 library(lme4)
 library(lmerTest)
 library(emmeans)
@@ -23,8 +23,6 @@ names(groove_stiminfo)[2] <- "stim"
 
 #absorption mediation models
 ```{r}
-cor.test(followup$positive_escapism_current, followup$AIMS_current_total)
-
 m1 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum)
 summary(m1)
 
@@ -36,12 +34,15 @@ summary(m3)
 
 m2 <-lm(data=followup, negative_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum )
 summary(m2)
+
+m2 <-lm(data=followup, positive_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum )
+summary(m2)
 ```
 
 #SL results
 ```{r}
-names(liking)[2] <- "id"
-SL_master <- merge(liking, followup, by="id")
+names(liking)[2] <- "ID"
+SL_master <- merge(liking, followup, by="ID")
 
 x=1:nrow(SL_master)
 for (i in x) {
@@ -58,22 +59,23 @@ SL_master$rep_category <- as.factor(SL_master$rep_category)
 SL_master <- within(SL_master, rep_category <- relevel(rep_category, ref = "medium"))
 
 m1 <- lmer(data=SL_master, liking ~ rep_category*outcome_type*QUIC_sum + deprivation_sum + Threat_sum +CHAOS_sum +
-             (1|id) + (1|clipnum))
+             (1|ID) + (1|clipnum))
+
 anova(m1)
 summary(m1)
 
 m1 <- lmer(data=SL_master, liking ~ QUIC_sum + deprivation_sum + Threat_sum + rep_category*CHAOS_sum*outcome_type +
-             (1|id) + (1|clipnum))
+             (1|ID) + (1|clipnum))
 anova(m1)
 summary(m1)
 
 m1 <- lmer(data=SL_master, liking ~ QUIC_sum + deprivation_sum + rep_category*Threat_sum*outcome_type + CHAOS_sum +
-             (1|id) + (1|clipnum))
+             (1|ID) + (1|clipnum))
 anova(m1)
 summary(m1)
 ```
 
-#groove results
+#replicating groove results
 ```{r}
 groove_stiminfo$stim <- as.character(groove_stiminfo$stim)
 groove<- followup %>%
@@ -84,7 +86,7 @@ pleasure_index <- seq(2,30, by=2)
 
 move <- groove[move_index] %>%
   cbind(followup[2]) %>%
-  pivot_longer(!id, names_to = "stim", values_to = "rating")
+  pivot_longer(!ID, names_to = "stim", values_to = "rating")
 
 x=1:nrow(move)
 for (i in x) {
@@ -96,28 +98,28 @@ move <- merge(move, groove_stiminfo)
 move$tert <- as.factor(move$tert)
 
 ##double check that for the contrasts, the weights are -1,2,-1 to low,intermediate, and high respectively
-move <- within(move, tert <- relevel(tert, ref = "Low"))
+move <- within(move, tert <- relevel(tert, ref = "Intermediate"))
 
-m1 <- lmer(data=move, rating ~ tert + (tert|id) + (1|stim))
+m1 <- lmer(data=move, rating ~ tert + (1|ID) + (1|stim))
 summary(m1)
 
-m.emm <- emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 3435)
+m.emm <- emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 4320)
 
 contrast(m.emm, 'poly') %>%
   broom::tidy() %>%
   head(3)
 
 #check w/ perceived complexity ratings
-m1 <- lmer(data=move, rating ~ PerceivedComplexity + (PerceivedComplexity|id) + (1|stim))
+m1 <- lmer(data=move, rating ~ PerceivedComplexity + (PerceivedComplexity|ID) + (1|stim))
 summary(m1)
 
-m2 <- lmer(data=move, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|id) + (1|stim))
+m2 <- lmer(data=move, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim))
 summary(m2)
 anova(m1,m2)
 
 pleasure <- groove[pleasure_index] %>%
   cbind(followup[2]) %>%
-  pivot_longer(!id, names_to = "stim", values_to = "rating")
+  pivot_longer(!ID, names_to = "stim", values_to = "rating")
 
 x=1:nrow(pleasure)
 for (i in x) {
@@ -129,40 +131,46 @@ pleasure <- merge(pleasure, groove_stiminfo)
 pleasure$tert <- as.factor(pleasure$tert)
 pleasure <- within(pleasure, tert <- relevel(tert, ref = "Low"))
 
-m1 <- lmer(data=pleasure, rating ~ tert + (tert|id) + (1|stim))
+m1 <- lmer(data=pleasure, rating ~ tert + (tert|ID) + (1|stim))
 summary(m1)
 
-m.emm <- emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 3435)
+m.emm <- emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 4320)
 
 contrast(m.emm, 'poly') %>%
   broom::tidy() %>%
   head(3)
 
 #check w/ perceived complexity ratings
-m1 <- lmer(data=pleasure, rating ~ PerceivedComplexity + (PerceivedComplexity|id) + (1|stim))
+m1 <- lmer(data=pleasure, rating ~ PerceivedComplexity + (PerceivedComplexity|ID) + (1|stim))
 summary(m1)
 
-m2 <- lmer(data=pleasure, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|id) + (1|stim))
+m2 <- lmer(data=pleasure, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim))
 summary(m2)
 anova(m1,m2)
+```
 
-
-move_master <- merge(move, followup, by="id")
-m1 <- lmer(data=move_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|id) + (1|stim))
+#checking to see different preferences across ELA experiences
+```{r}
+move_master <- merge(move, followup, by="ID")
+m1 <- lmer(data=move_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|ID) + (1|stim))
 summary(m1)
 performance::check_collinearity(m1)
 
-m1 <- lmer(data=move_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|id) + (1|stim))
+m1 <- lmer(data=move_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|ID) + (1|stim))
 summary(m1)
 performance::check_collinearity(m1)
 
 
-pleasure_master <- merge(pleasure, followup, by="id")
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|id) + (1|stim))
+pleasure_master <- merge(pleasure, followup, by="ID")
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|ID) + (1|stim))
 summary(m1)
 performance::check_collinearity(m1)
 
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|id) + (1|stim))
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|ID) + (1|stim))
 summary(m1)
 performance::check_collinearity(m1)
+
+
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum*tert + deprivation_sum + CHAOS_sum+ (tert|ID) + (1|stim))
+summary(m1)
 ```
