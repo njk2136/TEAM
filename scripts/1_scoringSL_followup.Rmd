@@ -21,7 +21,7 @@ followup <- read.csv(file='../data/SL_followup/Groove)_March 22, 2023_07.53.csv'
 ```{r}
 #double check this is accurate
 MET_cleaned <- MET %>%
-  select(Participant.Public.ID, Response, Correct, display) %>%
+  dplyr::select(Participant.Public.ID, Response, Correct, display) %>%
   subset(Response != "AUDIO PLAY REQUESTED") %>%
   subset(Response != "") %>%
   subset(display !="Practice") %>%
@@ -46,7 +46,7 @@ MET_scores <- merge(melodic_score, rhythmic_score)
 #BMRQ
 ```{r}
 bmrq <- ogsurveyresponses %>%
-  select("Please.choose.the.most.appropriate.category....When.I.share.music.with.someone.I.feel.a.special.connection.with.that.person.":"Please.choose.the.most.appropriate.category....When.I.hear.a.tune.I.like.a.lot.I.can.t.help.tapping.or.moving.to.its.beat.")
+  dplyr::select("Please.choose.the.most.appropriate.category....When.I.share.music.with.someone.I.feel.a.special.connection.with.that.person.":"Please.choose.the.most.appropriate.category....When.I.hear.a.tune.I.like.a.lot.I.can.t.help.tapping.or.moving.to.its.beat.")
 
 bmrq$X21..Mark..Completely.Agree..for.this.question....Completely.Disagree.Completely.Agree <- NULL
 
@@ -89,14 +89,14 @@ ogsurveyresponses$BMRQ_emotion <- apply(bmrq[cols_emotion], 1,sum)
 ogsurveyresponses$BMRQ_sensorimotor <- apply(bmrq[cols_sensorimotor],1, sum)
 ogsurveyresponses$BMRQ_moodreg <-apply(bmrq[cols_moodreg],1, sum)
 ogsurveyresponses$BMRQ_musicseek <- apply(bmrq[cols_musicseek],1, sum)
-ogsurveyresponses$BMR_socialreward <- apply(bmrq[cols_socialreward],1, sum)
+ogsurveyresponses$BMRQ_socialreward <- apply(bmrq[cols_socialreward],1, sum)
 ```
 
 
 #goldMSI
 ```{r}
 Gold <- ogsurveyresponses %>%
-  select("Please.choose.the.most.appropriate.category....I.spend.a.lot.of.free.time.doing.music.related.activities.":"Per.day..I.listen.attentively.to.music.for.")
+  dplyr::select("Please.choose.the.most.appropriate.category....I.spend.a.lot.of.free.time.doing.music.related.activities.":"Per.day..I.listen.attentively.to.music.for.")
 
 #delete atttention checking question
 
@@ -193,7 +193,7 @@ ogsurveyresponses$Gold_musicalsophistication <- apply(Gold[cols_musicalsophistic
 ```{r}
 #PAS Scoring
 PASS <- ogsurveyresponses %>%
-  select("I.have.usually.found.lovemaking.to.be.intensely.pleasurable.":"I.have.been.fascinated.with.the.dancing.of.flames.in.a.fireplace.")
+  dplyr::select("I.have.usually.found.lovemaking.to.be.intensely.pleasurable.":"I.have.been.fascinated.with.the.dancing.of.flames.in.a.fireplace.")
 
 #delete column CJ which is an attention-checking question
 PASS$Mark..False..for.this.question. <- NULL
@@ -321,7 +321,7 @@ ogsurveyresponses$PASS_smell <- apply(PASS[cols_smell],1, sum)
 ### CHILDHOOD ###
 #QUIC Scoring
 QUIC_child <- followup %>%
-  select("QUIC_child1":"QUIC_child38")
+  dplyr::select("QUIC_child1":"QUIC_child38")
 
 #recode verbal responses (if not numbers)
 QUIC_child[QUIC_child == "Yes"] <- as.numeric(1)
@@ -358,7 +358,7 @@ hist(followup$QUIC_child_total)
 ### ADOLESCENCE ###
 #QUIC Scoring
 QUIC_Adolescence <- followup %>%
-  select("QUIC_adol1":"QUIC_adol36")
+  dplyr::select("QUIC_adol1":"QUIC_adol36")
 
 #recode verbal responses (if not numbers)
 QUIC_Adolescence[QUIC_Adolescence == "Yes"] <- as.numeric(1)
@@ -392,7 +392,8 @@ followup$QUIC_Adolescence_safetyandsecurity <- apply(QUIC_Adolescence[cols_safet
 hist(followup$QUIC_Adolescence_total)
 
 cor.test(followup$QUIC_child_total, followup$QUIC_Adolescence_total)
-ggplot(data=followup, aes(x=QUIC_child_total, y=QUIC_Adolescence_total)) + geom_point()
+ggplot(data=followup, aes(x=QUIC_child_total, y=QUIC_Adolescence_total)) + geom_point() +
+  geom_smooth(method="lm")
 
 followup$QUIC_sum <- followup$QUIC_child_total + followup$QUIC_Adolescence_total
 ```
@@ -402,7 +403,7 @@ followup$QUIC_sum <- followup$QUIC_child_total + followup$QUIC_Adolescence_total
 ### CHILDHOOD ###
 #Deprivation Scoring
 deprivation_child <- followup %>%
-  select("DT_child1_1":"DT_child25_1")
+  dplyr::select("DT_child1_1":"DT_child25_1")
 
 cols_reverse <- c("DT_child1_1", "DT_child2_1", "DT_child3_1", "DT_child4_1", "DT_child5_1", "DT_child6_1", "DT_child7_1", "DT_child10_1")
 
@@ -425,7 +426,7 @@ hist(followup$deprivation_child_total)
 ### ADOLESCENCE ###
 #Deprivation Scoring
 deprivation_Adolescence <- followup %>%
-  select("DT_adol1_1":"DT_adol25_1")
+  dplyr::select("DT_adol1_1":"DT_adol25_1")
 
 cols_reverse <- c("DT_adol1_1", "DT_adol2_1", "DT_adol3_1", "DT_adol4_1", "DT_adol5_1", "DT_adol6_1", "DT_adol7_1", "DT_adol10_1")
 
@@ -445,13 +446,15 @@ followup$deprivation_Adolescence_physical <- apply(deprivation_Adolescence[cols_
 followup$deprivation_Adolescence_cognitive <- apply(deprivation_Adolescence[cols_cognitivedeprivation], 1,sum)
 hist(followup$deprivation_Adolescence_total)
 cor.test(followup$deprivation_child_total, followup$deprivation_Adolescence_total, na.rm=TRUE)
+ggplot(data=followup, aes(x=deprivation_child_total, y=deprivation_Adolescence_total)) + geom_point()+
+  geom_smooth()
 
 followup$deprivation_sum <- followup$deprivation_child_total + followup$deprivation_Adolescence_total
 
 ### CHILDHOOD ###
 #Threat Scoring
 threat_child <- followup %>%
-  select("DT_child26_1":"DT_child45_1")
+  dplyr::select("DT_child26_1":"DT_child45_1")
 
 cols_home_threat <- c("DT_child26_1","DT_child27_1","DT_child28_1","DT_child29_1","DT_child30_1","DT_child31_1","DT_child32_1","DT_child33_1","DT_child34_1","DT_child35_1","DT_child36_1","DT_child37_1")
 cols_neighborhood_threat <- c("DT_child38_1","DT_child39_1","DT_child40_1","DT_child41_1","DT_child42_1","DT_child43_1","DT_child44_1","DT_child45_1")
@@ -463,7 +466,7 @@ hist(followup$threat_childhood_total)
 ### ADOLESCENCE ###
 #Threat Scoring
 threat_adolescence <- followup %>%
-  select("DT_adol26_1":"DT_adol45_1")
+  dplyr::select("DT_adol26_1":"DT_adol45_1")
 
 cols_home_threat <- c("DT_adol26_1","DT_adol27_1","DT_adol28_1","DT_adol29_1","DT_adol30_1","DT_adol31_1","DT_adol32_1","DT_adol33_1","DT_adol34_1","DT_adol35_1","DT_adol36_1","DT_adol37_1")
 cols_neighborhood_threat <- c("DT_adol38_1","DT_adol39_1","DT_adol40_1","DT_adol41_1","DT_adol42_1","DT_adol43_1","DT_adol44_1","DT_adol45_1")
@@ -473,14 +476,14 @@ followup$threat_adolescence_neighborhood <- apply(threat_adolescence[cols_neighb
 hist(followup$threat_adolescence_total)
 ggplot(data=followup, aes(x=threat_childhood_total, y=threat_adolescence_total)) + geom_point()+
   geom_smooth()
-
+cor.test(followup$threat_adolescence_total, followup$threat_childhood_total)
 followup$Threat_sum <- followup$threat_childhood_total + followup$threat_adolescence_total
 ```
 
 #STAI
 ```{r}
 STAI <- followup %>%
-  select("STAI1_1":"STAI20_1")
+  dplyr::select("STAI1_1":"STAI20_1")
 
 
 cols_reverse <- c("STAI1_1","STAI3_1","STAI6_1","STAI7_1","STAI10_1","STAI13_1","STAI14_1","STAI16_1","STAI19_1")
@@ -495,7 +498,7 @@ hist(followup$STAI_total)
 #CD-RISC
 ```{r}
 CD.RISC <- followup %>%
-  select("CD.RISC1_1":"CD.RISC10_1")
+  dplyr::select("CD.RISC1_1":"CD.RISC10_1")
 
 followup$CD.RISC_total <- apply(CD.RISC,1,sum)
 hist(followup$CD.RISC_total)
@@ -506,7 +509,7 @@ hist(followup$CD.RISC_total)
 ### ADOLESCENT ###
 #HUMS Scoring
 HUMS_adolescent <- followup %>%
-  select("HUMS_adol1_1":"HUMS_adol13_1")
+  dplyr::select("HUMS_adol1_1":"HUMS_adol13_1")
 
 cols_healthy <- c("HUMS_adol3_1","HUMS_adol5_1","HUMS_adol6_1","HUMS_adol9_1","HUMS_adol13_1")
 cols_unhealthy <- c("HUMS_adol1_1","HUMS_adol2_1","HUMS_adol4_1","HUMS_adol7_1","HUMS_adol8_1","HUMS_adol10_1","HUMS_adol11_1","HUMS_adol12_1")
@@ -518,7 +521,7 @@ followup$HUMS_adolescence_unhealthy <- apply(HUMS_adolescent[cols_unhealthy], 1,
 ### ADULT ###
 #HUMS Scoring
 HUMS_adult <- followup %>%
-  select("HUMS_current1_1":"HUMS_current13_1")
+  dplyr::select("HUMS_current1_1":"HUMS_current13_1")
 
 cols_healthy <- c("HUMS_current3_1","HUMS_current5_1","HUMS_current6_1","HUMS_current9_1","HUMS_current13_1")
 cols_unhealthy <- c("HUMS_current1_1","HUMS_current2_1","HUMS_current4_1","HUMS_current7_1","HUMS_current8_1","HUMS_current10_1","HUMS_current11_1","HUMS_current12_1")
@@ -532,7 +535,7 @@ followup$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
 ### CHILDHOOD ###
 #CHAOS Scoring
 CHAOS_child <- followup %>%
-  select("CHAOS_child1_1":"CHAOS_child15_1")
+  dplyr::select("CHAOS_child1_1":"CHAOS_child15_1")
 
 cols_reverse <- c("CHAOS_child1_1", "CHAOS_child2_1", "CHAOS_child4_1", "CHAOS_child7_1",
                    "CHAOS_child12_1", "CHAOS_child14_1","CHAOS_child15_1")
@@ -550,7 +553,7 @@ hist(followup$CHAOS_child_total)
 ### ADOLESCENCE ###
 #CHAOS Scoring
 CHAOS_Adolescence <- followup %>%
-  select("CHAOS_Adolescence1_1":"CHAOS_Adolescence15_1")
+  dplyr::select("CHAOS_Adolescence1_1":"CHAOS_Adolescence15_1")
 
 cols_reverse <- c("CHAOS_Adolescence1_1", "CHAOS_Adolescence2_1", "CHAOS_Adolescence4_1", "CHAOS_Adolescence7_1",
                    "CHAOS_Adolescence12_1", "CHAOS_Adolescence14_1","CHAOS_Adolescence15_1")
@@ -562,7 +565,8 @@ followup$CHAOS_Adolescence_total <- apply(CHAOS_Adolescence,1, sum)
 hist(followup$CHAOS_Adolescence_total)
 
 cor.test(followup$CHAOS_child_total, followup$CHAOS_Adolescence_total)
-ggplot(data=followup, aes(x=CHAOS_child_total, y=CHAOS_Adolescence_total)) + geom_point()
+ggplot(data=followup, aes(x=CHAOS_child_total, y=CHAOS_Adolescence_total)) + geom_point() +
+  geom_smooth()
 
 followup$CHAOS_sum <- followup$CHAOS_child_total + followup$CHAOS_Adolescence_total
 ```
@@ -570,7 +574,7 @@ followup$CHAOS_sum <- followup$CHAOS_child_total + followup$CHAOS_Adolescence_to
 #AIMS Scoring
 ```{r}
 AIMS <- followup %>%
-  select("AIMS_current1_1":"AIMS_current34_1")
+  dplyr::select("AIMS_current1_1":"AIMS_current34_1")
 
 followup$AIMS_current_total <- apply(AIMS,1, sum)
 
@@ -581,7 +585,7 @@ hist(followup$AIMS_current_total)
 #escapism scoring
 ```{r}
 escapism_current <- followup %>%
-  select("Escapism_current1_1":"Escapism_current11_1")
+  dplyr::select("Escapism_current1_1":"Escapism_current11_1")
 
 cols_negative_escapism_current <- c("Escapism_current1_1","Escapism_current2_1","Escapism_current3_1","Escapism_current4_1","Escapism_current5_1","Escapism_current6_1")
   
@@ -595,7 +599,7 @@ cor.test(followup$AIMS_current_total, followup$negative_escapism_current)
 
 #adolescent
 escapism_adol <- followup %>%
-  select("Escampism_adol1_1":"Escapism_adol11_1")
+  dplyr::select("Escampism_adol1_1":"Escapism_adol11_1")
 
 cols_negative_escapism_adol <- c("Escampism_adol1_1","Escapism_adol2_1","Escapism_adol3_1","Escapism_adol4_1","Escapism_adol5_1","Escapism_adol6_1")
   
@@ -609,7 +613,7 @@ hist(followup$negative_escapism_adol)
 #SRQ
 ```{r}
 SRQ_current <- followup %>%
-  select("SRQ_current1_1":"SRQ_current8_1")
+  dplyr::select("SRQ_current1_1":"SRQ_current8_1")
 
 cols_prosocialinteractions <- c("SRQ_current1_1","SRQ_current3_1","SRQ_current6_1","SRQ_current7_1","SRQ_current8_1")
 
@@ -621,7 +625,7 @@ followup$SRQ_current_sociability <- apply(SRQ_current[cols_sociability],1, sum)
 
 #adol
 SRQ_adol <- followup %>%
-  select("SQR_adol1_1":"SQR_adol8_1")
+  dplyr::select("SQR_adol1_1":"SQR_adol8_1")
 
 cols_prosocialinteractions <- c("SQR_adol1_1","SQR_adol3_1","SQR_adol6_1","SQR_adol7_1","SQR_adol8_1")
 

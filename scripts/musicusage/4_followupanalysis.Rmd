@@ -1,48 +1,179 @@
 ---
-title: "4_followupanalysis"
+title: "4_followup_scoredanalysis"
 author: "Nick Kathios"
 date: '2023-02-25'
 output: html_document
 ---
 #load packages
 ```{r}
-library(tIDyverse)
+library(tidyverse)
 library(lme4)
 library(lmerTest)
 library(emmeans)
 library(mediation)
+library(corrplot)
+library(psych)
+library(sjPlot)
 ```
+
 
 #load data
 ```{r}
-followup <- read.csv(file='../../data/SLfollowupscored.csv')
+followup_scored <- read.csv(file='../../data/SLfollowupscored.csv')
 liking <- read.csv(file='../../data/SL_followup/masterinteractionliking.csv')
 groove_stiminfo <- read.csv(file="../../stimuli/senn_stim/stim_information.csv")
 names(groove_stiminfo)[2] <- "stim"
 ```
 
-#absorption mediation models
+#correlation matrices
 ```{r}
-m1 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum)
+#HUMS, eBMRQ, Mental Health corr matrix
+variables = dplyr::select(followup_scored, 
+                          HUMS_adult_unhealthy,HUMS_adult_healthy,
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, BMRQ_musicseek, 
+                          BMRQ_sensorimotor,PASS_total,
+                          STAI_total, CD.RISC_total, AIMS_current_total, SRQ_current_total,positive_escapism_current,
+                          negative_escapism_current)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
+                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
+                           'Sensorimotor',"PAS", "STAI", "CDRISC", "AIMS", "SRQ", "Positive Espcapism", 
+                           "Negative Espcapism")
+rownames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
+                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
+                           'Sensorimotor',"PAS", "STAI", "CDRISC", "AIMS", "SRQ", "Positive Espcapism", 
+                           "Negative Espcapism")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#HUMS, eBMRQ, ELA corr matrix
+variables = dplyr::select(followup_scored, 
+                          HUMS_adult_unhealthy,HUMS_adult_healthy,
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, BMRQ_musicseek, 
+                          BMRQ_sensorimotor,AIMS_current_total,positive_escapism_current,
+                          negative_escapism_current, QUIC_sum, CHAOS_sum, Threat_sum, deprivation_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
+                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
+                           'Sensorimotor', "AIMS", "Positive Espcapism", 
+                           "Negative Espcapism", "QUIC Sum", "CHAOS Sum", "Threat Sum", "Deprivation Sum")
+rownames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
+                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
+                           'Sensorimotor', "AIMS", "Positive Espcapism", 
+                           "Negative Espcapism", "QUIC Sum", "CHAOS Sum", "Threat Sum", "Deprivation Sum")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_AIMS_ELA.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+```
+
+#which facet of BMRQ is escapism related to?
+```{r}
+followup_scored$escapism_sum <- followup_scored$positive_escapism_current + followup_scored$negative_escapism_current
+
+m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
 
-m2 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + positive_escapism_current)
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.25, 1) +
+  ggtitle("Overall Escapism Score") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Absorption (AIMS)","Sensorimotor","Music Seeking", "Social Reward", "Emotion Evocation","Mood Regulation"))
+
+m1 <-lm(data=followup_scored, scale(positive_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
+summary(m1)
+
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.5, 0.75) +
+  ggtitle("Positive Escapism Score") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Absorption (AIMS)","Sensorimotor","Music Seeking", "Social Reward", "Emotion Evocation","Mood Regulation"))
+
+m1 <-lm(data=followup_scored, scale(negative_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
+summary(m1)
+
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.5, 0.75) +
+  ggtitle("Negative Escapism Score") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Absorption (AIMS)","Sensorimotor","Music Seeking", "Social Reward", "Emotion Evocation","Mood Regulation"))
+```
+
+
+#absorption mediation models
+```{r}
+m1 <-lm(data=followup_scored, scale(AIMS_current_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(PASS_total) + scale(STAI_total))
+summary(m1)
+
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.5, 0.75) +
+  ggtitle("AIMS Score") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Threat Sum","Deprivation Sum","CHAOS Sum", "QUIC Sum"))
+
+m2 <-lm(data=followup_scored, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + escapism_sum)
 summary(m2)
 
-m3 <-lm(data=followup, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + negative_escapism_current)
-summary(m3)
-
-m2 <-lm(data=followup, negative_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum )
+m2 <-lm(data=followup_scored, escapism_sum ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
 summary(m2)
 
-m2 <-lm(data=followup, positive_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum )
+m2 <-lm(data=followup_scored, negative_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
+summary(m2)
+
+m2 <-lm(data=followup_scored, positive_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total )
 summary(m2)
 ```
 
 #SL results
 ```{r}
 names(liking)[2] <- "ID"
-SL_master <- merge(liking, followup, by="ID")
+SL_master <- merge(liking, followup_scored, by="ID")
 
 x=1:nrow(SL_master)
 for (i in x) {
@@ -64,6 +195,8 @@ m1 <- lmer(data=SL_master, liking ~ rep_category*outcome_type*QUIC_sum + depriva
 anova(m1)
 summary(m1)
 
+
+
 m1 <- lmer(data=SL_master, liking ~ QUIC_sum + deprivation_sum + Threat_sum + rep_category*CHAOS_sum*outcome_type +
              (1|ID) + (1|clipnum))
 anova(m1)
@@ -78,14 +211,14 @@ summary(m1)
 #replicating groove results
 ```{r}
 groove_stiminfo$stim <- as.character(groove_stiminfo$stim)
-groove<- followup %>%
+groove<- followup_scored %>%
   dplyr::select("X1_move_1":"X39_pleasure_1")
 
 move_index <- seq(1,30,by=2)
 pleasure_index <- seq(2,30, by=2)
 
 move <- groove[move_index] %>%
-  cbind(followup[2]) %>%
+  cbind(followup_scored[2]) %>%
   pivot_longer(!ID, names_to = "stim", values_to = "rating")
 
 x=1:nrow(move)
@@ -103,7 +236,8 @@ move <- within(move, tert <- relevel(tert, ref = "Intermediate"))
 m1 <- lmer(data=move, rating ~ tert + (1|ID) + (1|stim))
 summary(m1)
 
-m.emm <- emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 4320)
+
+m.emm <-emmeans(m1, "tert",lmer.df = "satterthwaite",lmerTest.limit = 4320)
 
 contrast(m.emm, 'poly') %>%
   broom::tidy() %>%
@@ -113,12 +247,12 @@ contrast(m.emm, 'poly') %>%
 m1 <- lmer(data=move, rating ~ PerceivedComplexity + (PerceivedComplexity|ID) + (1|stim))
 summary(m1)
 
-m2 <- lmer(data=move, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim))
+m2 <- lmer(data=move, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
 summary(m2)
 anova(m1,m2)
 
 pleasure <- groove[pleasure_index] %>%
-  cbind(followup[2]) %>%
+  cbind(followup_scored[2]) %>%
   pivot_longer(!ID, names_to = "stim", values_to = "rating")
 
 x=1:nrow(pleasure)
@@ -129,7 +263,7 @@ for (i in x) {
 
 pleasure <- merge(pleasure, groove_stiminfo)
 pleasure$tert <- as.factor(pleasure$tert)
-pleasure <- within(pleasure, tert <- relevel(tert, ref = "Low"))
+pleasure <- within(pleasure, tert <- relevel(tert, ref = "Intermediate"))
 
 m1 <- lmer(data=pleasure, rating ~ tert + (tert|ID) + (1|stim))
 summary(m1)
@@ -144,33 +278,86 @@ contrast(m.emm, 'poly') %>%
 m1 <- lmer(data=pleasure, rating ~ PerceivedComplexity + (PerceivedComplexity|ID) + (1|stim))
 summary(m1)
 
-m2 <- lmer(data=pleasure, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim))
+m2 <- lmer(data=pleasure, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim),ontrol=lmerControl(optimizer="bobyqa"))
 summary(m2)
 anova(m1,m2)
 ```
 
 #checking to see different preferences across ELA experiences
 ```{r}
-move_master <- merge(move, followup, by="ID")
-m1 <- lmer(data=move_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|ID) + (1|stim))
+move_master <- merge(move, followup_scored, by="ID")
+m1 <- lmer(data=move_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum*tert + PASS_total + STAI_total + (tert|ID) + (1|stim))
 summary(m1)
 performance::check_collinearity(m1)
 
-m1 <- lmer(data=move_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|ID) + (1|stim))
+pleasure_master <- merge(pleasure, followup_scored, by="ID")
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum*tert + PASS_total + STAI_total+(1|ID) + (1|stim), control=lmerControl(optimizer="bobyqa"))
 summary(m1)
 performance::check_collinearity(m1)
 
+#PLOT
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum*tert + deprivation_sum + CHAOS_sum+ PASS_total + STAI_total + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+summary(m1)
 
-pleasure_master <- merge(pleasure, followup, by="ID")
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum + (tert|ID) + (1|stim))
+m1c <- lmer(data=pleasure_master, rating ~  QUIC_child_total + threat_childhood_total*tert + deprivation_child_total + CHAOS_child_total + PASS_total + STAI_total+(tert|ID) + (1|stim))
+summary(m1c)
+
+m1a <- lmer(data=pleasure_master, rating ~  QUIC_Adolescence_total + threat_adolescence_total*tert + deprivation_Adolescence_total + CHAOS_Adolescence_total + PASS_total + STAI_total+(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+summary(m1a)
+
+m1t <- lmer(data=pleasure_master, rating ~ threat_adolescence_total*tert + threat_childhood_total*tert + PASS_total + STAI_total +(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+summary(m1t)
+performance::check_collinearity(m1t)
+
+m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum*tert + CHAOS_sum+ PASS_total + STAI_total +(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+summary(m1)
+```
+
+#checking timing
+```{r}
+m1 <- lmer(data=move_master, rating ~ QUIC_child_total*tert + threat_childhood_total + deprivation_child_total + CHAOS_child_total*tert + PASS_total + STAI_total + (tert|ID) + (1|stim))
+summary(m1)
+
+m1 <- lmer(data=pleasure_master, rating ~  QUIC_child_total*tert + threat_childhood_total + deprivation_child_total + CHAOS_child_total*tert + PASS_total + STAI_total+(tert|ID) + (1|stim))
+summary(m1)
+
+#adolescence
+m1 <- lmer(data=move_master, rating ~ QUIC_Adolescence_total*tert + threat_adolescence_total + deprivation_Adolescence_total + CHAOS_Adolescence_total*tert + PASS_total + STAI_total + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+summary(m1)
+
+m1 <- lmer(data=pleasure_master, rating ~  QUIC_Adolescence_total*tert + threat_adolescence_total + deprivation_Adolescence_total + CHAOS_Adolescence_total*tert + PASS_total + STAI_total+(tert|ID) + (1|stim))
+summary(m1)
+```
+
+#building models on linear data + extracting Bs
+```{r}
+SL_master$outcome_type <- as.factor(SL_master$outcome_type)
+contrasts(SL_master$outcome_type) <- c(-0.5,0.5)
+m1 <- lmer(data=SL_master, liking ~ rep*outcome_type + (rep*outcome_type|ID))
+summary(m1)
+linear <- coef(m1)$ID
+linear <- tibble::rownames_to_column(linear, "ID")
+names(linear)[3] <- "linear_beta"
+SL_master <- merge(linear, SL_master, by="ID")
+
+m1 <- lm(data=SL_master, linear_beta ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
 summary(m1)
 performance::check_collinearity(m1)
 
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum + CHAOS_sum*tert+ (tert|ID) + (1|stim))
+typeof(SL_master$rep.x)
+m2 <- lmer(data=SL_master, liking ~ poly(rep,2,raw=TRUE)*outcome_type + (poly(rep,2,raw=TRUE)*outcome_type|ID))
+summary(m2)
+quadratic <- coef(m2)$ID
+quadratic <- tibble::rownames_to_column(quadratic, "ID")
+names(quadratic)[3] <- "linear_beta"
+names(quadratic)[4] <- "quadratic_beta"
+
+SL_master <- merge(quadratic, SL_master, by="ID")
+m1 <- lm(data=SL_master, linear_beta ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
 summary(m1)
 performance::check_collinearity(m1)
 
-
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum*tert + deprivation_sum + CHAOS_sum+ (tert|ID) + (1|stim))
-summary(m1)
+m2 <- lm(data=SL_master, quadratic_beta ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
+summary(m2)
+performance::check_collinearity(m1)
 ```
