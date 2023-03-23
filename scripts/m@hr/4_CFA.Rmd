@@ -9,17 +9,20 @@ output: html_document
 library(tidyverse)
 source("../reverseCode.R")
 library(psych)
+library(corrplot)
 ```
 
 #read in data
 ```{r}
 first <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
-second <- read.csv(file='../../data/SL_followup/Groove)_March 22, 2023_07.53.csv')
+second <- read.csv(file='../../data/SLfollowupscored.csv')
 
-keep <- setdiff(second$Q158,first$Q158)
+keep <- setdiff(second$ID,first$Q158)
 
-MH <- second[second$Q158 %in% keep, ] %>%
-  select("M.H_child1_1":"M.H_child20_1")
+second <- second[second$ID %in% keep, ] 
+
+MH <- second %>%
+  dplyr::select("M.H_child1_1":"M.H_child20_1")
 
 #MH <- MH[complete.cases(MH),]
 
@@ -29,59 +32,7 @@ MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
 
 #CFA
 ```{r}
-fafitfree <- fa(MH,nfactors = ncol(MH), rotate = "oblimin",covar = FALSE, SMC = TRUE,
- fm="ml", 
- max.iter=100)
-n_factors <- length(fafitfree$e.values)
-scree     <- data.frame(
-  Factor_n =  as.factor(1:n_factors), 
-  Eigenvalue = fafitfree$e.values)
-
-ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
-  geom_point() + geom_line() +
-  xlab("Number of factors") +
-  ylab("Initial eigenvalue") +
-  labs( title = "Scree Plot", 
-        subtitle = "(Based on the unreduced correlation matrix)")+
-  geom_line(y=1,color="red")
-
-
-fa.none <- psych::fa(r=MH, 
- nfactors = 5, 
-  covar = FALSE, SMC = TRUE,
- fm="ml", 
- max.iter=1000,  
- rotate="oblimin") # no rotation
-
-print(fa.none)
-
-fa.diagram(fa.none)
-
-SL_transformation <- EFAtools::SL(fa.none)
-SL_transformation <- SL_transformation[[1]]
-
-omega <-omega(SL_transformation, nfactors=5,n.iter=1,p=.05,poly=FALSE,key=NULL,
-    flip=TRUE,digits=2, title="Omega",sl=TRUE,labels=NULL,
-    plot=TRUE)
-
-summary(omega)
-
-
-fa.none <- psych::fa(r=MH, 
- nfactors = 1, 
-  covar = FALSE, SMC = TRUE,
- fm="ml", 
- max.iter=100,  
- rotate="varimax")
-
-#parallel analysis on residual to find factor #
-residual <- fa.none[["residual"]]
-parallel <- fa.parallel(residual) #suggests 4 factors
-MAP <- vss(residual) #suggests 5 factors
-MAP <- MAP[["map"]]
-print(MAP)
-
-fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+fafitfree <- fa(MH,nfactors = 5, rotate = "oblimin",covar = FALSE, SMC = TRUE,
  fm="ml", 
  max.iter=100)
 n_factors <- length(fafitfree$e.values)
@@ -108,4 +59,69 @@ summary(fa.none)
 SL_transformation <- EFAtools::SL(fa.none)
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
+
+##everything looks the same! the only thing of concern is item 19 not loading strongly (>.2) onto
+##the general factor
+scores <- factor.scores(as.matrix(MH), SL_transformation, method="components")
+scores <- scores$scores
+scores <- cbind(second[2], scores)
+names(scores)[2:7]<-c("General", "CaregiverSinging","CaregiverBeliefs", "HomeAttitudes", "MusicMaking","Social")
+total <- merge(scores, second)
+
+#validity tests
+total$SRQ_current_total
+variables = dplyr::select(total, 
+                          General,CaregiverSinging,
+                          CaregiverBeliefs, HomeAttitudes, MusicMaking, Social,
+                          MET_melodicscore, MET_rhythmicscore, SRQ_adol_total,
+                          SRQ_current_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("MH General Score", "Caregiver Singing","Caregiver Beliefs",
+                           "Attitude towards Home Musical Environment", "Music Making Tendencies", 
+                           "Social Contexts","MET Melodic Score", "MET Rhythmic Score", 
+                           "Adolescent SRQ", "Current SRQ")
+rownames(corr_matrix) <- c("MH General Score", "Caregiver Singing","Caregiver Beliefs",
+                           "Attitude towards Home Musical Environment", "Music Making Tendencies", 
+                           "Social Contexts","MET Melodic Score", "MET Rhythmic Score", 
+                           "Adolescent SRQ", "Current SRQ")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+```
+#test-retest correlations
+```{r}
+second <- read.csv(file='../../data/SLfollowupscored.csv')
+
+MH_retest <- second %>%
+  dplyr::select("M.H_child1_1":"M.H_child20_1")
+
+cols_reverse <- c("M.H_child6_1","M.H_child7_1","M.H_child11_1","M.H_child12_1","M.H_child18_1","M.H_child19_1","M.H_child20_1")
+MH_retest[cols_reverse] <- lapply(MH_retest[cols_reverse], reverseCode, min=1, max=7)
+
+cols_CaregiverBeliefs <- c("M.H_child1_1", "M.H_child2_1","M.H_child3_1","M.H_child4_1")
+cols_CaregiverSinging <- c("M.H_child9_1", "M.H_child10_1","M.H_child11_1","M.H_child13_1")
+cols_HomeAttitudes <- c("M.H_child18_1", "M.H_child19_1","M.H_child20_1")
+cols_MusicMaking <- c("M.H_child5_1", "M.H_child6_1","M.H_child7_1","M.H_child8_1","M.H_child12_1")
+cols_Social <- c("M.H_child14_1", "M.H_child15_1","M.H_child16_1","M.H_child17_1")
+
+MH_retest$General <- apply(MH_retest,1, sum) # total PAS scores
+MH_retest$CaregiverSinging <- apply(MH_retest[cols_CaregiverSinging], 1,sum)
+MH_retest$CaregiverBeliefs <- apply(MH_retest[cols_CaregiverBeliefs],1, sum)
+MH_retest$HomeAttitudes <-apply(MH_retest[cols_HomeAttitudes],1, sum)
+MH_retest$MusicMaking <- apply(MH_retest[cols_MusicMaking],1, sum)
+MH_retest$Social <- apply(MH_retest[cols_Social],1, sum)
+MH_retest <- cbind(second[2], MH_retest)
+names(first)[20]<-"ID"
+retest <- merge(MH_retest, first)
+cor.test(retest$MH_childhoodattitude, retest$HomeAttitudes)
 ```

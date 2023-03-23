@@ -285,66 +285,78 @@ anova(m1,m2)
 
 #checking to see different preferences across ELA experiences
 ```{r}
+#MOVE RATINGS
 move_master <- merge(move, followup_scored, by="ID")
-m1 <- lmer(data=move_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum*tert + PASS_total + STAI_total + (tert|ID) + (1|stim))
+m1 <- lmer(data=move_master, scale(rating) ~ scale(QUIC_sum)*tert + scale(Threat_sum) + scale(deprivation_sum) + scale(CHAOS_sum)*tert + scale(PASS_total) + scale(STAI_total) + (tert|ID) + (1|stim))
+anova(m1)
 summary(m1)
 performance::check_collinearity(m1)
+#investigate interaction
+emmeans::emtrends(m1, "tert", var = "QUIC_sum",lmer.df = "satterthwaite",lmerTest.limit = 4320) %>%
+  emmeans::test()
 
 pleasure_master <- merge(pleasure, followup_scored, by="ID")
+
+#PLEASANTNESS RATINGS
 m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum*tert + PASS_total + STAI_total+(1|ID) + (1|stim), control=lmerControl(optimizer="bobyqa"))
+anova(m1)
 summary(m1)
 performance::check_collinearity(m1)
 
-#PLOT
+#Threat + Deprivation Checks
 m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum*tert + deprivation_sum + CHAOS_sum+ PASS_total + STAI_total + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
 summary(m1)
-
-m1c <- lmer(data=pleasure_master, rating ~  QUIC_child_total + threat_childhood_total*tert + deprivation_child_total + CHAOS_child_total + PASS_total + STAI_total+(tert|ID) + (1|stim))
-summary(m1c)
-
-m1a <- lmer(data=pleasure_master, rating ~  QUIC_Adolescence_total + threat_adolescence_total*tert + deprivation_Adolescence_total + CHAOS_Adolescence_total + PASS_total + STAI_total+(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
-summary(m1a)
-
-m1t <- lmer(data=pleasure_master, rating ~ threat_adolescence_total*tert + threat_childhood_total*tert + PASS_total + STAI_total +(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
-summary(m1t)
-performance::check_collinearity(m1t)
+anova(m1)
+emmeans::emtrends(m1, "tert", var = "Threat_sum",lmer.df = "satterthwaite",lmerTest.limit = 4320) %>%
+  emmeans::test()
 
 m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum*tert + CHAOS_sum+ PASS_total + STAI_total +(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
 summary(m1)
+anova(m1)
 ```
 
 #checking timing
 ```{r}
 m1 <- lmer(data=move_master, rating ~ QUIC_child_total*tert + threat_childhood_total + deprivation_child_total + CHAOS_child_total*tert + PASS_total + STAI_total + (tert|ID) + (1|stim))
+anova(m1)
 summary(m1)
 
 m1 <- lmer(data=pleasure_master, rating ~  QUIC_child_total*tert + threat_childhood_total + deprivation_child_total + CHAOS_child_total*tert + PASS_total + STAI_total+(tert|ID) + (1|stim))
+anova(m1)
 summary(m1)
 
 #adolescence
 m1 <- lmer(data=move_master, rating ~ QUIC_Adolescence_total*tert + threat_adolescence_total + deprivation_Adolescence_total + CHAOS_Adolescence_total*tert + PASS_total + STAI_total + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+anova(m1)
 summary(m1)
 
-m1 <- lmer(data=pleasure_master, rating ~  QUIC_Adolescence_total*tert + threat_adolescence_total + deprivation_Adolescence_total + CHAOS_Adolescence_total*tert + PASS_total + STAI_total+(tert|ID) + (1|stim))
+m1 <- lmer(data=pleasure_master, rating ~  QUIC_Adolescence_total*tert + threat_adolescence_total + deprivation_Adolescence_total + CHAOS_Adolescence_total*tert + PASS_total + STAI_total+(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+anova(m1)
+summary(m1)
+
+#threat
+m1 <- lmer(data=move_master, rating ~ QUIC_child_total + threat_childhood_total*tert + deprivation_child_total + CHAOS_child_total + PASS_total + STAI_total + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+anova(m1)
+summary(m1)
+
+m1 <- lmer(data=move_master, rating ~  QUIC_Adolescence_total + threat_adolescence_total*tert + deprivation_Adolescence_total + CHAOS_Adolescence_total + PASS_total + STAI_total+(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+anova(m1)
+summary(m1)
+
+m1 <- lmer(data=pleasure_master, scale(rating) ~ scale(QUIC_child_total) + scale(threat_childhood_total)*tert + scale(deprivation_child_total) + scale(CHAOS_child_total) + scale(PASS_total) + scale(STAI_total) + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+anova(m1)
+summary(m1)
+emmeans::emtrends(m1, "tert", var = "threat_childhood_total",lmer.df = "satterthwaite",lmerTest.limit = 4320) %>%
+  emmeans::test()
+
+
+m1 <- lmer(data=move_master, rating ~  QUIC_Adolescence_total + threat_adolescence_total*tert + deprivation_Adolescence_total + CHAOS_Adolescence_total + PASS_total + STAI_total+(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+anova(m1)
 summary(m1)
 ```
 
 #building models on linear data + extracting Bs
 ```{r}
-SL_master$outcome_type <- as.factor(SL_master$outcome_type)
-contrasts(SL_master$outcome_type) <- c(-0.5,0.5)
-m1 <- lmer(data=SL_master, liking ~ rep*outcome_type + (rep*outcome_type|ID))
-summary(m1)
-linear <- coef(m1)$ID
-linear <- tibble::rownames_to_column(linear, "ID")
-names(linear)[3] <- "linear_beta"
-SL_master <- merge(linear, SL_master, by="ID")
-
-m1 <- lm(data=SL_master, linear_beta ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
-summary(m1)
-performance::check_collinearity(m1)
-
-typeof(SL_master$rep.x)
 m2 <- lmer(data=SL_master, liking ~ poly(rep,2,raw=TRUE)*outcome_type + (poly(rep,2,raw=TRUE)*outcome_type|ID))
 summary(m2)
 quadratic <- coef(m2)$ID
@@ -352,12 +364,268 @@ quadratic <- tibble::rownames_to_column(quadratic, "ID")
 names(quadratic)[3] <- "linear_beta"
 names(quadratic)[4] <- "quadratic_beta"
 
-SL_master <- merge(quadratic, SL_master, by="ID")
-m1 <- lm(data=SL_master, linear_beta ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
-summary(m1)
-performance::check_collinearity(m1)
+quad_master <- merge(quadratic, followup_scored, by="ID")
+#correlation matrices
 
-m2 <- lm(data=SL_master, quadratic_beta ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
-summary(m2)
-performance::check_collinearity(m1)
+variables = dplyr::select(quad_master, 
+                          linear_beta,quadratic_beta,
+                          outcome_typeOriginal, QUIC_sum, CHAOS_sum, Threat_sum, deprivation_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of # of Presentations", "Quadratic Effect of # of 
+                           Presentations","Effect of Alteration","QUIC Sum","CHAOS Sum",
+                           "Threat Sum", "Deprivation Sum")
+rownames(corr_matrix) <- c("Linear Effect of # of Presentations", "Quadratic Effect of # of 
+                           Presentations","Effect of Alteration","QUIC Sum","CHAOS Sum",
+                           "Threat Sum", "Deprivation Sum")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#childhood
+variables = dplyr::select(quad_master, 
+                          linear_beta,quadratic_beta,
+                          outcome_typeOriginal, QUIC_child_total, CHAOS_child_total, threat_childhood_total, deprivation_child_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of # of Presentations", "Quadratic Effect of # of 
+                           Presentations","Effect of Alteration","QUIC Childhood","CHAOS Childhood",
+                           "Threat Childhood", "Deprivation Childhood")
+rownames(corr_matrix) <- c("Linear Effect of # of Presentations", "Quadratic Effect of # of 
+                           Presentations","Effect of Alteration","QUIC Childhood","CHAOS Childhood",
+                           "Threat Childhood", "Deprivation Childhood")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#adol
+variables = dplyr::select(quad_master, 
+                          linear_beta,quadratic_beta,
+                          outcome_typeOriginal, QUIC_Adolescence_total, CHAOS_Adolescence_total, threat_adolescence_total, deprivation_Adolescence_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of # of Presentations", "Quadratic Effect of # of 
+                           Presentations","Effect of Alteration","QUIC Adolescence","CHAOS Adolescence",
+                           "Threat Adolescence", "Deprivation Adolescence")
+rownames(corr_matrix) <- c("Linear Effect of # of Presentations", "Quadratic Effect of # of 
+                           Presentations","Effect of Alteration","QUIC Adolescence","CHAOS Adolescence",
+                           "Threat Adolescence", "Deprivation Adolescence")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
 ```
+
+#building models on linear data + extracting Bs
+```{r}
+#ratings of pleasure
+m2 <- lmer(data=pleasure, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+summary(m2)
+groove <- coef(m2)$ID
+groove <- tibble::rownames_to_column(groove, "ID")
+names(groove)[3] <- "linear_beta"
+names(groove)[4] <- "quadratic_beta"
+groove_master <- merge(followup_scored, groove, by="ID")
+
+#correlation matrices
+
+variables = dplyr::select(groove_master, 
+                          linear_beta,quadratic_beta, QUIC_sum, CHAOS_sum, Threat_sum, 
+                          deprivation_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Sum","CHAOS Sum",
+                           "Threat Sum", "Deprivation Sum")
+rownames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Sum","CHAOS Sum",
+                           "Threat Sum", "Deprivation Sum")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#childhood
+variables = dplyr::select(groove_master, 
+                          linear_beta,quadratic_beta,
+                         QUIC_child_total, CHAOS_child_total, threat_childhood_total, deprivation_child_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Childhood","CHAOS Childhood",
+                           "Threat Childhood", "Deprivation Childhood")
+rownames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Childhood","CHAOS Childhood",
+                           "Threat Childhood", "Deprivation Childhood")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#adol
+variables = dplyr::select(groove_master, 
+                          linear_beta,quadratic_beta,
+                           QUIC_Adolescence_total, CHAOS_Adolescence_total, threat_adolescence_total, deprivation_Adolescence_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Adolescence","CHAOS Adolescence",
+                           "Threat Adolescence", "Deprivation Adolescence")
+rownames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Adolescence","CHAOS Adolescence",
+                           "Threat Adolescence", "Deprivation Adolescence")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#ratings of movement
+m2 <- lmer(data=move, rating ~ poly(PerceivedComplexity,2,raw=TRUE) + (poly(PerceivedComplexity,2,raw=TRUE)|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+summary(m2)
+groove <- coef(m2)$ID
+groove <- tibble::rownames_to_column(groove, "ID")
+names(groove)[3] <- "linear_beta"
+names(groove)[4] <- "quadratic_beta"
+groove_master <- merge(followup_scored, groove, by="ID")
+
+#correlation matrices
+variables = dplyr::select(groove_master, 
+                          linear_beta,quadratic_beta, QUIC_sum, CHAOS_sum, Threat_sum, 
+                          deprivation_sum)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Sum","CHAOS Sum",
+                           "Threat Sum", "Deprivation Sum")
+rownames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Sum","CHAOS Sum",
+                           "Threat Sum", "Deprivation Sum")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#childhood
+variables = dplyr::select(groove_master, 
+                          linear_beta,quadratic_beta,
+                         QUIC_child_total, CHAOS_child_total, threat_childhood_total, deprivation_child_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Childhood","CHAOS Childhood",
+                           "Threat Childhood", "Deprivation Childhood")
+rownames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Childhood","CHAOS Childhood",
+                           "Threat Childhood", "Deprivation Childhood")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+#adol
+variables = dplyr::select(groove_master, 
+                          linear_beta,quadratic_beta,
+                           QUIC_Adolescence_total, CHAOS_Adolescence_total, threat_adolescence_total, deprivation_Adolescence_total)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Adolescence","CHAOS Adolescence",
+                           "Threat Adolescence", "Deprivation Adolescence")
+rownames(corr_matrix) <- c("Linear Effect of Complexity", "Quadratic Effect of Complexity","QUIC Adolescence","CHAOS Adolescence",
+                           "Threat Adolescence", "Deprivation Adolescence")
+
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+```
+
+#model test of linear beta ~ quic
+```{r}
+m1 <- lm(data=groove_master, scale(linear_beta) ~ scale(QUIC_Adolescence_total) + scale(CHAOS_Adolescence_total) + scale(threat_adolescence_total) + scale(deprivation_Adolescence_total) + scale(PASS_total) + scale(STAI_total))
+summary(m1)
+
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.5, 0.5) +
+  ggtitle("Linear Beta Estimate (Move)") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("STAI","PAS","Deprivation Adolescence ", "Threat Adoelscence", "Deprivation Adolescence","QUIC Adoelscence"))
+
+m1t <- lm(data=groove_master, scale(linear_beta) ~ scale(QUIC_Adolescence_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total))
+summary(m1t)
+
+plot_model(m1t, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.5, 0.5) +
+  ggtitle("Linear Beta Estimate (Move)") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("STAI","PAS","QUIC Childhood", "QUIC Adoelscence"))
+```
+
+#presence vs absence
