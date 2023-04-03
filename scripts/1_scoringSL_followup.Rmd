@@ -636,6 +636,20 @@ followup$SRQ_adol_prosocialinteractions <- apply(SRQ_adol[cols_prosocialinteract
 followup$SRQ_adol_sociability <- apply(SRQ_adol[cols_sociability],1, sum)
 ```
 
+#AES
+```{r}
+AES <- followup %>%
+  dplyr::select("AES1_1":"AES14_1")
+
+cols_viseral <- c("AES3_1","AES4_1","AES7_1","AES11_1","AES12_1","AES13_1", "AES14_1")
+
+cols_abstract <- c("AES1_1","AES2_1","AES5_1","AES6_1","AES8_1","AES9_1","AES10_1")
+
+followup$AES_total <- apply(AES, 1, sum)
+followup$AES_viseral <- apply(AES[cols_viseral],1, sum)
+followup$AES_abstract <- apply(AES[cols_abstract],1, sum)
+```
+
 #write master file
 ```{r}
 names(followup)[18] <- "ID"

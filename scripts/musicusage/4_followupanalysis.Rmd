@@ -27,13 +27,13 @@ names(groove_stiminfo)[2] <- "stim"
 
 #correlation matrices
 ```{r}
-#HUMS, eBMRQ, Mental Health corr matrix
+#HUMS, eBMRQ, Mental Health, AES corr matrix
 variables = dplyr::select(followup_scored, 
                           HUMS_adult_unhealthy,HUMS_adult_healthy,
                           BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, BMRQ_musicseek, 
                           BMRQ_sensorimotor,PASS_total,
                           STAI_total, CD.RISC_total, AIMS_current_total, SRQ_current_total,positive_escapism_current,
-                          negative_escapism_current)
+                          negative_escapism_current, AES_viseral, AES_abstract, AES_total)
 output = corr.test(variables)
 
 corr_matrix = output$r
@@ -42,11 +42,11 @@ p_matrix <- output$p
 colnames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
                            'Sensorimotor',"PAS", "STAI", "CDRISC", "AIMS", "SRQ", "Positive Espcapism", 
-                           "Negative Espcapism")
+                           "Negative Espcapism", "AES Viseral", "AES Abstract", "AES total")
 rownames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
                            'Sensorimotor',"PAS", "STAI", "CDRISC", "AIMS", "SRQ", "Positive Espcapism", 
-                           "Negative Espcapism")
+                           "Negative Espcapism", "AES Viseral", "AES Abstract", "AES total")
 
 pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
 
@@ -56,12 +56,14 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
 
 dev.off()
 
-#HUMS, eBMRQ, ELA corr matrix
+#HUMS, eBMRQ, AES, ELA corr matrix
 variables = dplyr::select(followup_scored, 
                           HUMS_adult_unhealthy,HUMS_adult_healthy,
                           BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, BMRQ_musicseek, 
                           BMRQ_sensorimotor,AIMS_current_total,positive_escapism_current,
-                          negative_escapism_current, QUIC_sum, CHAOS_sum, Threat_sum, deprivation_sum)
+                          negative_escapism_current, AES_viseral, AES_abstract, AES_total, QUIC_sum, CHAOS_sum, 
+                          Threat_sum, deprivation_sum) 
+  
 output = corr.test(variables)
 
 corr_matrix = output$r
@@ -70,11 +72,13 @@ p_matrix <- output$p
 colnames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
                            'Sensorimotor', "AIMS", "Positive Espcapism", 
-                           "Negative Espcapism", "QUIC Sum", "CHAOS Sum", "Threat Sum", "Deprivation Sum")
+                           "Negative Espcapism", "AES Viseral", "AES Abstract", "AES Total", "QUIC Sum", "CHAOS Sum", 
+                           "Threat Sum", "Deprivation Sum")
 rownames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
                            'Sensorimotor', "AIMS", "Positive Espcapism", 
-                           "Negative Espcapism", "QUIC Sum", "CHAOS Sum", "Threat Sum", "Deprivation Sum")
+                           "Negative Espcapism", "AES Viseral", "AES Abstract", "AES Total","QUIC Sum", "CHAOS Sum", 
+                           "Threat Sum", "Deprivation Sum")
 
 pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_AIMS_ELA.pdf")
 
@@ -141,7 +145,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
 
 #absorption mediation models
 ```{r}
-m1 <-lm(data=followup_scored, scale(AIMS_current_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(PASS_total) + scale(STAI_total))
+m1 <-lm(data=followup_scored, scale(STAI_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum))
 summary(m1)
 
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
@@ -157,7 +161,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ) +
   scale_x_discrete(labels=c("Threat Sum","Deprivation Sum","CHAOS Sum", "QUIC Sum"))
 
-m2 <-lm(data=followup_scored, AIMS_current_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + escapism_sum)
+m2 <-lm(data=followup_scored, STAI_total ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + AIMS_current_total)
 summary(m2)
 
 m2 <-lm(data=followup_scored, escapism_sum ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
@@ -166,8 +170,10 @@ summary(m2)
 m2 <-lm(data=followup_scored, negative_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
 summary(m2)
 
-m2 <-lm(data=followup_scored, positive_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total )
+m2 <-lm(data=followup_scored, negative_escapism_current ~ deprivation_sum + CD.RISC_total)
 summary(m2)
+
+cor.test(followup_scored$AIMS_current_total, followup_scored$CD.RISC_total)
 ```
 
 #SL results
@@ -626,6 +632,41 @@ plot_model(m1t, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.y = element_text(family="Arial",size=16),
   ) +
   scale_x_discrete(labels=c("STAI","PAS","QUIC Childhood", "QUIC Adoelscence"))
+```
+
+#AES
+```{r}
+m1 <- lm(data=followup_scored, scale(QUIC_sum) ~ scale(AES_viseral) + scale(AES_abstract))
+summary(m1)
+
+m2 <- lm(data=followup_scored, scale(CHAOS_sum) ~ scale(AES_viseral) + scale(AES_abstract))
+summary(m2)
+
+m3 <- lm(data=followup_scored, scale(Threat_sum) ~ scale(AES_viseral) + scale(AES_abstract))
+summary(m3)
+
+m4 <- lm(data=followup_scored, scale(deprivation_sum) ~ scale(AES_viseral) + scale(AES_abstract))
+summary(m4)
+
+##does it mediate escapism
+m1 <-lm(data=followup_scored, scale(AES_abstract) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum) + scale(PASS_total) + scale(STAI_total))
+summary(m1)
+
+m2 <-lm(data=followup_scored, AES_abstract ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + escapism_sum)
+summary(m2)
+
+m2 <-lm(data=followup_scored, AES_abstract ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + positive_escapism_current)
+summary(m2)
+
+
+m2 <-lm(data=followup_scored, AES_abstract ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
+summary(m2)
+
+m2 <-lm(data=followup_scored, negative_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
+summary(m2)
+
+m2 <-lm(data=followup_scored, positive_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total )
+summary(m2)
 ```
 
 #presence vs absence
