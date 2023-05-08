@@ -14,12 +14,15 @@ library(mediation)
 library(corrplot)
 library(psych)
 library(sjPlot)
+library(mediation)
 ```
 
 
 #load data
 ```{r}
 followup_scored <- read.csv(file='../../data/SLfollowupscored.csv')
+
+
 liking <- read.csv(file='../../data/SL_followup/masterinteractionliking.csv')
 groove_stiminfo <- read.csv(file="../../stimuli/senn_stim/stim_information.csv")
 names(groove_stiminfo)[2] <- "stim"
@@ -91,6 +94,7 @@ dev.off()
 
 #which facet of BMRQ is escapism related to?
 ```{r}
+cor.test(followup_scored$AIMS_current_total, followup_scored$deprivation_sum)
 followup_scored$escapism_sum <- followup_scored$positive_escapism_current + followup_scored$negative_escapism_current
 
 m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
@@ -145,8 +149,53 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
 
 #absorption mediation models
 ```{r}
+cor.test(followup_scored$QUIC_sum, followup_scored$AIMS_current_total)
+followup_scored$CHAOS_sum_scaled <- as.vector(scale(followup_scored$CHAOS_sum))
+followup_scored$AIMS_current_total_scaled <- as.vector(scale(followup_scored$AIMS_current_total))
+followup_scored$AIMS_escapism_scaled <- as.vector(scale(followup_scored$AIMS_escapism))
+followup_scored$CD.RISC_total_scaled <- as.vector(scale(followup_scored$CD.RISC_total))
+followup_scored$deprivation_sum_scaled <- as.vector(scale(followup_scored$deprivation_sum))
+followup_scored$threat_sum_scaled <- as.vector(scale(followup_scored$Threat_sum))
+followup_scored$CHAOS_child_scaled <- as.vector(scale(followup_scored$CHAOS_child_total))
+followup_scored$CHAOS_adolescence_scaled <- as.vector(scale(followup_scored$CHAOS_Adolescence_total))
+followup_scored$deprivation_child_total_scaled <- as.vector(scale(followup_scored$deprivation_child_total))
+followup_scored$deprivation_Adolescence_total_scaled <- as.vector(scale(followup_scored$deprivation_Adolescence_total))
+
+#test for PASS (?) + CD RISC with deprivation, CHAOS, and threat
+m1 <-lm(data=followup_scored, CD.RISC_total_scaled ~ CHAOS_sum_scaled)
+m2 <-lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled + AIMS_current_total_scaled)
+
+summary(m2)
+mediate <- mediation::mediate(m1,m2, boot=TRUE, treat = "CHAOS_sum_scaled", mediator = "AIMS_current_total_scaled", sims=5000)
+summary(mediate)
+
 m1 <-lm(data=followup_scored, scale(STAI_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum))
 summary(m1)
+
+m1 <- lm(data=followup_scored, scale(CD.RISC_total) ~ scale(CHAOS_Adolescence_total)*scale(positive_escapism_current))
+summary(m1)
+
+m1 <- lm(data=followup_scored, scale(CD.RISC_total) ~ scale(deprivation_sum, center=114.2672)*scale(AIMS_current_total))
+summary(m1)
+
+m2 <- lm(data=followup_scored, scale(CD.RISC_total) ~ scale(deprivation_sum, center=93.48278)*scale(AIMS_current_total))
+summary(m2)
+
+mean(followup_scored$deprivation_sum) - sd(followup_scored$deprivation_sum)
+
+
+range(followup_scored$deprivation_sum)
+#plot model predictions
+newdata_low <- expand.grid(
+  AIMS_current_total=seq(36,170,1)  #deprivation_sum = seq(77,141,1)
+)
+predictions <- predict(m1, newdata_low,se.fit = TRUE, print.matrix =
+        TRUE, type="terms",terms = "AIMS_current_total")
+
+plot_model(m1, type = "pred")
+
+
+
 
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
  ylim(-0.5, 0.75) +
@@ -304,19 +353,19 @@ emmeans::emtrends(m1, "tert", var = "QUIC_sum",lmer.df = "satterthwaite",lmerTes
 pleasure_master <- merge(pleasure, followup_scored, by="ID")
 
 #PLEASANTNESS RATINGS
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum*tert + Threat_sum + deprivation_sum + CHAOS_sum*tert + PASS_total + STAI_total+(1|ID) + (1|stim), control=lmerControl(optimizer="bobyqa"))
+m1 <- lmer(data=pleasure_master, scale(rating) ~ scale(QUIC_sum)*tert + scale(Threat_sum) + scale(deprivation_sum) + scale(CHAOS_sum) + scale(PASS_total) + scale(STAI_total)+(1|ID) + (1|stim), control=lmerControl(optimizer="bobyqa"))
 anova(m1)
 summary(m1)
 performance::check_collinearity(m1)
 
 #Threat + Deprivation Checks
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum*tert + deprivation_sum + CHAOS_sum+ PASS_total + STAI_total + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+m1 <- lmer(data=pleasure_master, scale(rating) ~ scale(QUIC_sum) + scale(Threat_sum)*tert + scale(deprivation_sum) + scale(CHAOS_sum) + scale(PASS_total) + scale(STAI_total) + (tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
 summary(m1)
 anova(m1)
 emmeans::emtrends(m1, "tert", var = "Threat_sum",lmer.df = "satterthwaite",lmerTest.limit = 4320) %>%
   emmeans::test()
 
-m1 <- lmer(data=pleasure_master, rating ~ QUIC_sum + Threat_sum + deprivation_sum*tert + CHAOS_sum+ PASS_total + STAI_total +(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
+m1 <- lmer(data=pleasure_master, scale(rating) ~ scale(QUIC_sum) + scale(Threat_sum) + scale(deprivation_sum)*tert + scale(CHAOS_sum) + scale(PASS_total) + scale(STAI_total) +(tert|ID) + (1|stim),control=lmerControl(optimizer="bobyqa"))
 summary(m1)
 anova(m1)
 ```
@@ -662,11 +711,110 @@ summary(m2)
 m2 <-lm(data=followup_scored, AES_abstract ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
 summary(m2)
 
-m2 <-lm(data=followup_scored, negative_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total)
+m2 <-lm(data=followup_scored, negative_escapism_current ~ scale(AES_viseral) + scale(AES_abstract))
 summary(m2)
 
-m2 <-lm(data=followup_scored, positive_escapism_current ~ QUIC_sum + CHAOS_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total )
+m2 <-lm(data=followup_scored, positive_escapism_current ~ scale(AES_viseral) + scale(AES_abstract))
 summary(m2)
+
+cor.test(followup_scored$AES_, followup_scored$QUIC_sum)
 ```
 
-#presence vs absence
+#items analysis
+```{r}
+#is there a latent construct these measures are measuring?
+#items <- cbind(followup_scored[312:351], followup_scored[398:399],followup_scored[402:403],followup_scored[405:407])
+
+## get items for AIMS + Escapism
+items <- cbind(followup_scored[312:356])  %>%
+  rename_at(.vars = vars(starts_with("AIMS_current")),
+            .funs = funs(sub("AIMS_current", "", .))) %>%
+  mutate_if(is.character, as.numeric)
+# followup_scored[385:397], followup_scored[398:411])
+
+items <- scale(items)
+
+parallel <- fa.parallel(items) #suggests 8 factors
+MAP <- vss(items)
+MAP <- MAP[["map"]]
+print(MAP) #suggests 8
+
+fa.none <- psych::fa(r=items, 
+ nfactors = 4, 
+  covar = FALSE, SMC = TRUE,
+ fm="ml", 
+ max.iter=100,  
+ rotate="oblimin") # 
+summary(fa.none)
+
+SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- SL_transformation[[2]]
+SL_transformation
+
+
+
+scores <- fa.none[["scores"]]
+
+update <- cbind(scores, followup_scored)
+
+##try general scores!!
+
+cor.test(update$ML2, followup_scored$STAI_total)
+
+
+
+##scoring AIMS - escapism (from EFA w/ escapism + AIMS: these were the items that loaded w/ "neg" escapism)
+cols_escapismAIMS <- c("AIMS_current2_1","AIMS_current3_1","AIMS_current4_1","AIMS_current5_1","AIMS_current6_1","AIMS_current7_1","AIMS_current8_1","AIMS_current9_1","AIMS_current10_1","AIMS_current11_1","AIMS_current12_1","AIMS_current13_1","AIMS_current14_1","AIMS_current15_1","AIMS_current16_1","AIMS_current17_1","AIMS_current19_1","AIMS_current21_1","AIMS_current23_1","AIMS_current24_1","AIMS_current27_1","AIMS_current28_1","AIMS_current29_1","AIMS_current30_1","AIMS_current31_1","AIMS_current32_1","AIMS_current33_1","AIMS_current34_1")
+
+
+followup_scored$AIMS_escapism <- apply(followup_scored[cols_escapismAIMS], 1,sum)
+
+cor.test(followup_scored$threat_adolescence_total, followup_scored$AIMS_escapism)
+
+m1 <- lm(child)
+
+followup_scored$threat_childhood_total
+
+m1 <- lm(data=followup_scored, scale(CD.RISC_total) ~ scale(threat_childhood_total)*scale(AIMS_escapism))
+summary(m1)
+
+m1 <- lm(data=followup_scored, scale(CD.RISC_total) ~ scale(AIMS_escapism))
+summary(m1)
+
+
+
+#mediation
+all_scored$CHAOS_sum_scaled <- as.vector(scale(all_scored$CHAOS_sum))
+followup_scored$AIMS_escapism_scaled <- as.vector(scale(followup_scored$AIMS_escapism))
+all_scored$CD.RISC_total_scaled <- as.vector(scale(all_scored$CD.RISC_total))
+followup_scored$deprivation_sum_scaled <- as.vector(scale(followup_scored$deprivation_sum))
+followup_scored$threat_sum_scaled <- as.vector(scale(followup_scored$Threat_sum))
+followup_scored$CHAOS_child_scaled <- as.vector(scale(followup_scored$CHAOS_child_total))
+followup_scored$CHAOS_adolescence_scaled <- as.vector(scale(followup_scored$CHAOS_Adolescence_total))
+followup_scored$deprivation_child_total_scaled <- as.vector(scale(followup_scored$deprivation_child_total))
+followup_scored$deprivation_Adolescence_total_scaled <- as.vector(scale(followup_scored$deprivation_Adolescence_total))
+all_scored$BMRQ_absorption <- as.vector(scale(all_scored$BMRQ_absorption))
+
+m1 <-lm(data=all_scored, CD.RISC_total_scaled ~ CHAOS_sum_scaled)
+
+m2 <-lm(data=all_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled + BMRQ_absorption)
+
+mediate <- mediation::mediate(m1,m2, boot=TRUE, treat = "CHAOS_sum_scaled", mediator = "BMRQ_absorption", sims=10000)
+summary(mediate)
+
+
+m2 <-lm(data=followup_scored, scale(CD.RISC_total_scaled) ~  scale(Threat_sum)*scale(AIMS_escapism))
+
+m2 <-lm(data=followup_scored, scale(CD.RISC_total_scaled) ~  scale(deprivation_child_total)*scale(AIMS_escapism))
+mean(all_scored$deprivation_sum) - sd(all_scored$deprivation_sum)
+summary(m2)
+
+ggplot(data=followup_scored, aes(x=CD.RISC_total, y=deprivation_sum))+
+  geom_point() +
+  theme_classic()
+
+### does timing matter for absorption (both samples) && those that are related to cdrisc
+
+##check timing relationships across both samples
+```
+

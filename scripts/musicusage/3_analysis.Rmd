@@ -51,10 +51,10 @@ dev.off()
 
 #HUMS ~ eBMRQ
 ```{r}
-m1 <- lm(HUMS_adult_unhealthy ~ BMRQ_socialreward + BMRQ_emotion + BMRQ_moodreg + BMRQ_sensorimotor + BMRQ_musicseek + BMRQ_absorption + PASS_total + STAI_total, data=all_scored)
+m1 <- lm(scale(HUMS_adult_unhealthy) ~ scale(BMRQ_socialreward) + scale(BMRQ_emotion) + scale(BMRQ_moodreg) + scale(BMRQ_sensorimotor) + scale(BMRQ_musicseek) + scale(BMRQ_absorption), data=all_scored)
 summary(m1)
 
-m1 <- lm(scale(HUMS_adult_healthy) ~ scale(BMRQ_socialreward) + scale(BMRQ_emotion) + scale(BMRQ_moodreg) + scale(BMRQ_sensorimotor) + scale(BMRQ_musicseek) + scale(BMRQ_absorption) + PASS_total + STAI_total, data=all_scored)
+m1 <- lm(scale(HUMS_adult_healthy) ~ scale(BMRQ_socialreward) + scale(BMRQ_emotion) + scale(BMRQ_moodreg) + scale(BMRQ_sensorimotor) + scale(BMRQ_musicseek) + scale(BMRQ_absorption) + scale(PASS_total) + scale(STAI_total), data=all_scored)
 summary(m1)
 summary <- summary(m1)
 summary <- as.data.frame(summary[["coefficients"]])
@@ -74,7 +74,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Absorption", "Music Seeking","Sensorimotor","Mood Regulation", "Emotion Evocation", "Social Reward"))
+  scale_x_discrete(labels=c("STAI", "PAS", "Absorption", "Music Seeking","Sensorimotor","Mood Regulation", "Emotion Evocation", "Social Reward"))
 
 ggsave(plot=eBMRQ_HUMS_coef, '../../figures/pleasing:displeasing_followup/full_sample/eBMRQ_HUMS_coef.png',width=10)
 ```
@@ -188,7 +188,7 @@ cor.test(all_scored$BMRQ_absorption, all_scored$HUMS_adult_unhealthy)
 
 #is any dimension of ELA related to music reward sensitivity? or healthy / unhealthy music usage?
 ```{r}
-m1 <- lm(BMRQ_total ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
+m1 <- lm(BMRQ_absorption ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
 summary(m1)
 
 m2 <- lm(HUMS_adult_healthy ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
@@ -207,3 +207,52 @@ p.adjust(p, method = "fdr", n = length(p))
 m1 <- lm(BMRQ_absorption ~ CHAOS_sum + QUIC_sum + deprivation_sum + Threat_sum + PASS_total + STAI_total, data=all_scored)
 summary(m1)
 ```
+
+#moderation?
+```{r}
+m1 <- lm(scale(CD.RISC_totl) ~ scale(deprivation_sum)*scale(BMRQ_absorption), data=all_scored)
+summary(m1)
+```
+
+#item analysis for HUMS, resilience and absorption
+```{r}
+HUMS_items <- cbind(all_scored[564:576], all_scored[266])
+
+HUMS_items_healthy <- HUMS_items %>%
+  dplyr::select("HUMS3_1","HUMS5_1","HUMS6_1","HUMS9_1","HUMS13_1", "BMRQ_absorption")
+
+HUMS_items_healthy <- t(HUMS_items_healthy)
+HUMS_items_healthy <- scale(HUMS_items_healthy)
+distance <- dist(HUMS_items_healthy, method = "euclidean", upper = TRUE, diag = TRUE)
+
+n = nrow(distance)
+MDS <- cmdscale(distance, k= 2, eig = TRUE, x.ret = TRUE)
+X <- MDS$points[,1:2]
+X <- as.data.frame(X)
+X$labels <- rownames(X)
+HUMS_BMRQAbsorption <- 
+  ggplot(X, aes(x=V2, y=V1, label=labels))+
+  geom_text(vjust=0.2, alpha=0.6,nudge_x = -0.5)+
+  geom_point() +
+  theme_classic()
+ggsave(HUMS_BMRQAbsorption, file='../../figures/statistical_learningfollowup/HUMS_BMRQitem.png', width=12)
+
+HUMS_items_unhealthy <- HUMS_items %>%
+  dplyr::select("HUMS1_1","HUMS2_1","HUMS4_1","HUMS7_1","HUMS8_1","HUMS10_1","HUMS11_1","HUMS12_1", "BMRQ_absorption")
+
+HUMS_items_unhealthy <- t(HUMS_items_unhealthy)
+HUMS_items_unhealthy <- scale(HUMS_items_unhealthy)
+distance <- dist(HUMS_items_unhealthy, method = "euclidean", upper = TRUE, diag = TRUE)
+
+n = nrow(distance)
+MDS <- cmdscale(distance, k= 2, eig = TRUE, x.ret = TRUE)
+X <- MDS$points[,1:2]
+X <- as.data.frame(X)
+X$labels <- rownames(X)
+#HUMS_BMRQAbsorption <- 
+  ggplot(X, aes(x=V2, y=V1, label=labels))+
+  geom_text(vjust=0.2, alpha=0.6,nudge_x = -0.5)+
+  geom_point() +
+  theme_classic()
+```
+

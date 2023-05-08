@@ -199,9 +199,9 @@ PASS <- ogsurveyresponses %>%
 PASS$Mark..False..for.this.question. <- NULL
 
 # Replace 1s with 0s --> CURRENTLY REGULARLY CODED
-PASS[PASS == 1] <- 0
+PASS[PASS == 1] <- 1
 # Replace 2s with 1s
-PASS[PASS == 2] <- 1
+PASS[PASS == 2] <- 0
 
 
 # PAS columns to reverse code and sub-score (for these questions, the correct answer (ie the more anhedonic answer) is false.)
