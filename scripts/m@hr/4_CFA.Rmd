@@ -62,17 +62,28 @@ SL_transformation
 
 ##everything looks the same! the only thing of concern is item 19 not loading strongly (>.2) onto
 ##the general factor
-scores <- factor.scores(as.matrix(MH), SL_transformation, method="components")
-scores <- scores$scores
-scores <- cbind(second[2], scores)
-names(scores)[2:7]<-c("General", "CaregiverSinging","CaregiverBeliefs", "HomeAttitudes", "MusicMaking","Social")
-total <- merge(scores, second)
+
+#scoring
+cols_caregiverbeliefs <- c("M.H_child1_1","M.H_child2_1","M.H_child3_1","M.H_child4_1")
+cols_caregiversinging <- c("M.H_child9_1","M.H_child10_1","M.H_child11_1","M.H_child13_1")
+cols_childhoodattitude <- c("M.H_child18_1","M.H_child19_1","M.H_child20_1")
+cols_socialcontexts <- c("M.H_child14_1","M.H_child15_1","M.H_child16_1","M.H_child17_1")
+cols_musicmaking <- c("M.H_child5_1","M.H_child6_1","M.H_child7_1","M.H_child8_1", "M.H_child12_1")
+
+
+#scoring
+second$MH_total <- apply(MH,1, sum) # total BMRQ scores
+second$MH_caregiverbeliefs <- apply(MH[cols_caregiverbeliefs], 1,sum)
+second$MH_caregiversinging <- apply(MH[cols_caregiversinging],1, sum)
+second$MH_childhoodattitude <-apply(MH[cols_childhoodattitude],1, sum)
+second$MH_socialcontexts <- apply(MH[cols_socialcontexts],1, sum)
+second$MH_musicmaking <- apply(MH[cols_musicmaking],1, sum)
+
 
 #validity tests
-total$SRQ_current_total
-variables = dplyr::select(total, 
-                          General,CaregiverSinging,
-                          CaregiverBeliefs, HomeAttitudes, MusicMaking, Social,
+variables = dplyr::select(second, 
+                          MH_total,MH_caregiverbeliefs,
+                          MH_caregiversinging, MH_childhoodattitude, MH_musicmaking, MH_socialcontexts,
                           MET_melodicscore, MET_rhythmicscore, SRQ_adol_total,
                           SRQ_current_total)
 output = corr.test(variables)
@@ -80,11 +91,11 @@ output = corr.test(variables)
 corr_matrix = output$r
 p_matrix <- output$p
 
-colnames(corr_matrix) <- c("MH General Score", "Caregiver Singing","Caregiver Beliefs",
+colnames(corr_matrix) <- c("MH General Score","Caregiver Beliefs", "Caregiver Singing",
                            "Attitude towards Home Musical Environment", "Music Making Tendencies", 
                            "Social Contexts","MET Melodic Score", "MET Rhythmic Score", 
                            "Adolescent SRQ", "Current SRQ")
-rownames(corr_matrix) <- c("MH General Score", "Caregiver Singing","Caregiver Beliefs",
+rownames(corr_matrix) <- c("MH General Score","Caregiver Beliefs", "Caregiver Singing",
                            "Attitude towards Home Musical Environment", "Music Making Tendencies", 
                            "Social Contexts","MET Melodic Score", "MET Rhythmic Score", 
                            "Adolescent SRQ", "Current SRQ")
@@ -98,30 +109,10 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
 dev.off()
 
 ```
+
+
 #test-retest correlations
 ```{r}
-second <- read.csv(file='../../data/SLfollowupscored.csv')
-
-MH_retest <- second %>%
-  dplyr::select("M.H_child1_1":"M.H_child20_1")
-
-cols_reverse <- c("M.H_child6_1","M.H_child7_1","M.H_child11_1","M.H_child12_1","M.H_child18_1","M.H_child19_1","M.H_child20_1")
-MH_retest[cols_reverse] <- lapply(MH_retest[cols_reverse], reverseCode, min=1, max=7)
-
-cols_CaregiverBeliefs <- c("M.H_child1_1", "M.H_child2_1","M.H_child3_1","M.H_child4_1")
-cols_CaregiverSinging <- c("M.H_child9_1", "M.H_child10_1","M.H_child11_1","M.H_child13_1")
-cols_HomeAttitudes <- c("M.H_child18_1", "M.H_child19_1","M.H_child20_1")
-cols_MusicMaking <- c("M.H_child5_1", "M.H_child6_1","M.H_child7_1","M.H_child8_1","M.H_child12_1")
-cols_Social <- c("M.H_child14_1", "M.H_child15_1","M.H_child16_1","M.H_child17_1")
-
-MH_retest$General <- apply(MH_retest,1, sum) # total PAS scores
-MH_retest$CaregiverSinging <- apply(MH_retest[cols_CaregiverSinging], 1,sum)
-MH_retest$CaregiverBeliefs <- apply(MH_retest[cols_CaregiverBeliefs],1, sum)
-MH_retest$HomeAttitudes <-apply(MH_retest[cols_HomeAttitudes],1, sum)
-MH_retest$MusicMaking <- apply(MH_retest[cols_MusicMaking],1, sum)
-MH_retest$Social <- apply(MH_retest[cols_Social],1, sum)
-MH_retest <- cbind(second[2], MH_retest)
-names(first)[20]<-"ID"
-retest <- merge(MH_retest, first)
-cor.test(retest$MH_childhoodattitude, retest$HomeAttitudes)
+retest <- merge(second, first,by="ID")
+cor.test(retest$MH_caregiverbeliefs.x, retest$MH_caregiverbeliefs.y)
 ```

@@ -10,22 +10,50 @@ output: html_document
 library(tidyverse)
 library(corrplot)
 library(corrplot)
+source("../reverseCode.R")
 ```
 
 #read in data
 ```{r}
 scored_data<-read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
-scores <- read.csv(file =  "../../data/m@hr/efa_factorscores.csv")
 master <- read.csv(file="../../data/pleasing-displeasing_followup/pleasing_displeasing_scored.csv")
 
-names(scores)[2] <- "ID"
 names(scored_data)[20] <- "ID"
 master <- master[-1]
 names(master)[1] <- "ID"
 
-full <- merge(scored_data, master,by.x="ID", by.y="ID")
-full <- merge(full, scores,by.x="ID", by.y="ID")
+#scoring
+MH <- scored_data %>%
+  dplyr::select("M.H1_1":"M.H35_1")
+  
+MH <- MH[-c(32:34)] %>%
+  dplyr::select(-c("M.H17_1", "M.H20_1", "M.H18_1","M.H19_1","M.H13_1","M.H27_1","M.H23_1")) %>%
+  dplyr::select( -c("M.H15_1", "M.H24_1")) %>%
+  dplyr::select( -c("M.H22_1", "M.H31_1"))
 
+#scoring
+cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H29_1","M.H30_1",
+                  "M.H32_1")
+cols_caregiverbeliefs <- c("M.H1_1","M.H2_1","M.H3_1","M.H4_1")
+cols_caregiversinging <- c("M.H9_1","M.H10_1","M.H12_1","M.H16_1")
+cols_childhoodattitude <- c("M.H29_1","M.H30_1","M.H32_1")
+cols_socialcontexts <- c("M.H21_1","M.H25_1","M.H26_1","M.H28_1")
+cols_musicmaking <- c("M.H5_1","M.H6_1","M.H7_1","M.H8_1", "M.H14_1")
+
+# Reverse code
+MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode,  min=1, max=7)
+
+#scoring
+scored_data$MH_total <- apply(MH,1, sum) # total BMRQ scores
+scored_data$MH_caregiverbeliefs <- apply(MH[cols_caregiverbeliefs], 1,sum)
+scored_data$MH_caregiversinging <- apply(MH[cols_caregiversinging],1, sum)
+scored_data$MH_childhoodattitude <-apply(MH[cols_childhoodattitude],1, sum)
+scored_data$MH_socialcontexts <- apply(MH[cols_socialcontexts],1, sum)
+scored_data$MH_musicmaking <- apply(MH[cols_musicmaking],1, sum)
+
+write.csv(scored_data, file='../../data/pleasing-displeasing_followup/scored_data.csv')
+
+full <- merge(scored_data, master,by.x="ID", by.y="ID")
 #removing anyone missing ELA measures
 full <- full[complete.cases(full[391:418]),]
 ```
@@ -34,7 +62,7 @@ full <- full[complete.cases(full[391:418]),]
 ```{r}
 #M@HR + GoldMSI
 variables = dplyr::select(full, 
-                          g, F1, F2, F3, F4, F5, 
+                          MH_total, MH_caregiverbeliefs, MH_caregiversinging, MH_childhoodattitude, MH_socialcontexts, MH_musicmaking, 
                           Gold_activeengagement, Gold_perceptualabilities, Gold_musicaltraining, Gold_singingabilities, 
                           Gold_emotion, Gold_musicalsophistication)
 output = corr.test(variables)
@@ -58,7 +86,7 @@ dev.off()
 #generate correlation matrix
 #gather variables of interest
 variables = dplyr::select(full, 
-                          g, F1, F2, F3, F4, F5, 
+                          MH_total, MH_caregiverbeliefs, MH_caregiversinging, MH_childhoodattitude, MH_socialcontexts, MH_musicmaking, 
                           BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward,
                           BMRQ_absorption, BMRQ_musicseek, BMRQ_sensorimotor)
 output = corr.test(variables)
@@ -71,7 +99,7 @@ colnames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregive
 rownames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies','Total BMRQ', 'Mood Regulation', 'Emotion Evocation', 'Social Reward', 'Absorption', 'Music Seeking',
                            'Sensorimotor')
 
-pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
+pdf(file = "../../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
@@ -81,7 +109,7 @@ dev.off()
 
 #M@HR + ELA measures
 variables = dplyr::select(full, 
-                          g, F1, F2, F3, F4, F5, QUIC_child_total, 
+                          MH_total, MH_caregiverbeliefs, MH_caregiversinging, MH_childhoodattitude, MH_socialcontexts, MH_musicmaking, QUIC_child_total, 
                           CHAOS_child_total, deprivation_child_total, threat_childhood_total)
 output = corr.test(variables)
 
@@ -91,7 +119,7 @@ p_matrix <- output$p
 colnames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
 rownames(corr_matrix) <- c('M@H-R General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Attitude to Childhood Music', 'Social Contexts', 'Music-Making Tendencies', "QUIC Childhood", "CHAOS Childhood", "Deprivation Childhood", "Threat Childhood")
 
-pdf(file = "../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
+pdf(file = "../../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
@@ -102,15 +130,15 @@ dev.off()
 
 #modeling stuff
 ```{r}
-m1 <- lm(data=full, BMRQ_socialreward ~ F1 + F2 + F3 + F4 + F5)
+m1 <- lm(data=full, BMRQ_socialreward ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_socialcontexts + MH_musicmaking)
 summary(m1)
 
-m1 <- lm(data=full, BMRQ_total ~ F1 + F2 + F3 + F4 + F5)
+m1 <- lm(data=full, BMRQ_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_socialcontexts + MH_musicmaking)
 summary(m1)
 
-m1 <- lm(data=full, HUMS_adult_healthy ~ F1 + F2 + F3 + F4 + F5)
+m1 <- lm(data=full, HUMS_adult_healthy ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_socialcontexts + MH_musicmaking)
 summary(m1)
 
-m1 <- lm(data=full, HUMS_adult_unhealthy ~ F1 + F2 + F3 + F4 + F5)
+m1 <- lm(data=full, HUMS_adult_unhealthy ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_socialcontexts + MH_musicmaking)
 summary(m1)
 ```
