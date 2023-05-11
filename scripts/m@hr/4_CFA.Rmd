@@ -32,37 +32,49 @@ MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
 
 #CFA
 ```{r}
-fafitfree <- fa(MH,nfactors = 5, rotate = "oblimin",covar = FALSE, SMC = TRUE,
- fm="ml", 
- max.iter=100)
-n_factors <- length(fafitfree$e.values)
-scree     <- data.frame(
-  Factor_n =  as.factor(1:n_factors), 
-  Eigenvalue = fafitfree$e.values)
+model <- 'G =~ M.H_child1_1 + M.H_child2_1 + M.H_child3_1 + M.H_child4_1 + M.H_child9_1 + M.H_child10_1 + M.H_child11_1  + M.H_child13_1 + M.H_child18_1 + M.H_child19_1 + M.H_child20_1 + M.H_child14_1 + M.H_child15_1 + M.H_child16_1 + M.H_child17_1 + M.H_child5_1 + M.H_child6_1 + M.H_child7_1 + M.H_child8_1 + M.H_child12_1
+  caregiverbeliefs   =~ M.H_child1_1 + M.H_child2_1 + M.H_child3_1 + M.H_child4_1 
+  caregiversinging =~ M.H_child9_1 + M.H_child10_1 + M.H_child11_1 + M.H_child13_1 
+  childhoodattitude   =~ M.H_child18_1 + M.H_child19_1 + M.H_child20_1 
+  socialcontexts  =~ M.H_child14_1 + M.H_child15_1 + M.H_child16_1 + M.H_child17_1 
+  musicmaking =~ M.H_child5_1 + M.H_child6_1 + M.H_child7_1 + M.H_child8_1 + M.H_child12_1
 
-ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) + 
-  geom_point() + geom_line() +
-  xlab("Number of factors") +
-  ylab("Initial eigenvalue") +
-  labs( title = "Scree Plot", 
-        subtitle = "(Based on the unreduced correlation matrix)")+
-  geom_line(y=1,color="red")
+## restrictions --> make sure factors are uncorrelated
+G ~~ 0*caregiverbeliefs
+G ~~ 0*caregiversinging
+G ~~ 0*childhoodattitude
+G ~~ 0*socialcontexts
+G ~~ 0*musicmaking
 
-#item redux
-fa.none <- psych::fa(r=MH, 
- nfactors = 5, 
-  covar = FALSE, SMC = TRUE,
- fm="ml", 
- max.iter=100,  
- rotate="oblimin") # no rotation
-summary(fa.none)
-SL_transformation <- EFAtools::SL(fa.none)
-SL_transformation <- SL_transformation[[2]]
-SL_transformation
+caregiverbeliefs ~~ 0*caregiversinging
+caregiverbeliefs ~~ 0*childhoodattitude
+caregiverbeliefs ~~ 0*socialcontexts
+caregiverbeliefs ~~ 0*musicmaking
 
-##everything looks the same! the only thing of concern is item 19 not loading strongly (>.2) onto
-##the general factor
+caregiversinging ~~ 0*childhoodattitude
+caregiversinging ~~ 0*socialcontexts
+caregiversinging ~~ 0*musicmaking
 
+childhoodattitude ~~ 0*socialcontexts
+childhoodattitude ~~ 0*musicmaking
+
+socialcontexts ~~ 0*musicmaking
+
+#residual variances --> setting to 1
+    G ~~ 1*G
+    caregiverbeliefs ~~ 1*caregiverbeliefs
+    caregiversinging ~~ 1*caregiversinging
+    childhoodattitude ~~ 1*childhoodattitude
+    socialcontexts ~~ 1*socialcontexts
+    musicmaking ~~ 1*musicmaking'
+
+fitG <- lavaan::cfa(model, data = MH)
+lavaan::summary(fitG, fit.measures = T)
+
+semPlot::semPaths(fitG)
+```
+
+```{r}
 #scoring
 cols_caregiverbeliefs <- c("M.H_child1_1","M.H_child2_1","M.H_child3_1","M.H_child4_1")
 cols_caregiversinging <- c("M.H_child9_1","M.H_child10_1","M.H_child11_1","M.H_child13_1")
