@@ -103,23 +103,25 @@ output = corr.test(variables)
 corr_matrix = output$r
 p_matrix <- output$p
 
-colnames(corr_matrix) <- c("MH General Score","Caregiver Beliefs", "Caregiver Singing",
-                           "Attitude towards Home Musical Environment", "Music Making Tendencies", 
-                           "Social Contexts","MET Melodic Score", "MET Rhythmic Score", 
-                           "Adolescent SRQ", "Current SRQ")
-rownames(corr_matrix) <- c("MH General Score","Caregiver Beliefs", "Caregiver Singing",
-                           "Attitude towards Home Musical Environment", "Music Making Tendencies", 
-                           "Social Contexts","MET Melodic Score", "MET Rhythmic Score", 
-                           "Adolescent SRQ", "Current SRQ")
+colnames(corr_matrix) <- c("1","2", "3",
+                           "4", "5", 
+                           "6","7", "8", 
+                           "9", "10")
+rownames(corr_matrix) <- c("1","2", "3",
+                           "4", "5", 
+                           "6","7", "8", 
+                           "9", "10")
 
-pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_mentalhealth_AIMS.pdf")
+pdf(file = "../../figures/statistical_learningfollowup/CFA_new.pdf",width = 13, height=13)
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
-         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1), diag = FALSE,tl.cex = 3, cl.cex = 2)
 
 dev.off()
 
+m1 <- lm(SRQ_adol_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data=second)
+summary(m1)
 ```
 
 
