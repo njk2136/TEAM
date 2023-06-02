@@ -70,6 +70,7 @@ socialcontexts ~~ 0*musicmaking
 
 fitG <- lavaan::cfa(model, data = MH)
 lavaan::summary(fitG, fit.measures = T)
+inspect(fitG,what="std")$lambda
 
 semPlot::semPaths(fitG)
 ```
@@ -128,3 +129,10 @@ dev.off()
 retest <- merge(second, first,by="ID")
 cor.test(retest$MH_caregiverbeliefs.x, retest$MH_caregiverbeliefs.y)
 ```
+
+
+```{r}
+sd(second$What.is.your.age., na.rm=TRUE)
+
+```
+

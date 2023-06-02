@@ -31,3 +31,13 @@ names(master)[1] <- "ID"
 all_scored <- merge(master, scored_data, by.x="ID", by.y="ID")
 write.csv(all_scored, "../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
 ```
+
+#demographics
+```{r}
+mean(all_scored$What.is.your.age.)
+sd(all_scored$What.is.your.age.)
+range(all_scored$What.is.your.age.)
+
+table(all_scored$What.sex.were.you.assigned.at.birth.)
+```
+
