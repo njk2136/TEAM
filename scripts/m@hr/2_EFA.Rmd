@@ -66,7 +66,7 @@ print(MAP)
 
 #McDonald Omega Test on 5 + 6 factors
 fa.none <- psych::fa(r=updateMH, 
- nfactors = 5, 
+ nfactors = 6, 
   covar = FALSE, SMC = TRUE,
  fm="ml", 
  max.iter=1000,  
@@ -79,7 +79,7 @@ fa.diagram(fa.none)
 SL_transformation <- EFAtools::SL(fa.none)
 SL_transformation <- SL_transformation[[1]]
 
-omega <-omega(SL_transformation, nfactors=5,n.iter=1,p=.05,poly=FALSE,key=NULL,
+omega <-omega(SL_transformation, nfactors=6,n.iter=1,p=.05,poly=FALSE,key=NULL,
     flip=TRUE,digits=2, title="Omega",sl=TRUE,labels=NULL,
     plot=TRUE)
 
