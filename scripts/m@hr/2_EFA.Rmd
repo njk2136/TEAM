@@ -40,7 +40,7 @@ updateMH <- MH[complete.cases(MH),]
 ```{r}
 #initial determination of factor structure
 #Kaiser's criterion
-fafitfree <- fa(updateMH,nfactors = ncol(updateMH), rotate = "oblimin",covar = FALSE, SMC = TRUE,
+fafitfree <- fa(updateMH,nfactors = 6, rotate = "oblimin",covar = FALSE, SMC = TRUE,
  fm="ml", 
  max.iter=100)
 n_factors <- length(fafitfree$e.values)
@@ -54,17 +54,17 @@ ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) +
   ylab("Initial eigenvalue") +
   labs( title = "Scree Plot", 
         subtitle = "(Based on the unreduced correlation matrix)")+
-  geom_line(y=1,color="red")
+  geom_line(y=1,color="red") #suggests 6
 
 #parallel analysis
 parallel <- fa.parallel(updateMH)
 
 #MAP
-MAP <- vss(updateMH) #suggests 5 factors
+MAP <- vss(updateMH) #suggests 6 factors
 MAP <- MAP[["map"]]
 print(MAP)
 
-#McDonald Omega Test on 5 + 6 factors
+#McDonald Omega Test on 6 factors
 fa.none <- psych::fa(r=updateMH, 
  nfactors = 6, 
   covar = FALSE, SMC = TRUE,
