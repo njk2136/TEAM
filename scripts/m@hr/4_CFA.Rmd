@@ -17,9 +17,9 @@ library(corrplot)
 first <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
 second <- read.csv(file='../../data/SLfollowupscored.csv')
 
-keep <- setdiff(second$ID,first$Q158)
+#keep <- setdiff(second$ID,first$Q158)
 
-second <- second[second$ID %in% keep, ] 
+#second <- second[second$ID %in% keep, ] 
 
 MH <- second %>%
   dplyr::select("M.H_child1_1":"M.H_child20_1")
@@ -121,20 +121,27 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
 
 dev.off()
 
-m1 <- lm(SRQ_adol_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data=second)
+m1 <- lm(CD.RISC_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data=second)
 summary(m1)
 ```
 
 
 #test-retest correlations
 ```{r}
-retest <- merge(second, first,by="ID")
-cor.test(retest$MH_caregiverbeliefs.x, retest$MH_caregiverbeliefs.y)
+retest <- merge(second, first,by.x="ID",by.y="PROLIFIC_PID")
+mean(retest$What.is.your.age., na.rm = TRUE)
+cor.test(retest$MH_total.x, retest$MH_total.y)
 ```
 
 
 ```{r}
+second$HUMS_adult_healthy
 sd(second$What.is.your.age., na.rm=TRUE)
 
+model <- lm(MET_melodicscore ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data=second)
+
+summary(model)
+
+cor.test(second$MH_caregiverbeliefs, second$QUIC_child_safetyandsecurity)
 ```
 

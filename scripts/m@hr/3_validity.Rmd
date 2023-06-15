@@ -55,7 +55,7 @@ scored_data$MH_musicmaking <- apply(MH[cols_musicmaking],1, sum)
 
 write.csv(scored_data, file='../../data/pleasing-displeasing_followup/scored_data.csv')
 
-full <- merge(scored_data, master,by.x="ID.1", by.y="ID")
+full <- merge(scored_data, master,by.x="Q158", by.y="ID")
 #removing anyone missing ELA measures
 full <- full[complete.cases(full[394:421]),]
 ```
