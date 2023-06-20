@@ -76,7 +76,7 @@ print(fa.none)
 
 fa.diagram(fa.none)
 
-SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[1]]
 
 omega <-omega(SL_transformation, nfactors=6,n.iter=1,p=.05,poly=FALSE,key=NULL,
@@ -115,7 +115,7 @@ ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) +
   ylab("Initial eigenvalue") +
   labs( title = "Scree Plot", 
         subtitle = "(Based on the unreduced correlation matrix)")+
-  geom_line(y=1,color="red")
+  geom_line(y=1,color="red") #suggests 7
 
 #item reduction on this factor structure
 fa.none <- psych::fa(r=updateMH, 
@@ -125,7 +125,7 @@ fa.none <- psych::fa(r=updateMH,
  max.iter=100,  
  rotate="oblimin") # no rotation
 summary(fa.none)
-SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
 
@@ -143,10 +143,10 @@ fa.none <- psych::fa(r=updateMH,
 
 #parallel analysis on residual to find factor #
 residual <- fa.none[["residual"]]
-parallel <- fa.parallel(residual)
+parallel <- fa.parallel(residual) #suggests 4
 MAP <- vss(residual)
 MAP <- MAP[["map"]]
-print(MAP)
+print(MAP) #suggests 4
 
 fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
  fm="ml", 
@@ -162,9 +162,9 @@ ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) +
   ylab("Initial eigenvalue") +
   labs( title = "Scree Plot", 
         subtitle = "(Based on the unreduced correlation matrix)")+
-  geom_line(y=1,color="red")
+  geom_line(y=1,color="red") #suggests 6
 
-#item reduction on this factor structure
+#item reduction on this factor structure (6 has best BIC + RSMEA)
 fa.none <- psych::fa(r=updateMH, 
  nfactors = 6, 
   covar = FALSE, SMC = TRUE,
@@ -172,7 +172,7 @@ fa.none <- psych::fa(r=updateMH,
  max.iter=100,  
  rotate="oblimin") # no rotation
 summary(fa.none)
-SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
 
@@ -190,9 +190,9 @@ fa.none <- psych::fa(r=updateMH,
 
 #parallel analysis on residual to find factor #
 residual <- fa.none[["residual"]]
-parallel <- fa.parallel(residual)
+parallel <- fa.parallel(residual) #suggests 4
 MAP <- vss(residual)
-MAP <- MAP[["map"]]
+MAP <- MAP[["map"]] #suggests 4
 print(MAP)
 
 fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
@@ -209,17 +209,17 @@ ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) +
   ylab("Initial eigenvalue") +
   labs( title = "Scree Plot", 
         subtitle = "(Based on the unreduced correlation matrix)")+
-  geom_line(y=1,color="red") #suggests 7 factors
+  geom_line(y=1,color="red") #suggests 5 factors
 
 #item reduction on this factor structure
 fa.none <- psych::fa(r=updateMH, 
- nfactors = 7, 
+ nfactors = 5, 
   covar = FALSE, SMC = TRUE,
  fm="ml", 
  max.iter=100,  
  rotate="oblimin") # no rotation
 summary(fa.none)
-SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
 
@@ -237,10 +237,10 @@ fa.none <- psych::fa(r=updateMH,
 
 #parallel analysis on residual to find factor #
 residual <- fa.none[["residual"]]
-parallel <- fa.parallel(residual)
+parallel <- fa.parallel(residual) #suggests 3
 MAP <- vss(residual)
 MAP <- MAP[["map"]]
-print(MAP)
+print(MAP) #suggests 4
 
 fafitfree <- fa(residual,nfactors = ncol(residual), rotate = "oblimin",covar = FALSE, SMC = TRUE,
  fm="ml", 
@@ -256,7 +256,7 @@ ggplot(scree, aes(x = Factor_n, y = Eigenvalue, group = 1)) +
   ylab("Initial eigenvalue") +
   labs( title = "Scree Plot", 
         subtitle = "(Based on the unreduced correlation matrix)")+
-  geom_line(y=1,color="red")
+  geom_line(y=1,color="red") #suggests 5
 
 #item reduction on this factor structure
 fa.none <- psych::fa(r=updateMH, 
@@ -266,7 +266,7 @@ fa.none <- psych::fa(r=updateMH,
  max.iter=100,  
  rotate="oblimin") # no rotation
 summary(fa.none)
-SL_transformation <- EFAtools::SL(fa.none)
+SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
 
