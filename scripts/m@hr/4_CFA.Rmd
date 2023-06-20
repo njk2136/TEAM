@@ -18,9 +18,9 @@ library(lavaan)
 first <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
 second <- read.csv(file='../../data/SLfollowupscored.csv')
 
-#keep <- setdiff(second$ID,first$Q158)
+keep <- setdiff(second$ID,first$Q158)
 
-#second <- second[second$ID %in% keep, ] 
+second <- second[second$ID %in% keep, ] 
 
 MH <- second %>%
   dplyr::select("M.H_child1_1":"M.H_child20_1")
@@ -36,12 +36,14 @@ MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
 # need to discuss whether or not to use std.lv = FALSE in the CFA function. doing so sets 
 # the first item in each subscale  set to 1. if this is *not* used (i.e. std.lv = TRUE); we would
 # probably have to remove item 14. it looks like the OG paper did both between infant + preschool?
-model <- 'G =~ M.H_child1_1 + M.H_child2_1 + M.H_child3_1 + M.H_child4_1 + M.H_child9_1 + M.H_child10_1 + M.H_child11_1  + M.H_child13_1 + M.H_child18_1 + M.H_child19_1 + M.H_child20_1 + M.H_child14_1 + M.H_child15_1 + M.H_child16_1 + M.H_child17_1 + M.H_child5_1 + M.H_child6_1 + M.H_child7_1 + M.H_child8_1 + M.H_child12_1
-  caregiverbeliefs   =~ M.H_child1_1 + M.H_child2_1 + M.H_child3_1 + M.H_child4_1 
-  caregiversinging =~ M.H_child9_1 + M.H_child10_1 + M.H_child11_1 + M.H_child13_1 
-  childhoodattitude   =~ M.H_child18_1 + M.H_child19_1 + M.H_child20_1 
-  socialcontexts  =~   M.H_child15_1 + M.H_child14_1 + M.H_child16_1 + M.H_child17_1 
-  musicmaking =~ M.H_child5_1 + M.H_child6_1 + M.H_child7_1 + M.H_child8_1 + M.H_child12_1
+
+model <- 'G =~ M.H_child10_1 + M.H_child1_1 + M.H_child2_1 + M.H_child3_1 + M.H_child4_1 + M.H_child9_1  + M.H_child11_1  + M.H_child13_1 + M.H_child18_1 + M.H_child19_1 + M.H_child20_1 + M.H_child14_1 + M.H_child15_1 + M.H_child16_1 + M.H_child17_1 + M.H_child5_1 + M.H_child6_1 + M.H_child7_1 + M.H_child8_1 + M.H_child12_1
+  
+  caregiverbeliefs   =~ M.H_child2_1 + M.H_child1_1 +  + M.H_child3_1 + M.H_child4_1 
+  caregiversinging =~ M.H_child10_1 + M.H_child9_1  + M.H_child11_1 + M.H_child13_1 
+  childhoodattitude   =~ M.H_child20_1 + M.H_child19_1 + M.H_child18_1  
+  socialcontexts  =~  M.H_child15_1 + M.H_child14_1 + M.H_child16_1 + M.H_child17_1
+  musicmaking =~ M.H_child7_1 + M.H_child5_1 + M.H_child6_1  + M.H_child8_1 + M.H_child12_1
 
 ## restrictions --> make sure factors are uncorrelated
 G ~~ 0*caregiverbeliefs
@@ -72,11 +74,8 @@ socialcontexts ~~ 0*musicmaking
     socialcontexts ~~ 1*socialcontexts
     musicmaking ~~ 1*musicmaking'
 
-fitG <- lavaan::cfa(model, data = MH)
-lavaan::summary(fitG, fit.measures = T)
-inspect(fitG,what="std")
-
-semPlot::semPaths(fitG)
+fitG <- lavaan::cfa(model, data = MH,std.lv=TRUE)
+lavaan::summary(fitG, fit.measures = T, standardized = T)
 ```
 
 ```{r}
