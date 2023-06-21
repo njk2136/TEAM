@@ -138,13 +138,30 @@ cor.test(retest$MH_total.x, retest$MH_total.y)
 
 
 ```{r}
-second$HUMS_adult_healthy
-sd(second$What.is.your.age., na.rm=TRUE)
-
-model <- lm(MET_melodicscore ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data=second)
-
-summary(model)
-
-cor.test(second$MH_caregiverbeliefs, second$QUIC_child_safetyandsecurity)
+second$BMRQ_total
+variables = dplyr::select(second, 
+                          MH_total,
+                          MH_caregiverbeliefs, MH_caregiversinging,
+                          MH_childhoodattitude, MH_musicmaking, 
+                          MH_socialcontexts, QUIC_child_total,
+                          QUIC_child_parentalmonitoring, QUIC_child_parentalenvironment,
+                          QUIC_child_parentalpredictability, QUIC_child_physiscalenvironment,
+                          QUIC_child_safetyandsecurity, deprivation_child_total,
+                          deprivation_child_emotional, deprivation_child_physical,
+                          deprivation_child_cognitive, threat_childhood_total,
+                          threat_childhood_home, threat_childhood_neighborhood,
+                          CHAOS_child_total, CHAOS_child_shortform,
+                          STAI_total, PASS_total, CD.RISC_total, HUMS_adult_healthy, HUMS_adult_unhealthy,
+                          What.is.your.age., Gold_activeengagement,Gold_perceptualabilities, Gold_musicaltraining,
+                          Gold_singingabilities, Gold_emotion, Gold_musicalsophistication,BMRQ_total, BMRQ_emotion, )
+output = corr.test(variables)
+corr_matrix <- output$r
+p_matrix <- output$p
+colnames(corr_matrix) <- c('General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Childhood Attitude', 'Childhood Engagement with Music', 'Social Contexts', 'QUIC Total', 'QUIC Parental Monitoring', 'QUIC Parental Environment', 'QUIC Parental Predictability', 'QUIC Physical Environment', 'QUIC Safety and Security', 'Deprivation Total', 'Deprivation Emotional', 'Deprivation Physical', 'Deprivation Cognitive', 'Threat Total', 'Threat Home', 'Threat Neighborhood', 'CHAOS Total', 'CHAOS Short Form', 'STAI', 'PASS', 'CD RISC', "Healthy Music Usage", "Unhealthy Music Usage", "Age", "GoldMSI - Active Engagement", "GoldMSI - Perceptual Abilities", "GoldMSI - Musical Training", "GoldMSI - Singing Abilities", "GoldMSI - Emotion", "GoldMSI - Musical Sophistication")
+rownames(corr_matrix) <- c('General Score', 'Caregiver Beliefs', 'Caregiver Singing', 'Childhood Attitude', 'Childhood Engagement with Music', 'Social Contexts', 'QUIC Total', 'QUIC Parental Monitoring', 'QUIC Parental Environment', 'QUIC Parental Predictability', 'QUIC Physical Environment', 'QUIC Safety and Security', 'Deprivation Total', 'Deprivation Emotional', 'Deprivation Physical', 'Deprivation Cognitive', 'Threat Total', 'Threat Home', 'Threat Neighborhood', 'CHAOS Total', 'CHAOS Short Form', 'STAI', 'PASS','CD RISC', "Healthy Music Usage", "Unhealthy Music Usage", "Age","GoldMSI - Active Engagement", "GoldMSI - Perceptual Abilities", "GoldMSI - Musical Training", "GoldMSI - Singing Abilities", "GoldMSI - Emotion", "GoldMSI - Musical Sophistication")
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+```
 ```
 
