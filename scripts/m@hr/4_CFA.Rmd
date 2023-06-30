@@ -33,6 +33,8 @@ MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
 #use "all" for *new* construct validity results (SRQ + MET)
 #use "second" for replications of construct validity results from the EFA, as well as the CFA
 #the retest df is created below
+
+range(second$What.is.your.age.)
 ```
 
 #CFA
@@ -133,8 +135,12 @@ summary(m1)
 ```{r}
 '%notin%' <- Negate('%in%')
 retest <- subset(all, all$ID %notin% second$ID)
+
+range(retest$What.is.your.age., na.rm = TRUE)
 mean(retest$What.is.your.age., na.rm = TRUE)
 cor.test(retest$MH_total.x, retest$MH_total.y)
+
+table(retest$What.is.your.ethnicity..check.all.that.apply..)
 ```
 
 
@@ -164,5 +170,3 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 ```
-```
-
