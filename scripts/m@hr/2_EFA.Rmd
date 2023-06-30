@@ -269,11 +269,4 @@ summary(fa.none)
 SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
-
-scores <- factor.scores(as.matrix(updateMH), SL_transformation, method="components")
-scores <- scores$scores
-scores <- cbind(data[20], scores)
-names(scores)[1] <- "ID"
-
-write.csv(scores, file =  "../../data/m@hr/efa_factorscores.csv")
 ```
