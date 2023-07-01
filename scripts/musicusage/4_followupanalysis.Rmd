@@ -151,6 +151,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
 ```{r}
 cor.test(followup_scored$QUIC_sum, followup_scored$AIMS_current_total)
 followup_scored$CHAOS_sum_scaled <- as.vector(scale(followup_scored$CHAOS_sum))
+followup_scored$QUIC_sum_scaled <- as.vector(scale(followup_scored$QUIC_sum))
 followup_scored$AIMS_current_total_scaled <- as.vector(scale(followup_scored$AIMS_current_total))
 followup_scored$AIMS_escapism_scaled <- as.vector(scale(followup_scored$AIMS_escapism))
 followup_scored$CD.RISC_total_scaled <- as.vector(scale(followup_scored$CD.RISC_total))
@@ -162,12 +163,18 @@ followup_scored$deprivation_child_total_scaled <- as.vector(scale(followup_score
 followup_scored$deprivation_Adolescence_total_scaled <- as.vector(scale(followup_scored$deprivation_Adolescence_total))
 
 #test for PASS (?) + CD RISC with deprivation, CHAOS, and threat
-m1 <-lm(data=followup_scored, CD.RISC_total_scaled ~ CHAOS_sum_scaled)
-m2 <-lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled + AIMS_current_total_scaled)
+m1 <-lm(data=followup_scored, CD.RISC_total_scaled ~ QUIC_sum_scaled)
+m2 <-lm(data=followup_scored, CD.RISC_total_scaled ~  QUIC_sum_scaled + AIMS_current_total_scaled)
 
-summary(m2)
-mediate <- mediation::mediate(m1,m2, boot=TRUE, treat = "CHAOS_sum_scaled", mediator = "AIMS_current_total_scaled", sims=5000)
+summary(m1)
+mediate <- mediation::mediate(m1,m2, boot=TRUE, treat = "QUIC_sum_scaled", mediator = "AIMS_current_total_scaled")
 summary(mediate)
+
+seed=8061999
+
+#TRYING HAYES MEDIATION -- giving different answers than mediate package, also need to pick seed no
+process(data = followup_scored, y = "PASS_total", x = "QUIC_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed=seed)
+
 
 m1 <-lm(data=followup_scored, scale(STAI_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum))
 summary(m1)
