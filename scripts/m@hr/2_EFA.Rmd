@@ -20,8 +20,9 @@ library(corrplot)
 #read in data
 ```{r}
 data<-read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
+original <- read.csv(file='../../data/pleasing-displeasing_followup/pleasing_displeasing_scored.csv')
 
-data <- data[complete.cases(data[199:229]),]
+#data <- data[complete.cases(data[199:229]),]
 
 MH <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') %>%
   dplyr::select("M.H1_1":"M.H35_1")
@@ -34,6 +35,12 @@ cols_reverse <- c("M.H6_1","M.H7_1","M.H12_1","M.H14_1","M.H17_1","M.H18_1","M.H
 MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
 
 updateMH <- MH[complete.cases(MH),]
+
+names(original)[2] <- "ID"
+demo <- merge(original, data, by.x = "ID", by.y="Q158")
+
+
+range(demo$What.is.your.age.)
 ```
 
 #determine how many factors to use
@@ -269,11 +276,4 @@ summary(fa.none)
 SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
-
-scores <- factor.scores(as.matrix(updateMH), SL_transformation, method="components")
-scores <- scores$scores
-scores <- cbind(data[20], scores)
-names(scores)[1] <- "ID"
-
-write.csv(scores, file =  "../../data/m@hr/efa_factorscores.csv")
 ```

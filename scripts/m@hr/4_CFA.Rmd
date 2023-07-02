@@ -16,27 +16,29 @@ library(lavaan)
 #read in data
 ```{r}
 first <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
-second <- read.csv(file='../../data/SLfollowupscored.csv')
+all <- read.csv(file='../../data/SLfollowupscored.csv')
 
-keep <- setdiff(second$ID,first$Q158)
+keep <- setdiff(all$ID,first$Q158)
 
-second <- second[second$ID %in% keep, ] 
+second <- all[all$ID %in% keep, ] 
 
 MH <- second %>%
   dplyr::select("M.H_child1_1":"M.H_child20_1")
 
-#MH <- MH[complete.cases(MH),]
+MH <- MH[complete.cases(MH),]
 
 cols_reverse <- c("M.H_child6_1","M.H_child7_1","M.H_child11_1","M.H_child12_1","M.H_child18_1","M.H_child19_1","M.H_child20_1")
 MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+
+#use "all" for *new* construct validity results (SRQ + MET)
+#use "second" for replications of construct validity results from the EFA, as well as the CFA
+#the retest df is created below
+
+range(second$What.is.your.age.)
 ```
 
 #CFA
 ```{r}
-# need to discuss whether or not to use std.lv = FALSE in the CFA function. doing so sets 
-# the first item in each subscale  set to 1. if this is *not* used (i.e. std.lv = TRUE); we would
-# probably have to remove item 14. it looks like the OG paper did both between infant + preschool?
-
 model <- 'G =~ M.H_child10_1 + M.H_child1_1 + M.H_child2_1 + M.H_child3_1 + M.H_child4_1 + M.H_child9_1  + M.H_child11_1  + M.H_child13_1 + M.H_child18_1 + M.H_child19_1 + M.H_child20_1 + M.H_child14_1 + M.H_child15_1 + M.H_child16_1 + M.H_child17_1 + M.H_child5_1 + M.H_child6_1 + M.H_child7_1 + M.H_child8_1 + M.H_child12_1
   
   caregiverbeliefs   =~ M.H_child2_1 + M.H_child1_1 +  + M.H_child3_1 + M.H_child4_1 
@@ -131,9 +133,14 @@ summary(m1)
 
 #test-retest correlations
 ```{r}
-retest <- merge(second, first,by.x="ID",by.y="PROLIFIC_PID")
+'%notin%' <- Negate('%in%')
+retest <- subset(all, all$ID %notin% second$ID)
+
+range(retest$What.is.your.age., na.rm = TRUE)
 mean(retest$What.is.your.age., na.rm = TRUE)
 cor.test(retest$MH_total.x, retest$MH_total.y)
+
+table(retest$What.is.your.ethnicity..check.all.that.apply..)
 ```
 
 
@@ -163,5 +170,3 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 ```
-```
-

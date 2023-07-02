@@ -14,11 +14,14 @@ library(AICcmodavg)
 library(sjPlot)
 library(corrplot)
 library(psych)
+library(ggrepel)
 ```
 
 #read in data
 ```{r}
 all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
+
+table(all_scored$What.sex.were.you.assigned.at.birth.)
 ```
 
 #HUMS, eBMRQ, Mental Health corr matrix
@@ -43,7 +46,7 @@ rownames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult 
 pdf(file = "../../figures/pleasing:displeasing_followup/full_sample/eBMRQ_HUMS_mentalhealth.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
-         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, diag=FALSE,
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 
 dev.off()
@@ -99,7 +102,7 @@ rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 'Emotion Evocation',
 pdf(file = "../../figures/pleasing:displeasing_followup/BMRQ_corrplot_totals.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
-         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, diag=FALSE,
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 
 dev.off()
@@ -254,5 +257,53 @@ X$labels <- rownames(X)
   geom_text(vjust=0.2, alpha=0.6,nudge_x = -0.5)+
   geom_point() +
   theme_classic()
+```
+
+#absorption ~ HUMS + ~ Resilience
+```{r}
+abs_resilience <-
+  ggplot(data=all_scored, aes(x=BMRQ_absorption, y=CD.RISC_total)) +
+  geom_jitter(width = 0.065,height=0.065, alpha=0.5) +
+  theme_classic() +
+  geom_smooth(method="lm", color="#000000") +
+  xlab("BMRQ Absorption Score") +
+  ylab("Resilience Score")+
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+HUMS_Absorption <- all_scored %>%
+  select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy) %>%
+  pivot_longer(HUMS_adult_healthy:HUMS_adult_unhealthy, names_to = "type", values_to = "HUMS")
+
+HUMS_Absorption$type <- ifelse(HUMS_Absorption$type=="HUMS_adult_unhealthy", "Unhealthy", "Healthy")
+
+label <- expand.grid(
+  HUMS=30,
+  BMRQ_absorption = 15,
+  type=c("Healthy", "Unhealthy")
+)
+
+label$HUMS <- ifelse(label$type=="Unhealthy", label$HUMS -1, label$HUMS )
+
+abs_HUMS_label <- 
+  ggplot(data=HUMS_Absorption, aes(x=BMRQ_absorption, y=HUMS)) +
+  scale_color_manual(values=c("#56B4E9", "#E69F00")) +
+  scale_fill_manual(values=c("#56B4E9", "#E69F00")) +
+  geom_label_repel(aes(label = type, color=type),
+   #              nudge_x = -0.8,
+    #               na.rm = TRUE,
+                  data=label,
+                   family="Arial",
+                 size=6,
+                 min.segment.length = Inf) +
+    theme_classic()
+
+ggsave(abs_HUMS_label, file='../../figures/pleasing:displeasing_followup/abs_HUMS_label.png')
+
+cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
 ```
 
