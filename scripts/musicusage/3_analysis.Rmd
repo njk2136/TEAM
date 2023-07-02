@@ -20,6 +20,8 @@ library(ggrepel)
 #read in data
 ```{r}
 all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
+
+table(all_scored$What.sex.were.you.assigned.at.birth.)
 ```
 
 #HUMS, eBMRQ, Mental Health corr matrix

@@ -405,7 +405,7 @@ followup$QUIC_sum <- followup$QUIC_child_total + followup$QUIC_Adolescence_total
 deprivation_child <- followup %>%
   dplyr::select("DT_child1_1":"DT_child25_1")
 
-cols_reverse <- c("DT_child1_1", "DT_child2_1", "DT_child3_1", "DT_child4_1", "DT_child5_1", "DT_child6_1", "DT_child7_1", "DT_child10_1", "DT_child18_1", "DT_child19_1", "DT_child20_1", "DT_child21_1", "DT_child22_1", "DT_child23_1", "DT_child24_1", "DT_child25_1")
+cols_reverse <- c("DT_child1_1", "DT_child2_1", "DT_child3_1", "DT_child4_1", "DT_child5_1", "DT_child6_1", "DT_child7_1", "DT_child10_1")
 
 cols_emotionaldeprivation <- c("DT_child1_1", "DT_child2_1", "DT_child3_1", "DT_child4_1", "DT_child5_1", "DT_child6_1", "DT_child7_1")
 
@@ -428,7 +428,7 @@ hist(followup$deprivation_child_total)
 deprivation_Adolescence <- followup %>%
   dplyr::select("DT_adol1_1":"DT_adol25_1")
 
-cols_reverse <- c("DT_adol1_1", "DT_adol2_1", "DT_adol3_1", "DT_adol4_1", "DT_adol5_1", "DT_adol6_1", "DT_adol7_1", "DT_adol10_1")
+cols_reverse <- c("DT_adol1_1", "DT_adol2_1", "DT_adol3_1", "DT_adol4_1", "DT_adol5_1", "DT_adol6_1", "DT_adol7_1", "DT_adol10_1","DT_adol18_1", "DT_adol19_1", "DT_adol20_1", "DT_adol21_1", "DT_adol22_1", "DT_adol23_1", "DT_adol24_1", "DT_adol25_1")
 
 cols_emotionaldeprivation <- c("DT_adol1_1", "DT_adol2_1", "DT_adol3_1", "DT_adol4_1", "DT_adol5_1", "DT_adol6_1", "DT_adol7_1")
 
@@ -578,7 +578,7 @@ AIMS <- followup %>%
 
 followup$AIMS_current_total <- apply(AIMS,1, sum)
 
-cor.test(followup$AIMS_current_total, followup$QUIC_sum)
+cor.test(followup$AIMS_current_total, followup$deprivation_child_total)
 hist(followup$AIMS_current_total)
 ```
 
