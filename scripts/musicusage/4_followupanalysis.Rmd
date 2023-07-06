@@ -104,7 +104,8 @@ followup_scored$escapism_sum <- followup_scored$positive_escapism_current + foll
 m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
 
-plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+BMRQ_escapismcoef <-
+  plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
  ylim(-0.25, 1) +
   ggtitle("Overall Escapism Score") +
   ylab("Standardized Beta Coefficient Estimates")+
@@ -116,6 +117,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.y = element_text(family="Arial",size=16),
   ) +
   scale_x_discrete(labels=c("Absorption (AIMS)","Sensorimotor","Music Seeking", "Social Reward", "Emotion Evocation","Mood Regulation"))
+ggsave(BMRQ_escapismcoef, file='../../figures/statistical_learningfollowup/BMRQ_escapismcoef.png', dpi=350, width=10)
 
 m1 <-lm(data=followup_scored, scale(positive_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
