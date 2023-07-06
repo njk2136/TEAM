@@ -62,29 +62,31 @@ dev.off()
 
 #HUMS, eBMRQ, AES, ELA corr matrix
 variables = dplyr::select(followup_scored, 
-                          HUMS_adult_unhealthy,HUMS_adult_healthy,
                           BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, BMRQ_musicseek, 
-                          BMRQ_sensorimotor,AIMS_current_total,positive_escapism_current,
-                          negative_escapism_current, AES_viseral, AES_abstract, AES_total, QUIC_sum, CHAOS_sum, 
-                          Threat_sum, deprivation_sum) 
+                          BMRQ_sensorimotor,AIMS_current_total,QUIC_sum, CHAOS_sum, 
+                          deprivation_sum, Threat_sum, QUIC_child_total, CHAOS_child_total, 
+                          deprivation_child_total, threat_childhood_total, QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, threat_adolescence_total) 
   
 output = corr.test(variables)
 
 corr_matrix = output$r
 p_matrix <- output$p
 
-colnames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
+colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
-                           'Sensorimotor', "AIMS", "Positive Espcapism", 
-                           "Negative Espcapism", "AES Viseral", "AES Abstract", "AES Total", "QUIC Sum", "CHAOS Sum", 
-                           "Threat Sum", "Deprivation Sum")
-rownames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Usage', 'Total BMRQ', 'Mood Regulation', 
+                           'Sensorimotor', "AIMS", "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
+                           "Deprivation Adolescence","Threat Adolescence")
+rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
-                           'Sensorimotor', "AIMS", "Positive Espcapism", 
-                           "Negative Espcapism", "AES Viseral", "AES Abstract", "AES Total","QUIC Sum", "CHAOS Sum", 
-                           "Threat Sum", "Deprivation Sum")
+                           'Sensorimotor', "AIMS", "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
+                           "Deprivation Adolescence","Threat Adolescence")
 
-pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_AIMS_ELA.pdf")
+pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_ELA.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45,diag=FALSE, 
@@ -153,7 +155,6 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
 ```{r}
 cor.test(followup_scored$AIMS_current_total, followup_scored$positive_escapism_current)
 followup_scored$CHAOS_sum_scaled <- as.vector(scale(followup_scored$CHAOS_sum))
-followup_scored$QUIC_sum_scaled <- as.vector(scale(followup_scored$QUIC_sum))
 followup_scored$AIMS_current_total_scaled <- as.vector(scale(followup_scored$AIMS_current_total))
 followup_scored$AIMS_escapism_scaled <- as.vector(scale(followup_scored$AIMS_escapism))
 followup_scored$CD.RISC_total_scaled <- as.vector(scale(followup_scored$CD.RISC_total))
@@ -163,32 +164,16 @@ followup_scored$CHAOS_child_scaled <- as.vector(scale(followup_scored$CHAOS_chil
 followup_scored$CHAOS_adolescence_scaled <- as.vector(scale(followup_scored$CHAOS_Adolescence_total))
 followup_scored$deprivation_child_total_scaled <- as.vector(scale(followup_scored$deprivation_child_total))
 followup_scored$deprivation_Adolescence_total_scaled <- as.vector(scale(followup_scored$deprivation_Adolescence_total))
+followup_scored$threat_adolescence_scaled <- as.vector(scale(followup_scored$threat_adolescence_total))
+followup_scored$QUIC_adolescence_scaled <- as.vector(scale(followup_scored$QUIC_Adolescence_total))
+followup_scored$threat_childhood_scaled <- as.vector(scale(followup_scored$threat_childhood_total))
 
-#test for PASS (?) + CD RISC with deprivation, CHAOS, and threat
-##step 1: total effect. IV --> DV
-m1 <-lm(data=followup_scored, CD.RISC_total_scaled ~ CHAOS_sum_scaled)
-summary(m1)
-
-
-#step 2: IV --> mediator
-m2 <-lm(data=followup_scored, AIMS_current_total_scaled ~  CHAOS_sum_scaled)
-summary(m2)
-
-#step 3: mediator --> IV
-m3 <-lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled + AIMS_current_total_scaled)
-summary(m3)
-
-#step 4: mediation
-m1 <- lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled)
-m2 <- lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled + AIMS_current_total_scaled)
 seed = 111
 
-mediate <- mediation::mediate(m1,m2, treat = "CHAOS_sum_scaled", mediator = "AIMS_current_total_scaled", dropobs = TRUE)
-summary(mediate)
+#HAYES MEDIATION
+process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_adolescence_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed, cov="CHAOS_child_scaled")
 
-#TRYING HAYES MEDIATION
-process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed)
-
+cor.test(followup_scored$AIMS_current_total, followup_scored$PASS_total)
 
 m1 <-lm(data=followup_scored, scale(STAI_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum))
 summary(m1)
@@ -243,7 +228,7 @@ summary(m2)
 m2 <-lm(data=followup_scored, negative_escapism_current ~ deprivation_sum + CD.RISC_total)
 summary(m2)
 
-cor.test(followup_scored$AIMS_current_total, followup_scored$CD.RISC_total)
+cor.test(followup_scored$BMRQ_musicseek, followup_scored$STAI_total)
 ```
 
 #SL results
