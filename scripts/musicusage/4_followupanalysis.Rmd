@@ -86,7 +86,7 @@ rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation',
                            "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
                            "Deprivation Adolescence","Threat Adolescence")
 
-pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_ELA.pdf")
+pdf(file = "../../figures/statistical_learningfollowup/ELABMRQ.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45,diag=FALSE, 
@@ -104,8 +104,7 @@ followup_scored$escapism_sum <- followup_scored$positive_escapism_current + foll
 m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
 
-BMRQ_escapismcoef <-
-  plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
  ylim(-0.25, 1) +
   ggtitle("Overall Escapism Score") +
   ylab("Standardized Beta Coefficient Estimates")+
@@ -117,7 +116,6 @@ BMRQ_escapismcoef <-
     axis.text.y = element_text(family="Arial",size=16),
   ) +
   scale_x_discrete(labels=c("Absorption (AIMS)","Sensorimotor","Music Seeking", "Social Reward", "Emotion Evocation","Mood Regulation"))
-ggsave(BMRQ_escapismcoef, file='../../figures/statistical_learningfollowup/BMRQ_escapismcoef.png', dpi=350, width=10)
 
 m1 <-lm(data=followup_scored, scale(positive_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
@@ -170,10 +168,11 @@ followup_scored$threat_adolescence_scaled <- as.vector(scale(followup_scored$thr
 followup_scored$QUIC_adolescence_scaled <- as.vector(scale(followup_scored$QUIC_Adolescence_total))
 followup_scored$threat_childhood_scaled <- as.vector(scale(followup_scored$threat_childhood_total))
 
+#select seed for reproducible results
 seed = 111
 
 #HAYES MEDIATION
-process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_adolescence_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed, cov="CHAOS_child_scaled")
+process(data = followup_scored, y = "CD.RISC_total_scaled", x = "threat_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed)
 
 cor.test(followup_scored$AIMS_current_total, followup_scored$PASS_total)
 

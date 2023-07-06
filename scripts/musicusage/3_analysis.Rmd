@@ -88,9 +88,7 @@ ggsave(plot=eBMRQ_HUMS_coef, '../../figures/pleasing:displeasing_followup/full_s
 variables = dplyr::select(all_scored, 
                           BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, BMRQ_musicseek, 
                           BMRQ_sensorimotor,BMRQ_absorption,QUIC_sum, CHAOS_sum, 
-                          deprivation_sum, Threat_sum, QUIC_child_total, CHAOS_child_total, 
-                          deprivation_child_total, threat_childhood_total, QUIC_Adolescence_total, 
-                          CHAOS_Adolescence_total, deprivation_Adolescence_total, threat_adolescence_total)
+                          deprivation_sum, Threat_sum)
 output = corr.test(variables)
 
 corr_matrix = output$r
@@ -99,17 +97,13 @@ p_matrix <- output$p
 colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
                            'Sensorimotor', "Absorption", "QUIC Sum", "CHAOS Sum", 
-                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
-                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
-                           "Deprivation Adolescence","Threat Adolescence")
+                           "Deprivation Sum","Threat Sum")
 rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
                            'Emotion Evocation', 'Social Reward', 'Music Seeking',
                            'Sensorimotor', "AIMS", "QUIC Sum", "CHAOS Sum", 
-                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
-                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
-                           "Deprivation Adolescence","Threat Adolescence")
+                           "Deprivation Sum","Threat Sum")
 
-pdf(file = "../../figures/pleasing:displeasing_followup/BMRQELA_study1.pdf")
+pdf(file = "../../figures/pleasing:displeasing_followup/BMRQELAsum_study1.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, diag=FALSE,
