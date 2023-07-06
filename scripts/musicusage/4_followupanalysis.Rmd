@@ -14,7 +14,6 @@ library(mediation)
 library(corrplot)
 library(psych)
 library(sjPlot)
-library(mediation)
 ```
 
 
@@ -26,6 +25,8 @@ followup_scored <- read.csv(file='../../data/SLfollowupscored.csv')
 liking <- read.csv(file='../../data/SL_followup/masterinteractionliking.csv')
 groove_stiminfo <- read.csv(file="../../stimuli/senn_stim/stim_information.csv")
 names(groove_stiminfo)[2] <- "stim"
+
+table(followup_scored$What.sex.were.you.assigned.at.birth.)
 ```
 
 #correlation matrices
@@ -86,7 +87,7 @@ rownames(corr_matrix) <- c('Unhealthy Adult Music Usage','Healthy Adult Music Us
 pdf(file = "../../figures/statistical_learningfollowup_scored/BMRQ_HUMS_AIMS_ELA.pdf")
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
-         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45,diag=FALSE, 
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 
 dev.off()
@@ -94,7 +95,8 @@ dev.off()
 
 #which facet of BMRQ is escapism related to?
 ```{r}
-cor.test(followup_scored$AIMS_current_total, followup_scored$deprivation_sum)
+cor.test(followup_scored$AIMS_current_total, followup_scored$CHAOS_sum)
+
 followup_scored$escapism_sum <- followup_scored$positive_escapism_current + followup_scored$negative_escapism_current
 
 m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
@@ -149,7 +151,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
 
 #absorption mediation models
 ```{r}
-cor.test(followup_scored$QUIC_sum, followup_scored$AIMS_current_total)
+cor.test(followup_scored$AIMS_current_total, followup_scored$positive_escapism_current)
 followup_scored$CHAOS_sum_scaled <- as.vector(scale(followup_scored$CHAOS_sum))
 followup_scored$QUIC_sum_scaled <- as.vector(scale(followup_scored$QUIC_sum))
 followup_scored$AIMS_current_total_scaled <- as.vector(scale(followup_scored$AIMS_current_total))
@@ -163,17 +165,29 @@ followup_scored$deprivation_child_total_scaled <- as.vector(scale(followup_score
 followup_scored$deprivation_Adolescence_total_scaled <- as.vector(scale(followup_scored$deprivation_Adolescence_total))
 
 #test for PASS (?) + CD RISC with deprivation, CHAOS, and threat
-m1 <-lm(data=followup_scored, CD.RISC_total_scaled ~ QUIC_sum_scaled)
-m2 <-lm(data=followup_scored, CD.RISC_total_scaled ~  QUIC_sum_scaled + AIMS_current_total_scaled)
-
+##step 1: total effect. IV --> DV
+m1 <-lm(data=followup_scored, CD.RISC_total_scaled ~ CHAOS_sum_scaled)
 summary(m1)
-mediate <- mediation::mediate(m1,m2, boot=TRUE, treat = "QUIC_sum_scaled", mediator = "AIMS_current_total_scaled")
+
+
+#step 2: IV --> mediator
+m2 <-lm(data=followup_scored, AIMS_current_total_scaled ~  CHAOS_sum_scaled)
+summary(m2)
+
+#step 3: mediator --> IV
+m3 <-lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled + AIMS_current_total_scaled)
+summary(m3)
+
+#step 4: mediation
+m1 <- lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled)
+m2 <- lm(data=followup_scored, CD.RISC_total_scaled ~  CHAOS_sum_scaled + AIMS_current_total_scaled)
+seed = 111
+
+mediate <- mediation::mediate(m1,m2, treat = "CHAOS_sum_scaled", mediator = "AIMS_current_total_scaled", dropobs = TRUE)
 summary(mediate)
 
-seed=8061999
-
-#TRYING HAYES MEDIATION -- giving different answers than mediate package, also need to pick seed no
-process(data = followup_scored, y = "PASS_total", x = "QUIC_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed=seed)
+#TRYING HAYES MEDIATION
+process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed)
 
 
 m1 <-lm(data=followup_scored, scale(STAI_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum))
