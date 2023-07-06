@@ -20,7 +20,7 @@ survey <- read.csv(file="../data/pleasing-displeasing_followup/Displeasing)_Nove
 ### CHILDHOOD ###
 #QUIC Scoring
 QUIC_child <- survey %>%
-  select("QUIC_Child_2":"QUIC_Child_38")
+  dplyr::select("QUIC_Child_2":"QUIC_Child_38")
 
 #recode verbal responses (if not numbers)
 QUIC_child[QUIC_child == "Yes"] <- as.numeric(1)
@@ -49,7 +49,7 @@ hist(survey$QUIC_child_total)
 ### ADOLESCENCE ###
 #QUIC Scoring
 QUIC_Adolescence <- survey %>%
-  select("QUIC_Adolescence_2":"QUIC_Adolescence_38")
+  dplyr::select("QUIC_Adolescence_2":"QUIC_Adolescence_38")
 
 #recode verbal responses (if not numbers)
 QUIC_Adolescence[QUIC_Adolescence == "Yes"] <- as.numeric(1)
@@ -85,7 +85,7 @@ survey$QUIC_sum <- survey$QUIC_child_total + survey$QUIC_Adolescence_total
 ### CHILDHOOD ###
 #CHAOS Scoring
 CHAOS_child <- survey %>%
-  select("CHAOS_Child_1_1":"CHAOS_Child_6_1")
+  dplyr::select("CHAOS_Child_1_1":"CHAOS_Child_6_1")
 
 cols_reverse <- c("CHAOS_Child_1_1", "CHAOS_Child_5_1", "CHAOS_Child_6_1")
 
@@ -98,7 +98,7 @@ hist(survey$CHAOS_child_total)
 ### ADOLESCENCE ###
 #CHAOS Scoring
 CHAOS_Adolescence <- survey %>%
-  select("CHAOS_Adolescence_1_1":"CHAOS_Adolescence_6_1")
+  dplyr::select("CHAOS_Adolescence_1_1":"CHAOS_Adolescence_6_1")
 
 cols_reverse <- c("CHAOS_Adolescence_1_1", "CHAOS_Adolescence_5_1", "CHAOS_Adolescence_6_1")
 
@@ -118,7 +118,7 @@ survey$CHAOS_sum <- survey$CHAOS_child_total + survey$CHAOS_Adolescence_total
 ### CHILDHOOD ###
 #Deprivation Scoring
 deprivation_child <- survey %>%
-  select("DT1c_1":"DT25c_1")
+  dplyr::select("DT1c_1":"DT25c_1")
 
 cols_reverse <- c("DT1c_1", "DT2c_1", "DT3c_1", "DT4c_1", "DT5c_1", "DT6c_1", "DT7c_1", "DT10c_1")
 
@@ -141,7 +141,7 @@ hist(survey$deprivation_child_total)
 ### ADOLESCENCE ###
 #Deprivation Scoring
 deprivation_Adolescence <- survey %>%
-  select("DT1a_1":"DT25a_1")
+  dplyr::select("DT1a_1":"DT25a_1")
 
 cols_reverse <- c("DT1a_1", "DT2a_1", "DT3a_1", "DT4a_1", "DT5a_1", "DT6a_1", "DT7a_1", "DT10a_1")
 
@@ -167,7 +167,7 @@ survey$deprivation_sum <- survey$deprivation_child_total + survey$deprivation_Ad
 ### CHILDHOOD ###
 #Threat Scoring
 threat_child <- survey %>%
-  select("T1c_1":"T2.8c_1")
+  dplyr::select("T1c_1":"T2.8c_1")
 
 cols_home_threat <- c("T1c_1","T2c_1","T3c_1","T4c_1","T5c_1","T6c_1","T7c_1","T8c_1","T9c_1","T10c_1","T11c_1","T12c_1")
 cols_neighborhood_threat <- c("T2.1c_1","T2.2c_1","T2.3c_1","T2.4c_1","T2.5c_1","T2.6c_1","T2.7c_1","T2.8c_1")
@@ -179,7 +179,7 @@ hist(survey$threat_childhood_total)
 ### ADOLESCENCE ###
 #Threat Scoring
 threat_adolescence <- survey %>%
-  select("T1a_1":"T2.8a_1")
+  dplyr::select("T1a_1":"T2.8a_1")
 
 cols_home_threat <- c("T1a_1","T2a_1","T3a_1","T4a_1","T5a_1","T6a_1","T7a_1","T8a_1","T9a_1","T10a_1","T11a_1","T12a_1")
 cols_neighborhood_threat <- c("T2.1a_1","T2.2a_1","T2.3a_1","T2.4a_1","T2.5a_1","T2.6a_1","T2.7a_1","T2.8a_1")
@@ -198,7 +198,7 @@ survey$Threat_sum <- survey$threat_childhood_total + survey$threat_adolescence_t
 ### ADOLESCENT ###
 #HUMS Scoring
 HUMS_adolescent <- survey %>%
-  select("HUMS_a1_1":"HUMS_a13_1")
+  dplyr::select("HUMS_a1_1":"HUMS_a13_1")
 
 cols_healthy <- c("HUMS_a3_1","HUMS_a5_1","HUMS_a6_1","HUMS_a9_1","HUMS_a13_1")
 cols_unhealthy <- c("HUMS_a1_1","HUMS_a2_1","HUMS_a4_1","HUMS_a7_1","HUMS_a8_1","HUMS_a10_1","HUMS_a11_1","HUMS_a12_1")
@@ -210,7 +210,7 @@ survey$HUMS_adolescence_unhealthy <- apply(HUMS_adolescent[cols_unhealthy], 1,su
 ### ADULT ###
 #HUMS Scoring
 HUMS_adult <- survey %>%
-  select("HUMS1_1":"HUMS13_1")
+  dplyr::select("HUMS1_1":"HUMS13_1")
 
 cols_healthy <- c("HUMS3_1","HUMS5_1","HUMS6_1","HUMS9_1","HUMS13_1")
 cols_unhealthy <- c("HUMS1_1","HUMS2_1","HUMS4_1","HUMS7_1","HUMS8_1","HUMS10_1","HUMS11_1","HUMS12_1")
@@ -223,7 +223,7 @@ survey$HUMS_adult_unhealthy <- apply(HUMS_adult[cols_unhealthy], 1,sum)
 ```{r}
 #AES Scoring --> update to do factor structure according to Sachs (2016)
 AES <- survey %>%
-  select("AES1_1":"AES10_1")
+  dplyr::select("AES1_1":"AES10_1")
 
 survey$AES_total <- apply(AES,1,sum)
 ```
@@ -232,7 +232,7 @@ survey$AES_total <- apply(AES,1,sum)
 ```{r}
 #ASRS-v1.1 Scoring
 ASRS <- survey %>%
-  select("ASRS1_1":"ASRS6_1")
+  dplyr::select("ASRS1_1":"ASRS6_1")
 
 survey$ASRS_total <- apply(ASRS,1,sum)
 ```
@@ -241,7 +241,7 @@ survey$ASRS_total <- apply(ASRS,1,sum)
 ```{r}
  ## COLUMN NAMES FOR M@H SURVEY ## 
 MH <- survey %>%
-  select("M.H1_1":"M.H35_1")
+  dplyr::select("M.H1_1":"M.H35_1")
 
 #removing check questions
 MH <- MH[-c(32:34)]
@@ -276,7 +276,7 @@ hist(survey$MH_total)
 ```{r}
 #isolate survey you're scoring
 STAI <- survey %>%
-  select("STAI1_1":"STAI20_1")
+  dplyr::select("STAI1_1":"STAI20_1")
 
 
 cols_reverse <- c("STAI1_1","STAI3_1","STAI6_1","STAI7_1","STAI10_1","STAI13_1","STAI14_1","STAI16_1","STAI19_1")
@@ -292,7 +292,7 @@ hist(survey$STAI_total)
 ```{r}
 #CD-RISC Scoring
 CD.RISC <- survey %>%
-  select("CD.RISC1_1":"CD.RISC10_1")
+  dplyr::select("CD.RISC1_1":"CD.RISC10_1")
 
 survey$CD.RISC_total <- apply(CD.RISC,1,sum)
 hist(survey$CD.RISC_total)
@@ -302,7 +302,7 @@ hist(survey$CD.RISC_total)
 ```{r}
 #TIPI Scoring
 TIPI <- survey %>%
-  select("Q3.1_1":"Q3.1_10")
+  dplyr::select("Q3.1_1":"Q3.1_10")
 
 survey$TIPI_total <- apply(TIPI,1,sum)
 ```
@@ -311,7 +311,7 @@ survey$TIPI_total <- apply(TIPI,1,sum)
 ```{r}
 #STOMP Scoring
 STOMP <- survey %>%
-  select("STOMP_1":"STOMP_10")
+  dplyr::select("STOMP_1":"STOMP_10")
 
 survey$STOMP_total <- apply(STOMP,1,sum)
 ```
