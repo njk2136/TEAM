@@ -157,7 +157,7 @@ cor.test(retest$MH_total.x, retest$MH_total.y)
 
 table(retest$What.is.your.ethnicity..check.all.that.apply..)
 
-icc(retest$MH_total.x, retest$MH_total.y, model = "twoway", alpha = .05, lmer = TRUE)
+icc(retest$MH_total.x, retest$MH_total.y, model = "twoway", type = "consistency")
 ```
 
 
