@@ -86,22 +86,32 @@ ggsave(plot=eBMRQ_HUMS_coef, '../../figures/pleasing:displeasing_followup/full_s
 ```{r}
 #eBMRQ + ELA Sum
 variables = dplyr::select(all_scored, 
-                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, BMRQ_musicseek, 
+                          BMRQ_total, BMRQ_moodreg, BMRQ_emotion, BMRQ_socialreward, 
+                          BMRQ_musicseek, 
                           BMRQ_sensorimotor,BMRQ_absorption,QUIC_sum, CHAOS_sum, 
-                          deprivation_sum, Threat_sum)
+                          deprivation_sum, Threat_sum, QUIC_child_total, CHAOS_child_total, 
+                          deprivation_child_total, threat_childhood_total, 
+                          QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, threat_adolescence_total)
 output = corr.test(variables)
 
 corr_matrix = output$r
 p_matrix <- output$p
 
-colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
-                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
-                           'Sensorimotor', "Absorption", "QUIC Sum", "CHAOS Sum", 
-                           "Deprivation Sum","Threat Sum")
-rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
-                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
-                           'Sensorimotor', "AIMS", "QUIC Sum", "CHAOS Sum", 
-                           "Deprivation Sum","Threat Sum")
+colnames(corr_matrix) <- c('Total BMRQ', 'BMRQ - Mood Regulation', 
+                           'BMRQ - Emotion Evocation', 'BMRQ -  Social Reward', 
+                           'BMRQ - Music Seeking','BMRQ - Sensorimotor Reward', 
+                           "BMRQ - Absorption", "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
+                           "Deprivation Adolescence","Threat Adolescence")
+rownames(corr_matrix) <- c('Total BMRQ', 'BMRQ - Mood Regulation', 
+                           'BMRQ - Emotion Evocation', 'BMRQ -  Social Reward', 
+                           'BMRQ - Music Seeking','BMRQ - Sensorimotor Reward', 
+                           "BMRQ - Absorption", "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
+                           "Deprivation Adolescence","Threat Adolescence")
 
 pdf(file = "../../figures/pleasing:displeasing_followup/BMRQELAsum_study1.pdf")
 
@@ -221,63 +231,26 @@ m1 <- lm(scale(CD.RISC_totl) ~ scale(deprivation_sum)*scale(BMRQ_absorption), da
 summary(m1)
 ```
 
-#item analysis for HUMS, resilience and absorption
-```{r}
-HUMS_items <- cbind(all_scored[564:576], all_scored[266])
-
-HUMS_items_healthy <- HUMS_items %>%
-  dplyr::select("HUMS3_1","HUMS5_1","HUMS6_1","HUMS9_1","HUMS13_1", "BMRQ_absorption")
-
-HUMS_items_healthy <- t(HUMS_items_healthy)
-HUMS_items_healthy <- scale(HUMS_items_healthy)
-distance <- dist(HUMS_items_healthy, method = "euclidean", upper = TRUE, diag = TRUE)
-
-n = nrow(distance)
-MDS <- cmdscale(distance, k= 2, eig = TRUE, x.ret = TRUE)
-X <- MDS$points[,1:2]
-X <- as.data.frame(X)
-X$labels <- rownames(X)
-HUMS_BMRQAbsorption <- 
-  ggplot(X, aes(x=V2, y=V1, label=labels))+
-  geom_text(vjust=0.2, alpha=0.6,nudge_x = -0.5)+
-  geom_point() +
-  theme_classic()
-ggsave(HUMS_BMRQAbsorption, file='../../figures/statistical_learningfollowup/HUMS_BMRQitem.png', width=12)
-
-HUMS_items_unhealthy <- HUMS_items %>%
-  dplyr::select("HUMS1_1","HUMS2_1","HUMS4_1","HUMS7_1","HUMS8_1","HUMS10_1","HUMS11_1","HUMS12_1", "BMRQ_absorption")
-
-HUMS_items_unhealthy <- t(HUMS_items_unhealthy)
-HUMS_items_unhealthy <- scale(HUMS_items_unhealthy)
-distance <- dist(HUMS_items_unhealthy, method = "euclidean", upper = TRUE, diag = TRUE)
-
-n = nrow(distance)
-MDS <- cmdscale(distance, k= 2, eig = TRUE, x.ret = TRUE)
-X <- MDS$points[,1:2]
-X <- as.data.frame(X)
-X$labels <- rownames(X)
-#HUMS_BMRQAbsorption <- 
-  ggplot(X, aes(x=V2, y=V1, label=labels))+
-  geom_text(vjust=0.2, alpha=0.6,nudge_x = -0.5)+
-  geom_point() +
-  theme_classic()
-```
 
 #absorption ~ HUMS + ~ Resilience
 ```{r}
-abs_resilience <-
-  ggplot(data=all_scored, aes(x=BMRQ_absorption, y=CD.RISC_total)) +
-  geom_jitter(width = 0.065,height=0.065, alpha=0.5) +
+all_scored$HUMS_adult_healthy
+abs_unhealthyusage <-
+  ggplot(data=all_scored, aes(x=BMRQ_absorption, y=HUMS_adult_unhealthy)) +
+  geom_jitter(width = 0.065,height=0.065, alpha=0.5, color="#E69F00") +
   theme_classic() +
-  geom_smooth(method="lm", color="#000000") +
+  geom_smooth(method="lm", color="#E69F00", fill="#E69F00") +
   xlab("BMRQ Absorption Score") +
-  ylab("Resilience Score")+
+  ylab("Unhealthy Music Usage Score")+
   theme( 
     axis.text.x = element_text(size=18),
     axis.text.y = element_text(size=18),
     axis.title.x = element_text(size=24),
     axis.title.y = element_text(size=24)
   )
+
+ggsave(abs_unhealthyusage, file='../../figures/pleasing:displeasing_followup/abs_unhealthyusage.png')
+  
 
 HUMS_Absorption <- all_scored %>%
   select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy) %>%

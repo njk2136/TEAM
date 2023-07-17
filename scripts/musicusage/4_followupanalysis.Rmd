@@ -73,15 +73,15 @@ output = corr.test(variables)
 corr_matrix = output$r
 p_matrix <- output$p
 
-colnames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
-                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
-                           'Sensorimotor', "AIMS", "QUIC Sum", "CHAOS Sum", 
+colnames(corr_matrix) <- c('Total BMRQ', 'BMRQ - Mood Regulation', 
+                           'BMRQ - Emotion Evocation', 'BMRQ -  Social Reward', 
+                           'BMRQ - Music Seeking','BMRQ - Sensorimotor Reward', "Absorption (AIMS)", "QUIC Sum", "CHAOS Sum", 
                            "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
                            "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
                            "Deprivation Adolescence","Threat Adolescence")
-rownames(corr_matrix) <- c('Total BMRQ', 'Mood Regulation', 
-                           'Emotion Evocation', 'Social Reward', 'Music Seeking',
-                           'Sensorimotor', "AIMS", "QUIC Sum", "CHAOS Sum", 
+rownames(corr_matrix) <- c('Total BMRQ', 'BMRQ - Mood Regulation', 
+                           'BMRQ - Emotion Evocation', 'BMRQ -  Social Reward', 
+                           'BMRQ - Music Seeking','BMRQ - Sensorimotor Reward', "Absorption (AIMS)", "QUIC Sum", "CHAOS Sum", 
                            "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
                            "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", 
                            "Deprivation Adolescence","Threat Adolescence")
@@ -104,9 +104,10 @@ followup_scored$escapism_sum <- followup_scored$positive_escapism_current + foll
 m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
 
-plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
- ylim(-0.25, 1) +
-  ggtitle("Overall Escapism Score") +
+escapismcoef <-
+  plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.8, 0.8) +
+  ggtitle("Escapism Score") +
   ylab("Standardized Beta Coefficient Estimates")+
   theme_light() +
   theme(title=element_text(family="Arial", size=20),
@@ -115,7 +116,10 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Absorption (AIMS)","Sensorimotor","Music Seeking", "Social Reward", "Emotion Evocation","Mood Regulation"))
+  scale_x_discrete(labels=c("Absorption (AIMS)","BMRQ - Sensorimotor Reward","BMRQ - Music Seeking", "BMRQ - Social Reward", "BMRQ - Emotion Evocation","BMRQ - Mood Regulation")) +
+  geom_hline(yintercept=0,color='black',linetype='dashed')
+
+ggsave(escapismcoef, file='../../figures/statistical_learningfollowup/escapismcoef.png', width=10)
 
 m1 <-lm(data=followup_scored, scale(positive_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
@@ -131,7 +135,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
     axis.text.x = element_text(family="Arial", size=16),
     axis.text.y = element_text(family="Arial",size=16),
   ) +
-  scale_x_discrete(labels=c("Absorption (AIMS)","Sensorimotor","Music Seeking", "Social Reward", "Emotion Evocation","Mood Regulation"))
+  scale_x_discrete(labels=c("Absorption (AIMS)","BMRQ - Sensorimotor Reward","BMRQ - Music Seeking", "BMRQ - Social Reward", "BMRQ - Emotion Evocation","BMRQ - Mood Regulation"))
 
 m1 <-lm(data=followup_scored, scale(negative_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
@@ -825,3 +829,24 @@ ggplot(data=followup_scored, aes(x=CD.RISC_total, y=deprivation_sum))+
 ##check timing relationships across both samples
 ```
 
+
+#resilience & AIMS plot
+```{r}
+AIMS_resilience <-
+  ggplot(data=followup_scored, aes(x=AIMS_current_total, y=CD.RISC_total)) +
+  geom_jitter(width = 0.065,height=0.065, alpha=0.5) +
+  theme_classic() +
+  geom_smooth(method="lm", color='black') +
+  xlab("Absorption (AIMS) Score") +
+  ylab("Resilience Score")+
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+ggsave(AIMS_resilience, file='../../figures/statistical_learningfollowup/AIMS_resilience.png')
+
+cor.test(followup_scored$AIMS_current_total, followup_scored$CD.RISC_total)
+```
