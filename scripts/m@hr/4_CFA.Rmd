@@ -256,10 +256,13 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 
+cor.test()
+
 ```
 
 #Utility of scale models
 ```{r}
+cor.test(all$MH_musicmaking, all$MET_rhythmicscore)
 m1 <- lm(HUMS_adult_healthy ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
 
@@ -268,5 +271,11 @@ summary(m1)
 
 m1 <- lm(STAI_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
+
+hist(all$MET_melodicscore)
+
+ggplot(data=all, aes(x=MH_caregiverbeliefs, y=MET_melodicscore))+
+  geom_point()+
+  stat_smooth(method="lm")
 ```
 
