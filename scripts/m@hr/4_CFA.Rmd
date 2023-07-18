@@ -272,10 +272,10 @@ summary(m1)
 m1 <- lm(STAI_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
 
-hist(all$MET_melodicscore)
-
-ggplot(data=all, aes(x=MH_caregiverbeliefs, y=MET_melodicscore))+
+##scatter plots##
+ggplot(data=all, aes(x=MH_total, y=CD.RISC_total))+
   geom_point()+
-  stat_smooth(method="lm")
+  stat_smooth(method="lm") +
+  theme_classic()
 ```
 
