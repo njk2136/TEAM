@@ -1,0 +1,102 @@
+---
+title: "6_analysis_sample3"
+author: "Kelsie Lopez"
+date: "2023-07-27"
+output: html_document
+---
+
+#load packages
+```{r}
+library(tidyverse)
+library(lmerTest)
+library(MuMIn)
+library(AICcmodavg)
+library(sjPlot)
+library(corrplot)
+library(psych)
+library(stats)
+```
+
+#read in data
+```{r}
+all_scored <- read.csv("../../../TEAM/data/perception/survey_scored_sample3.csv")
+```
+
+```{r}
+#perception + sum ELA
+variables = dplyr::select(all_scored, 
+                          MBEA1_total, MBEA2_total, MBEA4_total,
+                          QUIC_sum, CHAOS_sum, CHAOS_sum_shortform, deprivation_sum, Threat_sum,
+                          QUIC_child_total, CHAOS_child, CHAOS_child_shortform, deprivation_child_total, threat_childhood_total,
+                          QUIC_adol_total, CHAOS_adol, CHAOS_adol_shortform, deprivation_Adolescence_total, threat_adolescence_total,
+                          general_child_caregiver, general_child_friend, general_child_rolemodel,general_adol_caregiver,
+                          general_adol_friend, general_adol_rolemodel)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("MBEA 1 Score", "MBEA 2 Score", "MBEA 4 Score", "QUIC Sum", "CHAOS Sum", "CHAOS Sum Short", "Deprivation Sum", "Threat Sum", "QUIC Child", "CHAOS Child", "CHAOS Child Short", "Deprivation Child", "Threat Child", "QUIC Adol", "CHAOS Adol", "CHAOS Adol Short", "Deprivation Adol", "Threat Adol", "POS Child Caregiver", "POS Child Friend", "POS Child Role Model", "POS Adol Caregiver", "POS Adol Friend", "POS Adol Role Model")
+rownames(corr_matrix) <- c("MBEA 1 Score", "MBEA 2 Score", "MBEA 4 Score", "QUIC Sum", "CHAOS Sum", "CHAOS Sum Short", "Deprivation Sum", "Threat Sum", "QUIC Child", "CHAOS Child", "CHAOS Child Short", "Deprivation Child", "Threat Child", "QUIC Adol", "CHAOS Adol", "CHAOS Adol Short", "Deprivation Adol", "Threat Adol", "POS Child Caregiver", "POS Child Friend", "POS Child Role Model", "POS Adol Caregiver", "POS Adol Friend", "POS Adol Role Model")
+
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+ggplot(all_scored, aes(x = CHAOS_child, y = MBEA1_total)) +
+    geom_point()
+
+#perception + POS DEV caregiver
+variables = dplyr::select(all_scored, 
+                          MBEA1_total, MBEA2_total, MBEA4_total,
+                          general_child_caregiver, predictability_child_caregiver, opportunity_child_caregiver,
+                          safetyandsupport_child_caregiver, general_adol_caregiver, predictability_adol_caregiver,
+                          opportunity_adol_caregiver, safetyandsupport_adol_caregiver,)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c("MBEA 1 Score", "MBEA 2 Score", "MBEA 4 Score", "POS Child General", "POS Child Predictability", "POS Child Opportunity", "POS Child Safety", "POS Adol General", "POS Adol Predictability", "POS Adol Opportunity", "POS Adol Safety")
+rownames(corr_matrix) <- c("MBEA 1 Score", "MBEA 2 Score", "MBEA 4 Score", "POS Child General", "POS Child Predictability", "POS Child Opportunity", "POS Child Safety", "POS Adol General", "POS Adol Predictability", "POS Adol Opportunity", "POS Adol Safety")
+
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+```
+
+#Adversity
+```{r}
+m1 <- lm((MBEA4_total) ~ (CHAOS_sum) + (Threat_sum) + (deprivation_sum) + (QUIC_sum) + (STAI_total), data=all_scored)
+summary(m1)
+
+m2 <- lm((MBEA2_total) ~ (CHAOS_sum) + (Threat_sum) + (deprivation_sum) + (QUIC_sum) + (STAI_total), data=all_scored)
+summary(m2)
+
+m3 <- lm((MBEA4_total) ~ (CHAOS_child) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total), data=all_scored)
+summary(m3)
+
+m4 <- lm((MBEA2_total) ~ (CHAOS_child_shortform) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total), data=all_scored)
+summary(m4)
+
+m5 <- lm((MBEA4_total) ~ (CHAOS_child_shortform) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total), data=all_scored)
+summary(m5)
+
+m6 <- lm((MBEA2_total) ~ (CHAOS_adol) + (threat_adolescence_total) + (deprivation_Adolescence_total) + (QUIC_adol_total) + (STAI_total), data=all_scored)
+summary(m6)
+```
+
+#POS DEV
+```{r}
+m1 <- lm((MBEA4_total) ~ (predictability_child_caregiver) + (opportunity_child_caregiver) + (safetyandsupport_child_caregiver), data=all_scored)
+summary(m1)
+
+m2 <- lm((MBEA4_total) ~ (predictability_adol_caregiver) + (opportunity_adol_caregiver) + (safetyandsupport_adol_caregiver), data=all_scored)
+summary(m2)
+
+m3 <- lm((MBEA2_total) ~ (predictability_adol_caregiver) + (opportunity_adol_caregiver) + (safetyandsupport_adol_caregiver), data=all_scored)
+summary(m3)
+```
+
