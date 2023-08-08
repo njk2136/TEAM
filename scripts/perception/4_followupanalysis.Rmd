@@ -197,25 +197,30 @@ summary(m2b)
 #CHAOS Child --> MET melodic
 CHAOS_child_METmelodic <- ggplot(followup, aes(x=CHAOS_child_total, y=MET_melodicscore)) +
                     geom_point() +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(CHAOS_child_METmelodic)
+ggsave("CHAOS_child_METmelodic.png", width = 6.5, height = 4)
 
 #CHAOS Child --> MET rhythmic
 CHAOS_child_MET_rhythmic <- ggplot(followup, aes(x=CHAOS_child_total, y=MET_rhythmicscore)) +
                     geom_point() +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(CHAOS_child_MET_rhythmic)
+ggsave("CHAOS_child_METrhythmic.png", width = 6.5, height = 4)
 
 #Threat Adolescence --> MET melodic
 threat_adol_METmelodic <- ggplot(followup, aes(x=threat_adolescence_total, y=MET_melodicscore)) +
                     geom_point() +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(threat_adol_METmelodic)
+ggsave("threat_adol_METmelodic.png", width = 6.5, height = 4)
 
 #Threat Adolescence --> MET rhythmic
 threat_adol_METrhythmic <- ggplot(followup, aes(x=threat_adolescence_total, y=MET_rhythmicscore)) +
                     geom_point() +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(threat_adol_METrhythmic)
+ggsave("threat_adol_METrhythmic.png", width = 6.5, height = 4)
+
 ```
 

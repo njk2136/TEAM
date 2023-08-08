@@ -139,15 +139,8 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
 
 #Adversity
 ```{r}
-#MBEA 1 Dimensional Results
-m1 <- lm((MBEA1_total) ~ (CHAOS_child) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
-summary(m1)
-
-m2 <- lm((MBEA1_total) ~ (CHAOS_adol) + (threat_adolescence_total) + (deprivation_Adolescence_total) + (QUIC_adol_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
-summary(m2)
-
 #MBEA 2 Dimensional Results
-m1 <- lm((MBEA2_total) ~ (CHAOS_child) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
+m1 <- lm((MBEA2_total) ~ (CHAOS_child) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total), data=all_scored)
 summary(m1)
 
 m1plot <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
@@ -156,7 +149,7 @@ m1plot <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
   ylab("Standardized Beta Coefficient Estimates")
 print(m1plot)
 
-m2 <- lm((MBEA2_total) ~ (CHAOS_adol) + (threat_adolescence_total) + (deprivation_Adolescence_total) + (QUIC_adol_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
+m2 <- lm((MBEA2_total) ~ (CHAOS_adol) + (threat_adolescence_total) + (deprivation_Adolescence_total) + (QUIC_adol_total) + (STAI_total), data=all_scored)
 summary(m2)
 
 m2plot <- plot_model(m2, show.values = TRUE,vline.color = "lightgrey") + 
@@ -166,7 +159,7 @@ m2plot <- plot_model(m2, show.values = TRUE,vline.color = "lightgrey") +
 print(m2plot)
 
 #MBEA 2 Timing Results
-m3 <- lm((MBEA2_total) ~ (threat_childhood_total) + (threat_adolescence_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
+m3 <- lm((MBEA2_total) ~ (CHAOS_child) + (CHAOS_adol) + (threat_childhood_total) + (threat_adolescence_total) + (STAI_total), data=all_scored)
 summary(m3)
 
 m3plot <- plot_model(m3, show.values = TRUE,vline.color = "lightgrey") + 
@@ -176,7 +169,7 @@ m3plot <- plot_model(m3, show.values = TRUE,vline.color = "lightgrey") +
 print(m3plot)
 
 #MBEA 4 Dimensional Results
-m4 <- lm((MBEA4_total) ~ (CHAOS_child) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
+m4 <- lm((MBEA4_total) ~ (CHAOS_child) + (threat_childhood_total) + (deprivation_child_total) + (QUIC_child_total) + (STAI_total), data=all_scored)
 summary(m4)
 
 m4plot <- plot_model(m4, show.values = TRUE,vline.color = "lightgrey") + 
@@ -184,13 +177,6 @@ m4plot <- plot_model(m4, show.values = TRUE,vline.color = "lightgrey") +
   ggtitle("MBEA 4 Scores") +
   ylab("Standardized Beta Coefficient Estimates")
 print(m4plot)
-
-m5 <- lm((MBEA4_total) ~ (CHAOS_adol) + (threat_adolescence_total) + (deprivation_Adolescence_total) + (QUIC_adol_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
-summary(m5)
-
-#MBEA 4 Timing Results
-m6 <- lm((MBEA4_total) ~ (threat_childhood_total) + (threat_adolescence_total) + (STAI_total) + (PAS_total) + (Gold_musicaltraining), data=all_scored)
-summary(m6)
 ```
 
 #POS DEV
@@ -260,11 +246,23 @@ print(m2plot)
 
 #Scatterplots
 ```{r}
+#CHAOS Childhood --> MBEA 2
+CHAOS_child_MBEA2 <- ggplot(all_scored, aes(x=CHAOS_child, y=MBEA2_total)) +
+                    geom_point(position = "jitter") +
+                    geom_smooth(method=lm)
+print(CHAOS_child_MBEA2)
+
 #Threat Adolescence --> MBEA 2
 threat_adol_MBEA2 <- ggplot(all_scored, aes(x=threat_adolescence_total, y=MBEA2_total)) +
-                    geom_point() +
+                    geom_point(position = "jitter") +
                     geom_smooth(method=lm)
 print(threat_adol_MBEA2)
+
+#CHAOS Childhood --> MBEA 4
+CHAOS_child_MBEA4 <- ggplot(all_scored, aes(x=CHAOS_child, y=MBEA4_total)) +
+                    geom_point(position = "jitter") +
+                    geom_smooth(method=lm)
+print(CHAOS_child_MBEA4)
 
 #POS Adolescence Caregiver Predictability --> MBEA 2
 caregiver_pred_adol_MBEA2 <- ggplot(all_scored, aes(x=predictability_adol_caregiver, y=MBEA2_total)) +
@@ -274,15 +272,35 @@ print(caregiver_pred_adol_MBEA2)
 
 #POS Adolescence Caregiver Predictability --> MBEA 4
 caregiver_pred_adol_MBEA4 <- ggplot(all_scored, aes(x=predictability_adol_caregiver, y=MBEA4_total)) +
-                    geom_point() +
+                    geom_point(position="jitter") +
                     geom_smooth(method=lm)
 print(caregiver_pred_adol_MBEA4)
 
+#POS Child Caregiver Predictability --> MBEA 4
+caregiver_pred_child_MBEA4 <- ggplot(all_scored, aes(x=predictability_child_caregiver, y=MBEA4_total)) +
+                    geom_point(position="jitter") +
+                    geom_smooth(method=lm)
+print(caregiver_pred_child_MBEA4)
+
+#POS Adolescence Caregiver Opportunity --> MBEA 4
+caregiver_opp_adol_MBEA4 <- ggplot(all_scored, aes(x=opportunity_adol_caregiver, y=MBEA4_total)) +
+                    geom_point(position="jitter") +
+                    geom_smooth(method=lm)
+print(caregiver_opp_adol_MBEA4)
+
 #CHAOS Child--> MBEA 1
 CHAOS_child_MBEA1 <- ggplot(all_scored, aes(x=CHAOS_child, y=MBEA1_total)) +
-                    geom_point() +
+                    geom_point(position="jitter") +
                     geom_smooth(method=lm)
 print(CHAOS_child_MBEA1)
+
+#Threat adol--> MBEA 1
+CHAOS_child_MBEA1 <- ggplot(all_scored, aes(x=threat_adolescence_total, y=MBEA1_total)) +
+                    geom_point(position="jitter") +
+                    geom_smooth(method=lm)
+print(CHAOS_child_MBEA1)
+
+
 ```
 
 #t tests
