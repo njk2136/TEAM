@@ -313,3 +313,22 @@ summary(m1)
 m2 <- lm(scale(BAT_total) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
 summary(m2)
 ```
+
+#Scatterplots
+```{r}
+#CHAOS Child --> MBEA1
+CHAOS_child_MBEA1 <- ggplot(all_scored, aes(x=CHAOS_child_total, y=MBEA_total)) +
+                    geom_point(position="jitter") +
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
+print(CHAOS_child_MBEA1)
+ggsave("CHAOS_child_MBEA1.png", width = 6.5, height = 4)
+
+#Threat Adol --> MBEA1
+threat_adol_MBEA1 <- ggplot(all_scored, aes(x=threat_adolescence_total, y=MBEA_total)) +
+                    geom_point(position="jitter") + 
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
+print(threat_adol_MBEA1)
+ggsave("threat_adol_MBEA1.png", width = 6.5, height = 4)
+
+```
+
