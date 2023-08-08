@@ -313,3 +313,13 @@ summary(m1)
 m2 <- lm(scale(BAT_total) ~ scale(CHAOS_child_total) + scale(threat_childhood_total) + scale(deprivation_child_total) + scale(QUIC_child_total) + scale(PASS_total) + scale(STAI_total) + scale(Gold_musicaltraining), data=all_scored)
 summary(m2)
 ```
+
+#Scatterplots
+```{r}
+#CHAOS Child --> MBEA1
+CHAOS_child_MBEA1 <- ggplot(all_scored, aes(x=CHAOS_child_total, y=MBEA_total)) +
+                    geom_point() +
+                    geom_smooth(method=lm)
+print(CHAOS_child_MBEA1)
+```
+

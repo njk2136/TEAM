@@ -13,6 +13,7 @@ library(tidyverse)
 #read in .csv
 ```{r}
 survey <- read.csv(file="../../../POS-DEV-Scale/data/POS DEV CFA_May 10, 2023_10.52 2.csv")
+df <- read.csv(file="../../../TEAM/data/perception/Perception Covariate Follow-Up_August 7, 2023_11.45.csv")
 source("../reverseCode.R")
 ```
 
@@ -245,6 +246,76 @@ STAI[cols_reverse] <- lapply(STAI[cols_reverse], reverseCode, min=1, max=4)
 #if it is a simple subscore (i.e. no reverse coding or anything)
 survey$STAI_total <- apply(STAI,1,sum)
 hist(survey$STAI_total)
+```
+
+#PAS Scoring
+```{r}
+PAS <- df %>%
+  dplyr::select("PAS_1":"PAS_61")
+
+#delete attention-checking question
+PAS$catch <- NULL
+
+PAS[PAS == 1] <- 1
+# Replace 2s with 1s
+PAS[PAS == 2] <- 0
+
+# PAS columns to reverse code and sub-score (for these questions, the correct answer (ie the more anhedonic answer) is false.) --> look at PAS scoring guidelines
+
+cols_reverse <- c("PAS_1","PAS_2","PAS_3","PAS_4","PAS_7","PAS_18","PAS_20","PAS_23","PAS_24","PAS_29","PAS_30","PAS_33","PAS_34","PAS_35","PAS_36","PAS_37","PAS_38","PAS_39","PAS_41","PAS_44","PAS_45","PAS_46","PAS_48","PAS_52","PAS_53","PAS_57","PAS_58","PAS_59","PAS_60","PAS_61")
+
+# Reverse code
+
+PAS[cols_reverse] <- lapply(PAS[cols_reverse], reverseCode, min=0, max=1)
+
+# Add sub-scores and total to main df
+
+df$PAS_total <- apply(PAS,1, sum) # total PAS scores
+
+```
+
+#GoldMSI Scoring
+```{r}
+Gold <- df %>%
+  dplyr::select("GMSI_1_1":"GMSI_38")
+
+#delete atttention checking question
+Gold$Qcheck <- NULL
+
+
+# GoldMSI columns to reverse code and sub-score (for these questions, the correct answer (ie the more positive answer) is a higher number. Negative questions are reverse coded.) 
+
+cols_reverse <- c("GMSI_21_1", "GMSI_11_1", "GMSI_13_1", "GMSI_23_1","GMSI_14_1","GMSI_27_1" , "GMSI_17_1" , "GMSI_25_1" , 
+"GMSI_9_1")
+
+cols_activeengagement <- c("GMSI_1_1" , "GMSI_3_1" , "GMSI_8_1" , "GMSI_15_1" , "GMSI_21_1" , "GMSI_24_1", "GMSI_28_1", "GMSI_34", "GMSI_38")
+
+cols_perceptualabilities <- c("GMSI_5_1" , "GMSI_6_1" , "GMSI_11_1" , "GMSI_12_1" , "GMSI_13_1" , "GMSI_18_1" , "GMSI_22_1" , "GMSI_23_1" , 
+"GMSI_26_1")
+
+cols_musicaltraining <- c("GMSI_14_1", "GMSI_27_1", "GMSI_32", "GMSI_33", "GMSI_35", "GMSI_36", "GMSI_37")
+
+
+cols_singingabilities <- c("GMSI_4_1" , "GMSI_7_1" , "GMSI_10_1" , "GMSI_17_1" , "GMSI_25_1" , "GMSI_29_1" , "GMSI_30_1")
+
+
+cols_emotion <- c("GMSI_2_1" , "GMSI_9_1" , "GMSI_16_1" , "GMSI_19_1" , "GMSI_20_1" , "GMSI_31_1")
+
+cols_musicalsophistication <- c("GMSI_1_1" , "GMSI_3_1" , "GMSI_4_1" , "GMSI_7_1" , "GMSI_10_1" , "GMSI_12_1" , "GMSI_14_1" , "GMSI_15_1" , "GMSI_17_1" , "GMSI_19_1" , "GMSI_23_1" , "GMSI_24_1" , "GMSI_25_1" , "GMSI_27_1" , "GMSI_29_1" , "GMSI_32" , "GMSI_33" , "GMSI_37")
+
+# Reverse code
+
+Gold[cols_reverse] <- lapply(Gold[cols_reverse], reverseCode, min=1, max=7)
+
+# Add sub-scores and total to main df
+
+df$Gold_total <- apply(Gold,1, sum)/38 # total GoldMSI score
+df$Gold_activeengagement <- apply(Gold[cols_activeengagement], 1,sum)/9
+df$Gold_perceptualabilities <- apply(Gold[cols_perceptualabilities],1, sum)/9
+df$Gold_musicaltraining <-apply(Gold[cols_musicaltraining],1, sum)/7
+df$Gold_singingabilities <- apply(Gold[cols_singingabilities],1, sum)/7
+df$Gold_emotion <- apply(Gold[cols_emotion],1, sum)/6
+df$Gold_musicalsophistication <- apply(Gold[cols_musicalsophistication],1, sum)/18
 ```
 
 #POSDEV
@@ -551,5 +622,6 @@ survey$MBEA4_total <- apply(MBEA4,1, sum)
 
 #saving output
 ```{r}
+#all <- merge(x= survey, y= df, by= 'PROLIFIC_PID')
 write.csv(survey, file="../../../TEAM/data/perception/survey_scored_sample3.csv")
 ```
