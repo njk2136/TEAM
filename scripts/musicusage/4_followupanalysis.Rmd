@@ -14,6 +14,7 @@ library(mediation)
 library(corrplot)
 library(psych)
 library(sjPlot)
+source("../reverseCode.R")
 ```
 
 
@@ -97,7 +98,7 @@ dev.off()
 
 #which facet of BMRQ is escapism related to?
 ```{r}
-cor.test(followup_scored$AIMS_current_total, followup_scored$CHAOS_sum)
+cor.test(followup_scored$Threat_sum, followup_scored$What.is.your.age.)
 
 followup_scored$escapism_sum <- followup_scored$positive_escapism_current + followup_scored$negative_escapism_current
 
@@ -160,7 +161,7 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
 cor.test(followup_scored$AIMS_current_total, followup_scored$positive_escapism_current)
 followup_scored$CHAOS_sum_scaled <- as.vector(scale(followup_scored$CHAOS_sum))
 followup_scored$AIMS_current_total_scaled <- as.vector(scale(followup_scored$AIMS_current_total))
-followup_scored$AIMS_escapism_scaled <- as.vector(scale(followup_scored$AIMS_escapism))
+followup_scored$escapism_sum_scaled <- as.vector(scale(followup_scored$escapism_sum))
 followup_scored$CD.RISC_total_scaled <- as.vector(scale(followup_scored$CD.RISC_total))
 followup_scored$deprivation_sum_scaled <- as.vector(scale(followup_scored$deprivation_sum))
 followup_scored$threat_sum_scaled <- as.vector(scale(followup_scored$Threat_sum))
@@ -175,10 +176,16 @@ followup_scored$threat_childhood_scaled <- as.vector(scale(followup_scored$threa
 #select seed for reproducible results
 seed = 111
 
-#HAYES MEDIATION
-process(data = followup_scored, y = "CD.RISC_total_scaled", x = "threat_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed)
+#HAYES MEDIATION -- added age as a covariate? - need to figure out where to put age in this narrative
+## both threat & CD.RISC are pos correlated w. age
+followup_scored$What.is.your.age.
+process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_sum_scaled", m ="escapism_sum", model = 4, seed = seed, cov="What.is.your.age.")
 
-cor.test(followup_scored$AIMS_current_total, followup_scored$PASS_total)
+cor.test(followup_scored$CD.RISC_total, followup_scored$A)
+
+ggplot(data=followup_scored, aes(y=CD.RISC_total, x=What.is.your.age.))+
+  geom_point()+
+  stat_smooth(method="lm")
 
 m1 <-lm(data=followup_scored, scale(STAI_total) ~ scale(QUIC_sum) + scale(CHAOS_sum) + scale(deprivation_sum) + scale(Threat_sum))
 summary(m1)
@@ -849,4 +856,15 @@ AIMS_resilience <-
 ggsave(AIMS_resilience, file='../../figures/statistical_learningfollowup/AIMS_resilience.png')
 
 cor.test(followup_scored$AIMS_current_total, followup_scored$CD.RISC_total)
+```
+
+#getting reliability measures
+```{r}
+CHAOS_child <- followup_scored %>%
+  dplyr::select("CHAOS_child1_1":"CHAOS_child15_1")
+
+cols_reverse <- c("CHAOS_child1_1", "CHAOS_child2_1", "CHAOS_child4_1", "CHAOS_child7_1",
+                   "CHAOS_child12_1", "CHAOS_child14_1","CHAOS_child15_1")
+
+CHAOS_child[cols_reverse] <- lapply(CHAOS_child[cols_reverse], reverseCode, min=1, max=5)
 ```
