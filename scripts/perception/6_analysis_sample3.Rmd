@@ -227,11 +227,21 @@ print(m4plot)
 m1 <- lm((MBEA4_total) ~ (CHAOS_child) + (predictability_child_caregiver), data=all_scored)
 summary(m1)
 
-m1plot <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+MBEA4_child_unpred_pred <- 
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.5, .5) +
   ggtitle("MBEA 4 Scores") +
-  ylab("Standardized Beta Coefficient Estimates")
-print(m1plot)
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=18),
+    axis.title.x = element_text(family="Arial", size=15),
+    axis.title.y = element_text(family="Arial",size=15),
+    axis.text.x = element_text(family="Arial", size=12),
+    axis.text.y = element_text(family="Arial",size=12),
+  ) +
+  scale_x_discrete(labels=c("Childhood Predictability", "Childhood CHAOS"))
+print(MBEA4_child_unpred_pred)
+ggsave("MBEA4_child_unpred_pred.png", width = 6.5, height = 4)
 
 #Adolescent
 m2 <- lm((MBEA4_total) ~ (CHAOS_adol) + (predictability_adol_caregiver), data=all_scored)
@@ -249,56 +259,63 @@ print(m2plot)
 #CHAOS Childhood --> MBEA 2
 CHAOS_child_MBEA2 <- ggplot(all_scored, aes(x=CHAOS_child, y=MBEA2_total)) +
                     geom_point(position = "jitter") +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(CHAOS_child_MBEA2)
+ggsave("CHAOS_child_MBEA2.png", width = 6.5, height = 4)
 
 #Threat Adolescence --> MBEA 2
 threat_adol_MBEA2 <- ggplot(all_scored, aes(x=threat_adolescence_total, y=MBEA2_total)) +
                     geom_point(position = "jitter") +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(threat_adol_MBEA2)
+ggsave("threat_adol_MBEA2.png", width = 6.5, height = 4)
 
 #CHAOS Childhood --> MBEA 4
 CHAOS_child_MBEA4 <- ggplot(all_scored, aes(x=CHAOS_child, y=MBEA4_total)) +
                     geom_point(position = "jitter") +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(CHAOS_child_MBEA4)
+ggsave("CHAOS_child_MBEA4).png", width = 6.5, height = 4)
 
 #POS Adolescence Caregiver Predictability --> MBEA 2
 caregiver_pred_adol_MBEA2 <- ggplot(all_scored, aes(x=predictability_adol_caregiver, y=MBEA2_total)) +
                     geom_point() +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(caregiver_pred_adol_MBEA2)
 
 #POS Adolescence Caregiver Predictability --> MBEA 4
 caregiver_pred_adol_MBEA4 <- ggplot(all_scored, aes(x=predictability_adol_caregiver, y=MBEA4_total)) +
                     geom_point(position="jitter") +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(caregiver_pred_adol_MBEA4)
+ggsave("caregiver_pred_adol_MBEA4.png", width = 6.5, height = 4)
 
 #POS Child Caregiver Predictability --> MBEA 4
 caregiver_pred_child_MBEA4 <- ggplot(all_scored, aes(x=predictability_child_caregiver, y=MBEA4_total)) +
                     geom_point(position="jitter") +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(caregiver_pred_child_MBEA4)
+ggsave("caregiver_pred_child_MBEA4.png", width = 6.5, height = 4)
 
 #POS Adolescence Caregiver Opportunity --> MBEA 4
 caregiver_opp_adol_MBEA4 <- ggplot(all_scored, aes(x=opportunity_adol_caregiver, y=MBEA4_total)) +
                     geom_point(position="jitter") +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(caregiver_opp_adol_MBEA4)
 
 #CHAOS Child--> MBEA 1
 CHAOS_child_MBEA1 <- ggplot(all_scored, aes(x=CHAOS_child, y=MBEA1_total)) +
                     geom_point(position="jitter") +
-                    geom_smooth(method=lm)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
 print(CHAOS_child_MBEA1)
+ggsave("CHAOS_child_MBEA1.png", width = 6.5, height = 4)
 
 #Threat adol--> MBEA 1
-CHAOS_child_MBEA1 <- ggplot(all_scored, aes(x=threat_adolescence_total, y=MBEA1_total)) +
+threat_adol_MBEA1 <- ggplot(all_scored, aes(x=threat_adolescence_total, y=MBEA1_total)) +
                     geom_point(position="jitter") +
-                    geom_smooth(method=lm)
-print(CHAOS_child_MBEA1)
+                    geom_smooth(method=lm) + theme(axis.title=element_text(size=20,face="bold"))
+print(threat_adol_MBEA1)
+ggsave("threat_adol_MBEA1.png", width = 6.5, height = 4)
 
 
 ```
@@ -323,5 +340,26 @@ CHAOS_new_adol <- all_scored$CHAOS_adol/75
 
 t.test(CHAOS_og_adol, CHAOS_new_adol)
 
+```
+
+```{r}
+CHAOS_child <- all_scored$CHAOS_child
+threat_adol <- all_scored$threat_adolescence_total
+caregiver_pred_child <- all_scored$predictability_child_caregiver
+caregiver_pred_adol <- all_scored$predictability_adol_caregiver
+MBEA2_total <- all_scored$MBEA2_total
+MBEA4_total <- all_scored$MBEA4_total
+
+corr.test(caregiver_pred_adol, MBEA4_total)
+
+CHAOS_child_histo <- ggplot(all_scored, aes(x=CHAOS_child)) +
+                    geom_histogram() + theme(axis.title=element_text(size=20,face="bold"))
+print(CHAOS_child_histo)
+ggsave("CHAOS_child_histo.png", width = 6.5, height = 4)
+
+threat_adol_histo <- ggplot(all_scored, aes(x=threat_adolescence_total)) +
+                    geom_histogram() + theme(axis.title=element_text(size=20,face="bold"))
+print(threat_adol_histo)
+ggsave("threat_adol_histo.png", width = 6.5, height = 4)
 ```
 
