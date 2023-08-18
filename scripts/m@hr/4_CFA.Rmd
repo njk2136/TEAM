@@ -22,21 +22,21 @@ keep <- setdiff(all$ID,first$Q158)
 
 second <- all[all$ID %in% keep, ] 
 
-MH <- second %>%
+MH_second <- second %>%
   dplyr::select("M.H_child1_1":"M.H_child20_1")
 
-MH <- MH[complete.cases(MH),]
+MH_second <- MH_second[complete.cases(MH_second),]
 
 cols_reverse <- c("M.H_child6_1","M.H_child7_1","M.H_child11_1","M.H_child12_1","M.H_child18_1","M.H_child19_1","M.H_child20_1")
-MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+MH_second[cols_reverse] <- lapply(MH_second[cols_reverse], reverseCode, min=1, max=7)
 
-MH <- all %>%
+MH_all <- all %>%
   dplyr::select("M.H_child1_1":"M.H_child20_1")
 
-MH <- MH[complete.cases(MH),]
+MH_all <- MH_all[complete.cases(MH_all),]
 
 cols_reverse <- c("M.H_child6_1","M.H_child7_1","M.H_child11_1","M.H_child12_1","M.H_child18_1","M.H_child19_1","M.H_child20_1")
-MH[cols_reverse] <- lapply(MH[cols_reverse], reverseCode, min=1, max=7)
+MH_all[cols_reverse] <- lapply(MH_all[cols_reverse], reverseCode, min=1, max=7)
 
 #use "all" for *new* construct validity results (SRQ + MET)
 #use "second" for replications of construct validity results from the EFA, as well as the CFA
@@ -98,19 +98,19 @@ cols_musicmaking <- c("M.H_child5_1","M.H_child6_1","M.H_child7_1","M.H_child8_1
 
 
 #scoring
-second$MH_total <- apply(MH,1, sum) # total BMRQ scores
-second$MH_caregiverbeliefs <- apply(MH[cols_caregiverbeliefs], 1,sum)
-second$MH_caregiversinging <- apply(MH[cols_caregiversinging],1, sum)
-second$MH_childhoodattitude <-apply(MH[cols_childhoodattitude],1, sum)
-second$MH_socialcontexts <- apply(MH[cols_socialcontexts],1, sum)
-second$MH_musicmaking <- apply(MH[cols_musicmaking],1, sum)
+second$MH_total <- apply(MH_second,1, sum) # total BMRQ scores
+second$MH_caregiverbeliefs <- apply(MH_second[cols_caregiverbeliefs], 1,sum)
+second$MH_caregiversinging <- apply(MH_second[cols_caregiversinging],1, sum)
+second$MH_childhoodattitude <-apply(MH_second[cols_childhoodattitude],1, sum)
+second$MH_socialcontexts <- apply(MH_second[cols_socialcontexts],1, sum)
+second$MH_musicmaking <- apply(MH_second[cols_musicmaking],1, sum)
 
-all$MH_total <- apply(MH,1, sum) # total BMRQ scores
-all$MH_caregiverbeliefs <- apply(MH[cols_caregiverbeliefs], 1,sum)
-all$MH_caregiversinging <- apply(MH[cols_caregiversinging],1, sum)
-all$MH_childhoodattitude <-apply(MH[cols_childhoodattitude],1, sum)
-all$MH_socialcontexts <- apply(MH[cols_socialcontexts],1, sum)
-all$MH_musicmaking <- apply(MH[cols_musicmaking],1, sum)
+all$MH_total <- apply(MH_all,1, sum) # total BMRQ scores
+all$MH_caregiverbeliefs <- apply(MH_all[cols_caregiverbeliefs], 1,sum)
+all$MH_caregiversinging <- apply(MH_all[cols_caregiversinging],1, sum)
+all$MH_childhoodattitude <-apply(MH_all[cols_childhoodattitude],1, sum)
+all$MH_socialcontexts <- apply(MH_all[cols_socialcontexts],1, sum)
+all$MH_musicmaking <- apply(MH_all[cols_musicmaking],1, sum)
 
 
 #validity tests
