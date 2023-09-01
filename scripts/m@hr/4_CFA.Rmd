@@ -150,14 +150,19 @@ summary(m1)
 ```{r}
 '%notin%' <- Negate('%in%')
 retest <- subset(all, all$ID %notin% second$ID)
+retest <- merge(retest, first, by.x = "ID", by.y = "PROLIFIC_PID")
 
 range(retest$What.is.your.age., na.rm = TRUE)
 mean(retest$What.is.your.age., na.rm = TRUE)
-cor.test(retest$MH_total.x, retest$MH_total.y)
 
 table(retest$What.is.your.ethnicity..check.all.that.apply..)
 
 icc(retest$MH_total.x, retest$MH_total.y, model = "twoway", type = "consistency")
+
+#ICMPC Poster
+MH_musicmaking.x <- retest$MH_musicmaking.x
+MH_musicmaking.y <- retest$MH_musicmaking.y
+corr.test(MH_musicmaking.x, MH_musicmaking.y)
 ```
 
 
@@ -319,7 +324,7 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
 MET_melodic <-
 ggplot(all, aes(x=MH_total, y=MET_melodicscore)) + 
   theme_classic() +
-  geom_point(position="jitter") + 
+  geom_point() + 
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("MET Melodic") +
@@ -335,7 +340,7 @@ corr.test(MH_total, MET_melodicscore)
 STAI <-
 ggplot(all, aes(x=MH_total, y=STAI_total)) + 
   theme_classic() +
-  geom_point(position="jitter") + 
+  geom_point() + 
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("STAI") +
@@ -345,6 +350,20 @@ ggsave("STAI.png", width = 6.5, height = 4)
 
 STAI_total <- all$STAI_total
 corr.test(MH_total, STAI_total)
+
+SRQ<-
+ggplot(all, aes(x=MH_total, y=SRQ_current_total)) + 
+  theme_classic() +
+  geom_point() + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR General") +
+  ylab("SRQ") +
+  theme(axis.title=element_text(size=20,face="bold"))
+print(SRQ)
+ggsave("SRQ.png", width = 6.5, height = 4)
+
+SRQ_current_total <- all$SRQ_current_total
+corr.test(MH_total, SRQ_current_total)
 ```
 
 
