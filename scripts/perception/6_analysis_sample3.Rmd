@@ -204,11 +204,21 @@ print(m2plot)
 m3 <- lm((MBEA4_total) ~ (predictability_adol_caregiver) + (opportunity_adol_caregiver) + (safetyandsupport_adol_caregiver), data=all_scored)
 summary(m3)
 
-m3plot <- plot_model(m3, show.values = TRUE,vline.color = "lightgrey") + 
+MBEA4_pos_adol <- plot_model(m3, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.75, .75) +
   ggtitle("MBEA 4 Scores") +
-  ylab("Standardized Beta Coefficient Estimates")
-print(m3plot)
+  ylab("Standardized Beta Coefficient Estimates") +
+  theme_light() +
+  theme(title=element_text(family="Arial", size=18),
+    axis.title.x = element_text(family="Arial", size=15),
+    axis.title.y = element_text(family="Arial",size=15),
+    axis.text.x = element_text(family="Arial", size=12),
+    axis.text.y = element_text(family="Arial",size=12),
+    ) +
+  scale_x_discrete(labels=c("Adolescent Safety", "Adolescent Opportunity", "Adolescent Predictability"))
+print(MBEA4_pos_adol)
+ggsave("MBEA4_pos_adol.png", width = 6.5, height = 4)
+
 
 #Timing Results
 m4 <- lm((MBEA4_total) ~ (predictability_child_caregiver) + (predictability_adol_caregiver) + (opportunity_child_caregiver) + (opportunity_adol_caregiver), data=all_scored)
@@ -229,7 +239,7 @@ summary(m1)
 
 MBEA4_child_unpred_pred <- 
 plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
-  ylim(-.5, .5) +
+  ylim(-1, 1) +
   ggtitle("MBEA 4 Scores") +
   ylab("Standardized Beta Coefficient Estimates")+
   theme_light() +
@@ -395,7 +405,7 @@ caregiver_pred_adol <- all_scored$predictability_adol_caregiver
 MBEA2_total <- all_scored$MBEA2_total
 MBEA4_total <- all_scored$MBEA4_total
 
-corr.test(caregiver_pred_adol, MBEA4_total)
+corr.test(threat_adol, MBEA2_total)
 
 CHAOS_child_histo <- ggplot(all_scored, aes(x=CHAOS_child)) +
                     geom_histogram() + theme(axis.title=element_text(size=20,face="bold"))
