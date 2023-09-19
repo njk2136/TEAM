@@ -13,7 +13,7 @@ library(tidyverse)
 #read in .csv
 ```{r}
 survey <- read.csv(file="../../../POS-DEV-Scale/data/POS DEV CFA_May 10, 2023_10.52 2.csv")
-df <- read.csv(file="../../../TEAM/data/perception/Perception Covariate Follow-Up_August 7, 2023_11.45.csv")
+df <- read.csv(file="../../../TEAM/data/perception/Perception Covariate Follow-Up_September 8, 2023_16.13.csv")
 source("../reverseCode.R")
 ```
 
@@ -622,6 +622,6 @@ survey$MBEA4_total <- apply(MBEA4,1, sum)
 
 #saving output
 ```{r}
-#all <- merge(x= survey, y= df, by= 'PROLIFIC_PID')
-write.csv(survey, file="../../../TEAM/data/perception/survey_scored_sample3.csv")
+all <- merge(x= survey, y= df, by= 'PROLIFIC_PID')
+write.csv(all, file="../../../TEAM/data/perception/survey_scored_sample3.csv")
 ```
