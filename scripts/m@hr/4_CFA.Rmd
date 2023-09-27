@@ -423,29 +423,29 @@ ggplot(all, aes(x=MH_total, y=MET_melodicscore)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("MET Melodic") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(MET_melodic_general)
 ggsave("MET_melodic_general.png", width = 6.5, height = 4)
 
 MET_melodic_cbeliefs <-
 ggplot(all, aes(x=MH_caregiverbeliefs, y=MET_melodicscore)) + 
   theme_classic() +
-  geom_point() + 
+  geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Beliefs") +
   ylab("MET Melodic") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(MET_melodic_cbeliefs)
 ggsave("MET_melodic_cbeliefs.png", width = 6.5, height = 4)
 
 MET_melodic_childengagement <-
 ggplot(all, aes(x=MH_musicmaking, y=MET_melodicscore)) + 
   theme_classic() +
-  geom_point() + 
+  geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Child Engagement") +
   ylab("MET Melodic") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(MET_melodic_childengagement)
 ggsave("MET_melodic_childengagement.png", width = 6.5, height = 4)
 
@@ -456,22 +456,22 @@ corr.test(MH_total, MET_melodicscore)
 HUMS_healthy <-
 ggplot(all, aes(x=MH_total, y=HUMS_adult_healthy)) + 
   theme_classic() +
-  geom_point() + 
+  geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("HUMS Healthy") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(HUMS_healthy)
 ggsave("HUMS_healthy.png", width = 6.5, height = 4)
 
 HUMS_unhealthy <-
 ggplot(all, aes(x=MH_childhoodattitude, y=HUMS_adult_unhealthy)) + 
   theme_classic() +
-  geom_point() + 
+  geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Attitude") +
   ylab("HUMS Unhealthy") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(HUMS_unhealthy)
 ggsave("HUMS_unhealthy.png", width = 6.5, height = 4)
 
@@ -482,7 +482,7 @@ ggplot(all, aes(x=MH_total, y=STAI_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("STAI") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
 ggsave("STAI.png", width = 6.5, height = 4)
 
@@ -496,7 +496,7 @@ ggplot(all, aes(x=MH_total, y=CD.RISC_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("CD.RISC") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("CD.RISC.png", width = 6.5, height = 4)
 
@@ -507,7 +507,7 @@ ggplot(all, aes(x=MH_total, y=SRQ_current_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("SRQ") +
-  theme(axis.title=element_text(size=20,face="bold"))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(SRQ)
 ggsave("SRQ.png", width = 6.5, height = 4)
 
