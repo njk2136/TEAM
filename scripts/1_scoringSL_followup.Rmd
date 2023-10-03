@@ -41,13 +41,31 @@ rhythmic_score <- MET_cleaned %>%
 names(rhythmic_score)[2] <- "MET_rhythmicscore"
 
 MET_scores <- merge(melodic_score, rhythmic_score)
+
+
+MET_key <- MET %>%
+  dplyr::select(ANSWER, text, display, Response) %>%
+  subset(Response != "AUDIO PLAY REQUESTED") %>%
+  subset(Response != "") %>%
+  subset(display !="Practice") %>%
+  subset(display !="practice_ritmo") %>%
+  dplyr::select(ANSWER, text, display) %>%
+  distinct()
+
+write.csv(MET_key, file='../data/MET_key.csv')
 ```
 
 #BMRQ
 ```{r}
 bmrq <- ogsurveyresponses %>%
-  dplyr::select("Please.choose.the.most.appropriate.category....When.I.share.music.with.someone.I.feel.a.special.connection.with.that.person.":"Please.choose.the.most.appropriate.category....When.I.hear.a.tune.I.like.a.lot.I.can.t.help.tapping.or.moving.to.its.beat.")
+  dplyr::select("Please.choose.the.most.appropriate.category....When.I.share.music.with.someone.I.feel.a.special.connection.with.that.person.":"Please.choose.the.most.appropriate.category....When.I.hear.a.tune.I.like.a.lot.I.can.t.help.tapping.or.moving.to.its.beat.", "PublicID")
 
+absorption <- followup %>%
+  dplyr::select('AIMS_current3_1', 'AIMS_current13_1', 'AIMS_current15_1', 'AIMS_current29_1', 'Q158')
+
+bmrq <- merge(bmrq,absorption, by.x="PublicID", by.y = 'Q158')
+bmrq$Q158 <- NULL
+bmrq$PublicID <- NULL
 bmrq$X21..Mark..Completely.Agree..for.this.question....Completely.Disagree.Completely.Agree <- NULL
 
 # BMRQ columns to reverse code and sub-score
@@ -79,6 +97,8 @@ cols_socialreward <-c("Please.choose.the.most.appropriate.category....When.I.sha
   "Please.choose.the.most.appropriate.category....I.like.to.sing.or.play.an.instrument.with.other.people.",
                      "Please.choose.the.most.appropriate.category....At.a.concert.I.feel.connected.to.the.performers.and.the.audience.")
 
+absorption_cols = c('AIMS_current3', 'AIMS_current13', 'AIMS_current15', 'AIMS_current29')
+
 # Reverse code
 bmrq[cols_reverse] <- lapply(bmrq[cols_reverse], reverseCode)
 
@@ -90,6 +110,7 @@ ogsurveyresponses$BMRQ_sensorimotor <- apply(bmrq[cols_sensorimotor],1, sum)
 ogsurveyresponses$BMRQ_moodreg <-apply(bmrq[cols_moodreg],1, sum)
 ogsurveyresponses$BMRQ_musicseek <- apply(bmrq[cols_musicseek],1, sum)
 ogsurveyresponses$BMRQ_socialreward <- apply(bmrq[cols_socialreward],1, sum)
+ogsurveyresponses$BMRQ_absorption <- apply(bmrq[absorption_cols],1, sum)
 ```
 
 

@@ -227,7 +227,7 @@ summary(m1)
 
 #moderation?
 ```{r}
-m1 <- lm(scale(CD.RISC_totl) ~ scale(deprivation_sum)*scale(BMRQ_absorption), data=all_scored)
+m1 <- lm(scale(CD.RISC_total) ~ scale(deprivation_sum)*scale(BMRQ_absorption), data=all_scored)
 summary(m1)
 ```
 
@@ -282,5 +282,15 @@ abs_HUMS_label <-
 ggsave(abs_HUMS_label, file='../../figures/pleasing:displeasing_followup/abs_HUMS_label.png')
 
 cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
+
+HUMS_Absorption <- all_scored %>%
+  select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy, ID) %>%
+  pivot_longer(HUMS_adult_healthy:HUMS_adult_unhealthy, names_to = "type", values_to = "HUMS")
+
+HUMS_Absorption$type <- ifelse(HUMS_Absorption$type=="HUMS_adult_unhealthy", "Unhealthy", "Healthy")
+HUMS_Absorption$type <- as.factor(HUMS_Absorption$type)
+contrasts(HUMS_Absorption$type) <- c(-0.5,0.5)
+m3 <- lmer(scale(HUMS) ~ scale(BMRQ_absorption)*type + (1|ID), data=HUMS_Absorption)
+summary(m3)
 ```
 
