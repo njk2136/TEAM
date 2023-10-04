@@ -535,3 +535,10 @@ ggplot(data=all, aes(x=MH_total, y=CD.RISC_total))+
   theme_classic()
 ```
 
+```{r}
+mh <- second$MH_total
+bmrq <- second$BMRQ_total
+
+corr.test(mh, bmrq)
+```
+

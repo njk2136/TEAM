@@ -177,3 +177,11 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
 dev.off()
 ```
 
+#Correlation values
+```{r}
+mh <- full$MH_total
+threat <- full$threat_childhood_total
+
+corr.test(mh, threat)
+```
+
