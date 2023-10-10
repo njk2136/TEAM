@@ -65,8 +65,13 @@ absorption <- followup %>%
 
 bmrq <- merge(bmrq,absorption, by.x="PublicID", by.y = 'Q158')
 bmrq$Q158 <- NULL
-bmrq$PublicID <- NULL
 bmrq$X21..Mark..Completely.Agree..for.this.question....Completely.Disagree.Completely.Agree <- NULL
+absorption$Q158 <- NULL
+
+
+ogsurveyresponses <- merge(ogsurveyresponses, bmrq, by.x="PublicID", by.y = 'PublicID')
+ogsurveyresponses$PublicID <- NULL
+bmrq$PublicID <- NULL
 
 # BMRQ columns to reverse code and sub-score
 cols_reverse <- c("Please.choose.the.most.appropriate.category....In.my.free.time.I.hardly.listen.to.music.",
@@ -97,11 +102,10 @@ cols_socialreward <-c("Please.choose.the.most.appropriate.category....When.I.sha
   "Please.choose.the.most.appropriate.category....I.like.to.sing.or.play.an.instrument.with.other.people.",
                      "Please.choose.the.most.appropriate.category....At.a.concert.I.feel.connected.to.the.performers.and.the.audience.")
 
-absorption_cols = c('AIMS_current3', 'AIMS_current13', 'AIMS_current15', 'AIMS_current29')
+absorption_cols = c('AIMS_current3_1', 'AIMS_current13_1', 'AIMS_current15_1', 'AIMS_current29_1')
 
 # Reverse code
 bmrq[cols_reverse] <- lapply(bmrq[cols_reverse], reverseCode)
-
 
 # Add sub-scores and total to main df
 ogsurveyresponses$BMRQ_total <- apply(bmrq,1, sum) # total BMRQ scores

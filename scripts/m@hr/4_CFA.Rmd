@@ -150,14 +150,15 @@ summary(m1)
 ```{r}
 '%notin%' <- Negate('%in%')
 retest <- subset(all, all$ID %notin% second$ID)
-retest <- merge(retest, first, by.x = "ID", by.y = "PROLIFIC_PID")
+retest <- merge(retest, first, by.x = "ID", by.y = "PROLIFIC_PID") %>%
+  dplyr::select(MH_childhoodattitude.x,MH_childhoodattitude.y)
+
+ICC(retest, missing=TRUE, alpha=0.5, lmer=TRUE, check.keys = FALSE)
 
 range(retest$What.is.your.age., na.rm = TRUE)
 mean(retest$What.is.your.age., na.rm = TRUE)
 
 table(retest$What.is.your.ethnicity..check.all.that.apply..)
-
-icc(retest$MH_total.x, retest$MH_total.y, model = "twoway", type = "consistency")
 
 #ICMPC Poster
 MH_musicmaking.x <- retest$MH_musicmaking.x
@@ -264,7 +265,7 @@ cor.test()
 
 ```
 
-#updated figures for manuscript 9/25
+#updated figures for manuscript 
 ```{r}
 #Replications GoldMSI
 variables = dplyr::select(second, 
@@ -484,7 +485,29 @@ ggplot(all, aes(x=MH_total, y=STAI_total)) +
   ylab("STAI") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
-ggsave("STAI.png", width = 6.5, height = 4)
+ggsave("Figure5_C.png", width = 6.5, height = 4)
+
+STAI <-
+ggplot(all, aes(x=MH_caregiversinging, y=STAI_total)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Caregiver Singing") +
+  ylab("STAI") +
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
+print(STAI)
+ggsave("Figure5_B.png", width = 6.5, height = 4)
+
+STAI <-
+ggplot(all, aes(x=MH_childhoodattitude, y=STAI_total)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Attitude Toward Childhood Music Environment") +
+  ylab("STAI") +
+  theme(axis.title=element_text(size=15,face="bold"), axis.text=element_text(size=15))
+print(STAI)
+ggsave("Figure5_C.png", width = 6.5, height = 4)
 
 STAI_total <- all$STAI_total
 corr.test(MH_total, STAI_total)
@@ -498,7 +521,51 @@ ggplot(all, aes(x=MH_total, y=CD.RISC_total)) +
   ylab("CD.RISC") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
-ggsave("CD.RISC.png", width = 6.5, height = 4)
+ggsave("Figure6_A.png", width = 6.5, height = 4)
+
+CD.RISC <-
+ggplot(all, aes(x=MH_caregiverbeliefs, y=CD.RISC_total)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Caregiver Beliefs") +
+  ylab("CD.RISC") +
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
+print(CD.RISC)
+ggsave("Figure6_B.png", width = 6.5, height = 4)
+
+CD.RISC <-
+ggplot(all, aes(x=MH_caregiversinging, y=CD.RISC_total)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Caregiver Singing") +
+  ylab("CD.RISC") +
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
+print(CD.RISC)
+ggsave("Figure6_C.png", width = 6.5, height = 4)
+
+CD.RISC <-
+ggplot(all, aes(x=MH_socialcontexts, y=CD.RISC_total)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Social Contexts") +
+  ylab("CD.RISC") +
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
+print(CD.RISC)
+ggsave("Figure6_D.png", width = 6.5, height = 4)
+
+CD.RISC <-
+ggplot(all, aes(x=MH_childhoodattitude, y=CD.RISC_total)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Attitude Toward Childhood Music Environment") +
+  ylab("CD.RISC") +
+  theme(axis.title=element_text(size=15,face="bold"), axis.text=element_text(size=15))
+print(CD.RISC)
+ggsave("Figure6_E.png", width = 6.5, height = 4)
 
 SRQ<-
 ggplot(all, aes(x=MH_total, y=SRQ_current_total)) + 
@@ -511,8 +578,32 @@ ggplot(all, aes(x=MH_total, y=SRQ_current_total)) +
 print(SRQ)
 ggsave("SRQ.png", width = 6.5, height = 4)
 
+SRQ<-
+ggplot(all, aes(x=MH_socialcontexts, y=SRQ_current_total)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Social Contexts") +
+  ylab("SRQ") +
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
+print(SRQ)
+ggsave("Figure2_B.png", width = 6.5, height = 4)
+
 SRQ_current_total <- all$SRQ_current_total
 corr.test(MH_total, SRQ_current_total)
+
+BMRQ_socialreward <-
+ggplot(second, aes(x=MH_socialcontexts, y=BMRQ_socialreward)) + 
+  theme_classic() +
+  geom_point(position="jitter") + 
+  geom_smooth(method=lm) + 
+  xlab("M@HR Social Contexts") +
+  ylab("BMRQ Social Reward") +
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
+print(BMRQ_socialreward)
+ggsave("Figure2_A.png", width = 6.5, height = 4)
+
+
 ```
 
 
@@ -528,6 +619,28 @@ summary(m1)
 m1 <- lm(STAI_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
 
+m1 <- lm(BMRQ_socialreward ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = second)
+summary(m1)
+
+BMRQ_socialreward <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("BMRQ Social Reward") +
+  ylab("Standardized Beta Coefficient Estimates") +
+  theme(axis.title=element_text(size=17), axis.text=element_text(size=17))
+print(BMRQ_socialreward)
+ggsave("Figure2_C.png", width = 6.5, height = 4)
+
+m1 <- lm(SRQ_current_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
+summary(m1)
+
+SRQ <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("SRQ") +
+  ylab("Standardized Beta Coefficient Estimates") +
+  theme(axis.title=element_text(size=17), axis.text=element_text(size=17))
+print(SRQ)
+ggsave("Figure2_D.png", width = 6.5, height = 4)
+
 ##scatter plots##
 ggplot(data=all, aes(x=MH_total, y=CD.RISC_total))+
   geom_point()+
@@ -536,9 +649,9 @@ ggplot(data=all, aes(x=MH_total, y=CD.RISC_total))+
 ```
 
 ```{r}
-mh <- second$MH_total
-bmrq <- second$BMRQ_total
+mh <- all$MH_total
+SRQ <- all$SRQ_current_total
 
-corr.test(mh, bmrq)
+corr.test(mh, SRQ)
 ```
 
