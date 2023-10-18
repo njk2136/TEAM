@@ -665,6 +665,11 @@ ggplot(data=all, aes(x=MH_total, y=CD.RISC_total))+
   geom_point()+
   stat_smooth(method="lm") +
   theme_classic()
+
+#checking if MET/STAI/cd.risc correlations persist w. musical training as a covariate
+m1 <- lm(HUMS_adult_healthy ~ MH_total + Gold_musicaltraining, data = all)
+summary(m1)
+all$HUMS_adult_healthy
 ```
 
 ```{r}
