@@ -503,9 +503,9 @@ ggplot(all, aes(x=MH_childhoodattitude, y=STAI_total)) +
   theme_classic() +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
-  xlab("M@HR Attitude Toward Childhood Music Environment") +
+  xlab("M@HR Attitude") +
   ylab("STAI") +
-  theme(axis.title=element_text(size=15,face="bold"), axis.text=element_text(size=15))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
 ggsave("Figure5_C.png", width = 6.5, height = 4)
 
@@ -550,7 +550,7 @@ ggplot(all, aes(x=MH_socialcontexts, y=CD.RISC_total)) +
   theme_classic() +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
-  xlab("M@HR Social Contexts") +
+  xlab("M@HR Social Listening Contexts") +
   ylab("CD.RISC") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
@@ -561,9 +561,9 @@ ggplot(all, aes(x=MH_childhoodattitude, y=CD.RISC_total)) +
   theme_classic() +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
-  xlab("M@HR Attitude Toward Childhood Music Environment") +
+  xlab("M@HR Attitude") +
   ylab("CD.RISC") +
-  theme(axis.title=element_text(size=15,face="bold"), axis.text=element_text(size=15))
+  theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_E.png", width = 6.5, height = 4)
 
@@ -583,7 +583,7 @@ ggplot(all, aes(x=MH_socialcontexts, y=SRQ_current_total)) +
   theme_classic() +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
-  xlab("M@HR Social Contexts") +
+  xlab("M@HR Social Listening Contexts") +
   ylab("SRQ") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(SRQ)
@@ -597,7 +597,7 @@ ggplot(second, aes(x=MH_socialcontexts, y=BMRQ_socialreward)) +
   theme_classic() +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
-  xlab("M@HR Social Contexts") +
+  xlab("M@HR Social Listening Contexts") +
   ylab("BMRQ Social Reward") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(BMRQ_socialreward)
@@ -609,9 +609,20 @@ ggsave("Figure2_A.png", width = 6.5, height = 4)
 
 #Utility of scale models
 ```{r}
-cor.test(all$MH_musicmaking, all$MET_rhythmicscore)
-m1 <- lm(HUMS_adult_healthy ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
+m1 <- lm(scale(HUMS_adult_healthy) ~ scale(MH_caregiverbeliefs) + scale(MH_musicmaking) + scale(MH_caregiversinging) + scale(MH_socialcontexts) + scale(MH_childhoodattitude), data = all)
 summary(m1)
+
+HUMS_adult_healthy <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+  ylim(-.5, .5) +
+  ggtitle("HUMS Healthy") +
+  ylab("Standardized Beta Coefficient Estimates") +
+  xlab("M@HR") +
+  scale_x_discrete(labels=c("Attitude Toward Childhood Music Environment","Social Listening Contexts", "Caregiver Initiation of Singing", "Child Engagement with Music", "Caregiver Beliefs")) + 
+  theme_light() +
+  geom_hline(yintercept=0,color='black',linetype='dashed') +
+  theme(axis.title=element_text(size=10), axis.text=element_text(size=10))
+print(HUMS_adult_healthy)
+ggsave("Figure4_C.png", width = 6.5, height = 4)
 
 m1 <- lm(PASS_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
@@ -619,25 +630,33 @@ summary(m1)
 m1 <- lm(STAI_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
 
-m1 <- lm(BMRQ_socialreward ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = second)
+m1 <- lm(scale(MH_socialcontexts) ~ scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_absorption) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor), data=second)
 summary(m1)
 
 BMRQ_socialreward <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.5, .5) +
-  ggtitle("BMRQ Social Reward") +
+  ggtitle("M@HR Social Listening Contexts") +
   ylab("Standardized Beta Coefficient Estimates") +
-  theme(axis.title=element_text(size=17), axis.text=element_text(size=17))
+  xlab("eBMRQ") +
+  scale_x_discrete(labels=c("Sensorimotor","Music Seeking", "Absorption", "Social Reward", "Emotion", "Mood Regulation")) + 
+  theme_light() +
+  geom_hline(yintercept=0,color='black',linetype='dashed') +
+  theme(axis.title=element_text(size=15), axis.text=element_text(size=15))
 print(BMRQ_socialreward)
 ggsave("Figure2_C.png", width = 6.5, height = 4)
 
-m1 <- lm(SRQ_current_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
+m1 <- lm(scale(SRQ_current_total) ~ scale(MH_caregiverbeliefs) + scale(MH_musicmaking) + scale(MH_caregiversinging) + scale(MH_socialcontexts) + scale(MH_childhoodattitude), data = all)
 summary(m1)
 
 SRQ <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
   ylim(-.5, .5) +
   ggtitle("SRQ") +
   ylab("Standardized Beta Coefficient Estimates") +
-  theme(axis.title=element_text(size=17), axis.text=element_text(size=17))
+  xlab ("M@HR") +
+  scale_x_discrete(labels=c("Attitude Toward Childhood Music Environment","Social Listening Contexts", "Caregiver Initiation of Singing", "Child Engagement with Music", "Caregiver Beliefs")) + 
+  theme_light() +
+  geom_hline(yintercept=0,color='black',linetype='dashed') +
+  theme(axis.title=element_text(size=10), axis.text=element_text(size=10))
 print(SRQ)
 ggsave("Figure2_D.png", width = 6.5, height = 4)
 
@@ -649,9 +668,9 @@ ggplot(data=all, aes(x=MH_total, y=CD.RISC_total))+
 ```
 
 ```{r}
-mh <- all$MH_total
-SRQ <- all$SRQ_current_total
+mh <- second$MH_socialcontexts
+bmrq <- second$BMRQ_socialreward
 
-corr.test(mh, SRQ)
+corr.test(mh, bmrq)
 ```
 
