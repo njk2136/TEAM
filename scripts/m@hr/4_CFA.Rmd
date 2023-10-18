@@ -11,6 +11,7 @@ source("../reverseCode.R")
 library(psych)
 library(corrplot)
 library(lavaan)
+library(sjPlot)
 ```
 
 #read in data
@@ -612,7 +613,8 @@ ggsave("Figure2_A.png", width = 6.5, height = 4)
 m1 <- lm(scale(HUMS_adult_healthy) ~ scale(MH_caregiverbeliefs) + scale(MH_musicmaking) + scale(MH_caregiversinging) + scale(MH_socialcontexts) + scale(MH_childhoodattitude), data = all)
 summary(m1)
 
-HUMS_adult_healthy <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+HUMS_adult_healthy <- 
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors="red") + 
   ylim(-.5, .5) +
   ggtitle("HUMS Healthy") +
   ylab("Standardized Beta Coefficient Estimates") +
@@ -633,7 +635,8 @@ summary(m1)
 m1 <- lm(scale(MH_socialcontexts) ~ scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_absorption) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor), data=second)
 summary(m1)
 
-BMRQ_socialreward <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+BMRQ_socialreward <- 
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors=c("blue","red")) + 
   ylim(-.5, .5) +
   ggtitle("M@HR Social Listening Contexts") +
   ylab("Standardized Beta Coefficient Estimates") +
@@ -642,13 +645,15 @@ BMRQ_socialreward <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey"
   theme_light() +
   geom_hline(yintercept=0,color='black',linetype='dashed') +
   theme(axis.title=element_text(size=15), axis.text=element_text(size=15))
+
 print(BMRQ_socialreward)
 ggsave("Figure2_C.png", width = 6.5, height = 4)
 
 m1 <- lm(scale(SRQ_current_total) ~ scale(MH_caregiverbeliefs) + scale(MH_musicmaking) + scale(MH_caregiversinging) + scale(MH_socialcontexts) + scale(MH_childhoodattitude), data = all)
 summary(m1)
 
-SRQ <- plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+SRQ <- 
+plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors = 'red') + 
   ylim(-.5, .5) +
   ggtitle("SRQ") +
   ylab("Standardized Beta Coefficient Estimates") +
