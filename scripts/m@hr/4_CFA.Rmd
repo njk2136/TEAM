@@ -483,10 +483,10 @@ ggplot(all, aes(x=MH_total, y=STAI_total)) +
   geom_point() + 
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
-  ylab("STAI") +
+  ylab("STAI Trait Anxiety") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
-ggsave("Figure5_C.png", width = 6.5, height = 4)
+ggsave("Figure5_A.png", width = 6.5, height = 4)
 
 STAI <-
 ggplot(all, aes(x=MH_caregiversinging, y=STAI_total)) + 
@@ -494,7 +494,7 @@ ggplot(all, aes(x=MH_caregiversinging, y=STAI_total)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Singing") +
-  ylab("STAI") +
+  ylab("STAI Trait Anxiety") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
 ggsave("Figure5_B.png", width = 6.5, height = 4)
@@ -505,7 +505,7 @@ ggplot(all, aes(x=MH_childhoodattitude, y=STAI_total)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Attitude") +
-  ylab("STAI") +
+  ylab("STAI Trait Anxiety") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
 ggsave("Figure5_C.png", width = 6.5, height = 4)
@@ -519,7 +519,7 @@ ggplot(all, aes(x=MH_total, y=CD.RISC_total)) +
   geom_point() + 
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
-  ylab("CD.RISC") +
+  ylab("CD.RISC Resilience") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_A.png", width = 6.5, height = 4)
@@ -530,7 +530,7 @@ ggplot(all, aes(x=MH_caregiverbeliefs, y=CD.RISC_total)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Beliefs") +
-  ylab("CD.RISC") +
+  ylab("CD.RISC Resilience") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_B.png", width = 6.5, height = 4)
@@ -541,7 +541,7 @@ ggplot(all, aes(x=MH_caregiversinging, y=CD.RISC_total)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Singing") +
-  ylab("CD.RISC") +
+  ylab("CD.RISC Resilience") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_C.png", width = 6.5, height = 4)
@@ -552,7 +552,7 @@ ggplot(all, aes(x=MH_socialcontexts, y=CD.RISC_total)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Social Listening Contexts") +
-  ylab("CD.RISC") +
+  ylab("CD.RISC Resilience") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_D.png", width = 6.5, height = 4)
@@ -563,7 +563,7 @@ ggplot(all, aes(x=MH_childhoodattitude, y=CD.RISC_total)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Attitude") +
-  ylab("CD.RISC") +
+  ylab("CD.RISC Resilience") +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_E.png", width = 6.5, height = 4)
@@ -619,10 +619,10 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors="red") +
   ggtitle("HUMS Healthy") +
   ylab("Standardized Beta Coefficient Estimates") +
   xlab("M@HR") +
-  scale_x_discrete(labels=c("Attitude Toward Childhood Music Environment","Social Listening Contexts", "Caregiver Initiation of Singing", "Child Engagement with Music", "Caregiver Beliefs")) + 
+  scale_x_discrete(labels=c("Attitude","Social Listening Contexts", "Caregiver Singing", "Child Engagement", "Caregiver Beliefs")) + 
   theme_light() +
   geom_hline(yintercept=0,color='black',linetype='dashed') +
-  theme(axis.title=element_text(size=10), axis.text=element_text(size=10))
+  theme(axis.title=element_text(size=15), axis.text=element_text(size=15))
 print(HUMS_adult_healthy)
 ggsave("Figure4_C.png", width = 6.5, height = 4)
 
@@ -658,10 +658,10 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors = 'red') +
   ggtitle("SRQ") +
   ylab("Standardized Beta Coefficient Estimates") +
   xlab ("M@HR") +
-  scale_x_discrete(labels=c("Attitude Toward Childhood Music Environment","Social Listening Contexts", "Caregiver Initiation of Singing", "Child Engagement with Music", "Caregiver Beliefs")) + 
+  scale_x_discrete(labels=c("Attitude","Social Listening Contexts", "Caregiver Singing", "Child Engagement", "Caregiver Beliefs")) + 
   theme_light() +
   geom_hline(yintercept=0,color='black',linetype='dashed') +
-  theme(axis.title=element_text(size=10), axis.text=element_text(size=10))
+  theme(axis.title=element_text(size=15), axis.text=element_text(size=15))
 print(SRQ)
 ggsave("Figure2_D.png", width = 6.5, height = 4)
 
