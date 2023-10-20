@@ -11,6 +11,7 @@ source("../reverseCode.R")
 library(psych)
 library(corrplot)
 library(lavaan)
+library(semPlot)
 library(sjPlot)
 ```
 
@@ -85,8 +86,9 @@ socialcontexts ~~ 0*musicmaking
     socialcontexts ~~ 1*socialcontexts
     musicmaking ~~ 1*musicmaking'
 
-fitG <- lavaan::cfa(model, data = MH,std.lv=TRUE)
+fitG <- lavaan::cfa(model, data = MH_all,std.lv=TRUE)
 lavaan::summary(fitG, fit.measures = T, standardized = T)
+semPaths(fitG)
 ```
 
 ```{r}
