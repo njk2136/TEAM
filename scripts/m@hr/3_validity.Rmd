@@ -124,7 +124,7 @@ summary(m1)
 m1 <- lm(data=full, HUMS_adult_unhealthy ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_socialcontexts + MH_musicmaking)
 summary(m1)
 
-m1 <- lm(data=full, MH_socialcontexts ~ BMRQ_moodreg + BMRQ_emotion + BMRQ_socialreward + BMRQ_absorption + BMRQ_musicseek + BMRQ_sensorimotor)
+m1 <- lm(data=full, scale(MH_socialcontexts) ~ scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_absorption) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor))
 summary(m1)
 ```
 
@@ -179,9 +179,9 @@ dev.off()
 
 #Correlation values
 ```{r}
-mh <- full$MH_total
-threat <- full$threat_childhood_total
+mh <- full$MH_musicmaking
+bmrq <- full$Gold_total
 
-corr.test(mh, threat)
+corr.test(mh, bmrq)
 ```
 
