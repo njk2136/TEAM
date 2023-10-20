@@ -425,9 +425,11 @@ ggplot(all, aes(x=MH_total, y=MET_melodicscore)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("MET Melodic") +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(MET_melodic_general)
-ggsave("MET_melodic_general.png", width = 6.5, height = 4)
+ggsave("Figure3_A.png", width = 6.5, height = 4)
 
 MET_melodic_cbeliefs <-
 ggplot(all, aes(x=MH_caregiverbeliefs, y=MET_melodicscore)) + 
@@ -436,9 +438,11 @@ ggplot(all, aes(x=MH_caregiverbeliefs, y=MET_melodicscore)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Beliefs") +
   ylab("MET Melodic") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(MET_melodic_cbeliefs)
-ggsave("MET_melodic_cbeliefs.png", width = 6.5, height = 4)
+ggsave("Figure3_B.png", width = 6.5, height = 4)
 
 MET_melodic_childengagement <-
 ggplot(all, aes(x=MH_musicmaking, y=MET_melodicscore)) + 
@@ -447,9 +451,11 @@ ggplot(all, aes(x=MH_musicmaking, y=MET_melodicscore)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Child Engagement") +
   ylab("MET Melodic") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(MET_melodic_childengagement)
-ggsave("MET_melodic_childengagement.png", width = 6.5, height = 4)
+ggsave("Figure3_C.png", width = 6.5, height = 4)
 
 MH_total <- all$MH_total
 MET_melodicscore <- all$MET_melodicscore
@@ -462,9 +468,11 @@ ggplot(all, aes(x=MH_total, y=HUMS_adult_healthy)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("HUMS Healthy") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(HUMS_healthy)
-ggsave("HUMS_healthy.png", width = 6.5, height = 4)
+ggsave("Figure4_A.png", width = 6.5, height = 4)
 
 HUMS_unhealthy <-
 ggplot(all, aes(x=MH_childhoodattitude, y=HUMS_adult_unhealthy)) + 
@@ -473,9 +481,11 @@ ggplot(all, aes(x=MH_childhoodattitude, y=HUMS_adult_unhealthy)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Attitude") +
   ylab("HUMS Unhealthy") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(HUMS_unhealthy)
-ggsave("HUMS_unhealthy.png", width = 6.5, height = 4)
+ggsave("Figure4_B.png", width = 6.5, height = 4)
 
 STAI <-
 ggplot(all, aes(x=MH_total, y=STAI_total)) + 
@@ -484,6 +494,8 @@ ggplot(all, aes(x=MH_total, y=STAI_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("STAI Trait Anxiety") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
 ggsave("Figure5_A.png", width = 6.5, height = 4)
@@ -495,6 +507,8 @@ ggplot(all, aes(x=MH_caregiversinging, y=STAI_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Singing") +
   ylab("STAI Trait Anxiety") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
 ggsave("Figure5_B.png", width = 6.5, height = 4)
@@ -506,6 +520,8 @@ ggplot(all, aes(x=MH_childhoodattitude, y=STAI_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Attitude") +
   ylab("STAI Trait Anxiety") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(STAI)
 ggsave("Figure5_C.png", width = 6.5, height = 4)
@@ -520,6 +536,8 @@ ggplot(all, aes(x=MH_total, y=CD.RISC_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR General") +
   ylab("CD.RISC Resilience") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_A.png", width = 6.5, height = 4)
@@ -531,6 +549,8 @@ ggplot(all, aes(x=MH_caregiverbeliefs, y=CD.RISC_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Beliefs") +
   ylab("CD.RISC Resilience") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_B.png", width = 6.5, height = 4)
@@ -542,6 +562,8 @@ ggplot(all, aes(x=MH_caregiversinging, y=CD.RISC_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Caregiver Singing") +
   ylab("CD.RISC Resilience") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_C.png", width = 6.5, height = 4)
@@ -553,6 +575,8 @@ ggplot(all, aes(x=MH_socialcontexts, y=CD.RISC_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Social Listening Contexts") +
   ylab("CD.RISC Resilience") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_D.png", width = 6.5, height = 4)
@@ -564,6 +588,8 @@ ggplot(all, aes(x=MH_childhoodattitude, y=CD.RISC_total)) +
   geom_smooth(method=lm) + 
   xlab("M@HR Attitude") +
   ylab("CD.RISC Resilience") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(CD.RISC)
 ggsave("Figure6_E.png", width = 6.5, height = 4)
@@ -585,7 +611,9 @@ ggplot(all, aes(x=MH_socialcontexts, y=SRQ_current_total)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Social Listening Contexts") +
-  ylab("SRQ") +
+  ylab("SRQ Total") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(SRQ)
 ggsave("Figure2_B.png", width = 6.5, height = 4)
@@ -599,10 +627,12 @@ ggplot(second, aes(x=MH_socialcontexts, y=BMRQ_socialreward)) +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
   xlab("M@HR Social Listening Contexts") +
-  ylab("BMRQ Social Reward") +
+  ylab("eBMRQ Music Social Reward") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   theme(axis.title=element_text(size=20,face="bold"), axis.text=element_text(size=15))
 print(BMRQ_socialreward)
-ggsave("Figure2_A.png", width = 6.5, height = 4)
+ggsave("Figure2_A.png", width = 6.5, height = 4.4)
 
 
 ```
@@ -622,9 +652,10 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors="red") +
   scale_x_discrete(labels=c("Attitude","Social Listening Contexts", "Caregiver Singing", "Child Engagement", "Caregiver Beliefs")) + 
   theme_light() +
   geom_hline(yintercept=0,color='black',linetype='dashed') +
-  theme(axis.title=element_text(size=15), axis.text=element_text(size=15))
+  theme(axis.title=element_text(size=15, face="bold"), axis.text=element_text(size=15, face="bold"), plot.title=element_text(size=15, face="bold"), axis.text.x=element_text(size=10))
+
 print(HUMS_adult_healthy)
-ggsave("Figure4_C.png", width = 6.5, height = 4)
+ggsave("Figure4_C.png", width = 6.85, height = 4)
 
 m1 <- lm(PASS_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
@@ -644,10 +675,10 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors=c("blue","re
   scale_x_discrete(labels=c("Sensorimotor","Music Seeking", "Absorption", "Social Reward", "Emotion", "Mood Regulation")) + 
   theme_light() +
   geom_hline(yintercept=0,color='black',linetype='dashed') +
-  theme(axis.title=element_text(size=15), axis.text=element_text(size=15))
+  theme(axis.title=element_text(size=15, face="bold"), axis.text=element_text(size=15, face="bold"), plot.title=element_text(size=15, face="bold"), axis.text.x=element_text(size=10))
 
 print(BMRQ_socialreward)
-ggsave("Figure2_C.png", width = 6.5, height = 4)
+ggsave("Figure2_C.png", width = 6.85, height = 4)
 
 m1 <- lm(scale(SRQ_current_total) ~ scale(MH_caregiverbeliefs) + scale(MH_musicmaking) + scale(MH_caregiversinging) + scale(MH_socialcontexts) + scale(MH_childhoodattitude), data = all)
 summary(m1)
@@ -661,9 +692,9 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey", colors = 'red') +
   scale_x_discrete(labels=c("Attitude","Social Listening Contexts", "Caregiver Singing", "Child Engagement", "Caregiver Beliefs")) + 
   theme_light() +
   geom_hline(yintercept=0,color='black',linetype='dashed') +
-  theme(axis.title=element_text(size=15), axis.text=element_text(size=15))
+  theme(axis.title=element_text(size=15, face="bold"), axis.text=element_text(size=15, face="bold"), plot.title=element_text(size=15, face="bold"), axis.text.x=element_text(size=10))
 print(SRQ)
-ggsave("Figure2_D.png", width = 6.5, height = 4)
+ggsave("Figure2_D.png", width = 6.85, height = 4)
 
 ##scatter plots##
 ggplot(data=all, aes(x=MH_total, y=CD.RISC_total))+

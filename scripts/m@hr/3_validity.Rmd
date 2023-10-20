@@ -179,8 +179,8 @@ dev.off()
 
 #Correlation values
 ```{r}
-mh <- full$MH_musicmaking
-bmrq <- full$Gold_total
+mh <- full$MH_socialcontexts
+bmrq <- full$BMRQ_socialreward
 
 corr.test(mh, bmrq)
 ```
