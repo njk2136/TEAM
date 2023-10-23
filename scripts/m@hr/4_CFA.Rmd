@@ -19,7 +19,67 @@ library(sjPlot)
 ```{r}
 first <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
 all <- read.csv(file='../../data/SLfollowupscored.csv')
+```
 
+#correcting musical training scoring of goldmsi
+```{r}
+gold <- all[608:647]
+
+#for those who reported no musical training, turning NAs to 1s
+gold[is.na(gold)] <- 1
+
+#for those who reported "no daily practice" (8th option to question), giving them a 1 score
+gold$On.average..at.the.peak.of.my.interest..I.practiced.my.primary.instrument.this.many.hours.per.day....Selected.Choice <-
+  ifelse(gold$On.average..at.the.peak.of.my.interest..I.practiced.my.primary.instrument.this.many.hours.per.day....Selected.Choice==8,1,gold$On.average..at.the.peak.of.my.interest..I.practiced.my.primary.instrument.this.many.hours.per.day....Selected.Choice)
+
+
+cols_reverse <- c("Please.choose.the.most.appropriate.category....I.don.t.spend.much.of.my.disposable.income.on.music." , 
+"Please.choose.the.most.appropriate.category....I.find.it.difficult.to.spot.mistakes.in.a.performance.of.a.song.even.if.I.know.the.tune." , 
+"Please.choose.the.most.appropriate.category....I.have.trouble.recognizing.a.familiar.song.when.played.in.a.different.way.or.by.a.different.performer." , 
+"Please.choose.the.most.appropriate.category....When.I.sing..I.have.no.idea.whether.I.m.in.tune.or.not." , 
+"Please.choose.the.most.appropriate.category....I.have.never.been.complimented.for.my.talents.as.a.musical.performer." , 
+"Please.choose.the.most.appropriate.category....I.would.not.consider.myself.a.musician." , 
+"Please.choose.the.most.appropriate.category....I.am.not.able.to.sing.in.harmony.when.somebody.is.singing.a.familiar.tune." , 
+"Please.choose.the.most.appropriate.category....I.don.t.like.singing.in.public.because.I.m.afraid.that.I.would.sing.wrong.notes." , 
+"Please.choose.the.most.appropriate.category....Pieces.of.music.rarely.evoke.emotions.for.me.")
+
+cols_musicalsophistication <- c("Please.choose.the.most.appropriate.category....I.spend.a.lot.of.free.time.doing.music.related.activities." , 
+           "Please.choose.the.most.appropriate.category....I.enjoy.writing.about.music..for.example.on.blogs.and.forums." , 
+"Please.choose.the.most.appropriate.category....If.somebody.starts.singing.a.song.I.don.t.know..I.can.usually.join.in." , 
+"Please.choose.the.most.appropriate.category....I.can.sing.or.play.music.from.memory." , 
+"Please.choose.the.most.appropriate.category....I.am.able.to.hit.the.right.notes.when.I.sing.along.with.a.recording." , 
+"Please.choose.the.most.appropriate.category....I.can.compare.and.discuss.differences.between.two.performances.or.versions.of.the.same.piece.of.music." , 
+"Please.choose.the.most.appropriate.category....I.have.never.been.complimented.for.my.talents.as.a.musical.performer." , 
+"Please.choose.the.most.appropriate.category....I.often.read.or.search.the.internet.for.things.related.to.music." , 
+"Please.choose.the.most.appropriate.category....I.am.not.able.to.sing.in.harmony.when.somebody.is.singing.a.familiar.tune." , 
+"Please.choose.the.most.appropriate.category....I.am.able.to.identify.what.is.special.about.a.given.musical.piece." , 
+"Please.choose.the.most.appropriate.category....When.I.sing..I.have.no.idea.whether.I.m.in.tune.or.not." , 
+"Please.choose.the.most.appropriate.category....Music.is.kind.of.an.addiction.for.me..I.couldn.t.live.without.it." , 
+"Please.choose.the.most.appropriate.category....I.don.t.like.singing.in.public.because.I.m.afraid.that.I.would.sing.wrong.notes." , 
+"Please.choose.the.most.appropriate.category....I.would.not.consider.myself.a.musician." , 
+"Please.choose.the.most.appropriate.category....After.hearing.a.new.song.two.or.three.times..I.can.usually.sing.it.by.myself." , 
+"I.engaged.in.regular..daily.practice.of.a.musical.instrument..including.voice..for." , 
+"On.average..at.the.peak.of.my.interest..I.practiced.my.primary.instrument.this.many.hours.per.day....Selected.Choice" , "I.can.play.this.many.musical.instruments.")
+
+cols_musicaltraining <- c("Please.choose.the.most.appropriate.category....I.have.never.been.complimented.for.my.talents.as.a.musical.performer." , "Please.choose.the.most.appropriate.category....I.would.not.consider.myself.a.musician.", 
+"I.engaged.in.regular..daily.practice.of.a.musical.instrument..including.voice..for." , 
+"On.average..at.the.peak.of.my.interest..I.practiced.my.primary.instrument.this.many.hours.per.day....Selected.Choice" , 
+"I.have.had.formal.training.in.music.theory.for." , 
+"During.my.lifetime..I.have.had.formal.training.on.a.music.instrument..including.voice..for." , 
+"I.can.play.this.many.musical.instruments.")
+
+
+# Reverse code
+gold[cols_reverse] <- lapply(gold[cols_reverse], reverseCode, min=1, max=7)
+
+# Add sub-scores and total to main df
+
+all$Gold_musicaltraining <-apply(gold[cols_musicaltraining],1, sum)/7
+all$Gold_musicalsophistication <- apply(gold[cols_musicalsophistication],1, sum)/18
+```
+
+
+```{r}
 keep <- setdiff(all$ID,first$Q158)
 
 second <- all[all$ID %in% keep, ] 
