@@ -53,9 +53,15 @@ scored_data$MH_childhoodattitude <-apply(MH[cols_childhoodattitude],1, sum)
 scored_data$MH_socialcontexts <- apply(MH[cols_socialcontexts],1, sum)
 scored_data$MH_musicmaking <- apply(MH[cols_musicmaking],1, sum)
 
-write.csv(scored_data, file='../../data/pleasing-displeasing_followup/scored_data.csv')
 
 full <- merge(scored_data, master,by.x="Q158", by.y="ID")
+
+full <- full[complete.cases(full[217:247]),]
+
+write.csv(scored_data, file='../../data/pleasing-displeasing_followup/scored_data.csv')
+
+write.csv(full, file='../../data/pleasing-displeasing_followup/EFA_scored_data.csv')
+
 #removing anyone missing ELA measures
 #full <- full[complete.cases(full[397:424]),]
 ```
