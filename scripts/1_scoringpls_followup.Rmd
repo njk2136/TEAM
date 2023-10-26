@@ -313,7 +313,7 @@ survey$TIPI_total <- apply(TIPI,1,sum)
 STOMP <- survey %>%
   dplyr::select("STOMP_1":"STOMP_10")
 
-survey$STOMP_total <- apply(STOMP,1,sum)
+#survey$STOMP_total <- apply(STOMP,1,sum)
 ```
 
 #write scored survey df to .csv
