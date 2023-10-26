@@ -185,9 +185,9 @@ dev.off()
 
 #Correlation values
 ```{r}
-mh <- full$MH_socialcontexts
-bmrq <- full$BMRQ_socialreward
+mh <- full$MH_total
+gold <- full$Gold_activeengagement
 
-corr.test(mh, bmrq)
+cor.test(mh, gold)
 ```
 
