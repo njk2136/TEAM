@@ -771,9 +771,9 @@ all$HUMS_adult_healthy
 ```
 
 ```{r}
-mh <- second$MH_childhoodattitude
-gold <- second$Gold_emotion
+mh <- all$MH_childhoodattitude
+CD <- all$CD.RISC_total
 
-cor.test(mh, gold)
+cor.test(mh, CD)
 ```
 
