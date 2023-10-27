@@ -139,9 +139,9 @@ dev.off()
 
 #Correlation values
 ```{r}
-mh <- full$MH_total
-gold <- full$Gold_activeengagement
+mh <- full$MH_childhoodattitude
+adv <- full$deprivation_child_total
 
-cor.test(mh, gold)
+cor.test(mh, adv)
 ```
 
