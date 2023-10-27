@@ -771,8 +771,8 @@ all$HUMS_adult_healthy
 ```
 
 ```{r}
-mh <- all$MH_socialcontexts
-x <- all$CD.RISC_total
+mh <- second$MH_childhoodattitude
+x <- second$Gold_musicaltraining
 
 cor.test(mh, x)
 ```
