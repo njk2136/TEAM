@@ -22,10 +22,14 @@ library(ggrepel)
 all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
 
 table(all_scored$What.sex.were.you.assigned.at.birth.)
+
+hist(all_scored$deprivation_sum)
 ```
 
 #HUMS, eBMRQ, Mental Health corr matrix
 ```{r}
+cor.test(all_scored$CD.RISC_total, all_scored$deprivation_sum)
+
 #HUMS, eBMRQ, Mental Health
 variables = dplyr::select(all_scored, 
                           HUMS_adolescence_unhealthy, HUMS_adult_unhealthy,
