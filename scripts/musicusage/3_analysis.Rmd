@@ -288,13 +288,58 @@ ggsave(abs_HUMS_label, file='../../figures/pleasing:displeasing_followup/abs_HUM
 cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
 
 HUMS_Absorption <- all_scored %>%
-  select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy, ID) %>%
+  dplyr::select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy, ID)
+
+HUMS_Absorption$HUMS_adult_healthy <- scale(HUMS_Absorption$HUMS_adult_healthy)
+HUMS_Absorption$HUMS_adult_unhealthy <- scale(HUMS_Absorption$HUMS_adult_unhealthy)
+
+
+
+HUMS_Absorption <- HUMS_Absorption %>%
   pivot_longer(HUMS_adult_healthy:HUMS_adult_unhealthy, names_to = "type", values_to = "HUMS")
 
 HUMS_Absorption$type <- ifelse(HUMS_Absorption$type=="HUMS_adult_unhealthy", "Unhealthy", "Healthy")
 HUMS_Absorption$type <- as.factor(HUMS_Absorption$type)
+HUMS_Absorption$absorption_scaled <- scale(HUMS_Absorption$BMRQ_absorption)
+
 contrasts(HUMS_Absorption$type) <- c(-0.5,0.5)
-m3 <- lmer(scale(HUMS) ~ scale(BMRQ_absorption)*type + (1|ID), data=HUMS_Absorption)
+m3 <- lmer((HUMS) ~ absorption_scaled*type + (1|ID), data=HUMS_Absorption)
 summary(m3)
+
+#plotting
+##plotting
+newdata <- expand.grid(
+  absorption_scaled=seq(-2.092594,1.517042,0.01),
+  HUMS = seq(-3.4162226, 4.0308494, 0.1),
+  type = c("Healthy", "Unhealthy")
+)
+
+predictions<- predictSE(m3, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions)
+
+pred$BMRQ_absorption <- (pred$absorption_scaled * attr(HUMS_Absorption$absorption_scaled, 'scaled:scale') + attr(HUMS_Absorption$absorption_scaled, 'scaled:center'))
+
+HUMS_AIMS_plot<-
+  ggplot(data=pred, aes(x=BMRQ_absorption, y=fit)) +
+  geom_point(data=HUMS_Absorption, (aes(y=HUMS, color=type)),alpha=0.5)+
+  geom_line(aes(col=type))+
+  geom_ribbon(aes(ymin=fit-se.fit, ymax=fit+se.fit, fill=type),alpha=0.25) +
+  ylab('Music Usage Score \n(within subscale Z-score)') +
+  xlab('eBMRQ Absorption Score') +
+  theme_classic() +
+ theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20)
+  ) +
+   scale_color_manual(values=c("#E69F00","#56B4E9")) +
+  scale_fill_manual(values=c("#E69F00","#56B4E9"))
+
+
+ggsave('../../figures/AIMS_paper/HUMS_Absorptionplot.png', HUMS_AIMS_plot, dpi=350)
 ```
 

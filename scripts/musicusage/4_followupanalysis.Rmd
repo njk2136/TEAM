@@ -105,6 +105,7 @@ followup_scored$escapism_sum <- followup_scored$positive_escapism_current + foll
 m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
 
+
 escapismcoef <-
   plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
  ylim(-0.8, 0.8) +
@@ -121,6 +122,19 @@ escapismcoef <-
   geom_hline(yintercept=0,color='black',linetype='dashed')
 
 ggsave(escapismcoef, file='../../figures/statistical_learningfollowup/escapismcoef.png', width=10)
+
+escapism_AIMS <- followup_scored %>%
+  dplyr::select(positive_escapism_current, negative_escapism_current, AIMS_current_total, ID) 
+
+escapism_AIMS$positive_escapism_current <- (escapism_AIMS$positive_escapism_current)/5
+escapism_AIMS$negative_escapism_current <- (escapism_AIMS$negative_escapism_current)/6
+
+escapism_AIMS <- escapism_AIMS %>%
+  pivot_longer(positive_escapism_current:negative_escapism_current, names_to = "type", values_to = "escapism")
+
+m1 <-lmer(data=escapism_AIMS, scale(escapism) ~  scale(AIMS_current_total)*type + (1|ID))
+summary(m1)
+
 
 m1 <-lm(data=followup_scored, scale(positive_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
@@ -836,6 +850,61 @@ ggplot(data=followup_scored, aes(x=CD.RISC_total, y=deprivation_sum))+
 ##check timing relationships across both samples
 ```
 
+#HUMS & AIMS
+```{r}
+HUMS_AIMS <- 
+followup_scored %>%
+  dplyr::select(ID, AIMS_current_total, HUMS_adult_unhealthy, HUMS_adult_healthy)
+
+HUMS_AIMS$HUMS_adult_unhealthy <- scale(HUMS_AIMS$HUMS_adult_unhealthy)
+HUMS_AIMS$HUMS_adult_healthy <- scale(HUMS_AIMS$HUMS_adult_healthy)
+
+HUMS_AIMS <-HUMS_AIMS %>%
+  pivot_longer(HUMS_adult_unhealthy:HUMS_adult_healthy, names_to = "usage_type", values_to = "HUMS")
+
+HUMS_AIMS$usage_type <- as.factor(HUMS_AIMS$usage_type)
+contrasts(HUMS_AIMS$usage_type) <- c(-0.5,0.5)
+HUMS_AIMS$AIMS_scaled <- scale(HUMS_AIMS$AIMS_current_total)
+
+
+m1 <- lmer((HUMS) ~ (AIMS_scaled)*usage_type + (1|ID), data=HUMS_AIMS)
+summary(m1)
+
+##plotting
+
+newdata <- expand.grid(
+  AIMS_scaled=seq(-2.8090675,2.0247280,0.01),
+  HUMS = seq(-3.3741340, 4.1651413, 0.1),
+  usage_type = c("HUMS_adult_unhealthy", "HUMS_adult_healthy")
+)
+
+predictions<- predictSE(m1, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions)
+pred$AIMS_current_total <-pred$AIMS_scaled * attr(HUMS_AIMS$AIMS_scaled, 'scaled:scale') + attr(HUMS_AIMS$AIMS_scaled, 'scaled:center')
+
+
+HUMS_AIMS_plot<-
+  ggplot(data=pred, aes(x=AIMS_current_total, y=fit)) +
+  geom_line(aes(col=usage_type))+
+  geom_ribbon(aes(ymin=fit-se.fit, ymax=fit+se.fit, fill=usage_type),alpha=0.25) +
+  ylab('Music Usage Score \n(within subscale Z-score)') +
+  xlab('AIMS Score') +
+  theme_classic() +
+ theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20)
+  ) +
+   scale_color_manual(values=c("#56B4E9","#E69F00")) +
+  scale_fill_manual(values=c("#56B4E9","#E69F00")) +
+  geom_point(aes(y=HUMS, color=usage_type), data=HUMS_AIMS, alpha=0.5)
+
+ggsave('../../figures/AIMS_paper/HUMS_AIMS.png', HUMS_AIMS_plot, dpi=350)
+```
 
 #resilience & AIMS plot
 ```{r}
