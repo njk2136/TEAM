@@ -20,10 +20,6 @@ library(ggrepel)
 #read in data
 ```{r}
 all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
-
-table(all_scored$What.sex.were.you.assigned.at.birth.)
-
-hist(all_scored$deprivation_sum)
 ```
 
 #HUMS, eBMRQ, Mental Health corr matrix
@@ -360,7 +356,7 @@ pred$BMRQ_absorption <- (pred$absorption_scaled * attr(HUMS_Absorption$absorptio
 
 HUMS_AIMS_plot<-
   ggplot(data=pred, aes(x=BMRQ_absorption, y=fit)) +
-  geom_point(data=HUMS_Absorption, (aes(y=HUMS, color=type)),alpha=0.5)+
+  geom_jitter(data=HUMS_Absorption, (aes(y=HUMS, color=type)),alpha=0.5,width = 0.09)+
   geom_line(aes(col=type))+
   geom_ribbon(aes(ymin=fit-se.fit, ymax=fit+se.fit, fill=type),alpha=0.25) +
   ylab('Music Usage Score \n(within subscale Z-score)') +
@@ -379,5 +375,28 @@ HUMS_AIMS_plot<-
 
 
 ggsave('../../figures/AIMS_paper/HUMS_Absorptionplot.png', HUMS_AIMS_plot, dpi=350)
+
+cor.test(all_scored$CD.RISC_total, scale(all_scored$BMRQ_absorption))
+```
+
+#plotting res + abs
+```{r}
+abs_resilience<-
+  ggplot(data=all_scored, aes(x=BMRQ_absorption, y=CD.RISC_total)) +
+         geom_jitter(width=0.05, alpha=0.75) +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("eBMRQ Absorption Score") +
+  ylab("CD.RISC-10 Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
+
+ggsave(file='../../figures/AIMS_paper/abs_resilience.png',abs_resilience)
 ```
 
