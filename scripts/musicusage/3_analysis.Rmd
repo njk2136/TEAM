@@ -54,6 +54,43 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 
 dev.off()
+
+
+CHAOS_ebmrqabs<-
+  ggplot(data=all_scored, aes(x=CHAOS_sum, y=BMRQ_absorption)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total CHAOS Score") +
+  ylab("eBMRQ Absorption Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_absorption)
+
+ggsave(file='../../figures/AIMS_paper/CHAOS_ebmrqabs.png',CHAOS_ebmrqabs)
+
+Threat_ebmrqabs<-
+  ggplot(data=all_scored, aes(x=Threat_sum, y=BMRQ_absorption)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total Threat Score") +
+  ylab("eBMRQ Absorption Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_absorption)
+
+ggsave(file='../../figures/AIMS_paper/Threat_ebmrqabs.png',Threat_ebmrqabs)
 ```
 
 #HUMS ~ eBMRQ
@@ -257,7 +294,7 @@ ggsave(abs_unhealthyusage, file='../../figures/pleasing:displeasing_followup/abs
   
 
 HUMS_Absorption <- all_scored %>%
-  select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy) %>%
+  dplyr::select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy) %>%
   pivot_longer(HUMS_adult_healthy:HUMS_adult_unhealthy, names_to = "type", values_to = "HUMS")
 
 HUMS_Absorption$type <- ifelse(HUMS_Absorption$type=="HUMS_adult_unhealthy", "Unhealthy", "Healthy")
@@ -272,8 +309,8 @@ label$HUMS <- ifelse(label$type=="Unhealthy", label$HUMS -1, label$HUMS )
 
 abs_HUMS_label <- 
   ggplot(data=HUMS_Absorption, aes(x=BMRQ_absorption, y=HUMS)) +
-  scale_color_manual(values=c("#56B4E9", "#E69F00")) +
-  scale_fill_manual(values=c("#56B4E9", "#E69F00")) +
+  scale_color_manual(values=c("#E69F00","#56B4E9")) +
+  scale_fill_manual(values=c("#E69F00","#56B4E9")) +
   geom_label_repel(aes(label = type, color=type),
    #              nudge_x = -0.8,
     #               na.rm = TRUE,
@@ -330,6 +367,7 @@ HUMS_AIMS_plot<-
   xlab('eBMRQ Absorption Score') +
   theme_classic() +
  theme(
+   legend.position = "none",
     axis.title.x = element_text(family="Arial", size=22),
     axis.title.y = element_text(family="Arial",size=22),
     axis.text.x = element_text(family="Arial", size=20),

@@ -21,12 +21,6 @@ source("../reverseCode.R")
 #load data
 ```{r}
 followup_scored <- read.csv(file='../../data/SLfollowupscored.csv')
-
-
-liking <- read.csv(file='../../data/SL_followup/masterinteractionliking.csv')
-groove_stiminfo <- read.csv(file="../../stimuli/senn_stim/stim_information.csv")
-names(groove_stiminfo)[2] <- "stim"
-
 table(followup_scored$What.sex.were.you.assigned.at.birth.)
 ```
 
@@ -94,6 +88,43 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 
 dev.off()
+
+#plotting ELA + Abs scatters
+CHAOS_AIMS<-
+  ggplot(data=followup_scored, aes(x=CHAOS_sum, y=AIMS_current_total)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total CHAOS Score") +
+  ylab("AIMS Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(followup_scored$CHAOS_sum, followup_scored$AIMS_current_total)
+
+ggsave(file='../../figures/AIMS_paper/CHAOS_AIMS.png',CHAOS_AIMS)
+
+Threat_AIMS<-
+  ggplot(data=followup_scored, aes(x=Threat_sum, y=AIMS_current_total)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total Threat Score") +
+  ylab("AIMS Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(followup_scored$Threat_sum, followup_scored$AIMS_current_total)
+
+ggsave(file='../../figures/AIMS_paper/Threat_AIMS.png',Threat_AIMS, width=7.5)
 ```
 
 #which facet of BMRQ is escapism related to?
@@ -893,6 +924,7 @@ HUMS_AIMS_plot<-
   xlab('AIMS Score') +
   theme_classic() +
  theme(
+   legend.position = "none",
     axis.title.x = element_text(family="Arial", size=22),
     axis.title.y = element_text(family="Arial",size=22),
     axis.text.x = element_text(family="Arial", size=20),
@@ -936,4 +968,62 @@ cols_reverse <- c("CHAOS_child1_1", "CHAOS_child2_1", "CHAOS_child4_1", "CHAOS_c
                    "CHAOS_child12_1", "CHAOS_child14_1","CHAOS_child15_1")
 
 CHAOS_child[cols_reverse] <- lapply(CHAOS_child[cols_reverse], reverseCode, min=1, max=5)
+```
+
+#AIMS + escapism
+```{r}
+#HUMS & AIMS
+escapism_AIMS <- 
+followup_scored %>%
+  dplyr::select(ID, AIMS_current_total, negative_escapism_current, positive_escapism_current)
+
+escapism_AIMS$negative_escapism_current <- scale(escapism_AIMS$negative_escapism_current)
+escapism_AIMS$positive_escapism_current <- scale(escapism_AIMS$positive_escapism_current)
+
+escapism_AIMS <-escapism_AIMS %>%
+  pivot_longer(negative_escapism_current:positive_escapism_current, names_to = "escapism_type", values_to = "escapism")
+
+escapism_AIMS$escapism_type <- as.factor(escapism_AIMS$escapism_type)
+contrasts(escapism_AIMS$escapism_type) <- c(-0.5,0.5)
+escapism_AIMS$AIMS_scaled <- scale(escapism_AIMS$AIMS_current_total)
+
+
+m1 <- lmer((escapism) ~ (AIMS_scaled)*escapism_type + (1|ID), data=escapism_AIMS)
+summary(m1)
+
+##plotting
+
+newdata <- expand.grid(
+  AIMS_scaled=seq(-2.8090675,2.0247280,0.01),
+  HUMS = seq(-2.223430, 1.527875, 0.1),
+  escapism_type = c("negative_escapism_current", "positive_escapism_current")
+)
+
+predictions<- predictSE(m1, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions)
+pred$AIMS_current_total <-pred$AIMS_scaled * attr(escapism_AIMS$AIMS_scaled, 'scaled:scale') + attr(escapism_AIMS$AIMS_scaled, 'scaled:center')
+
+
+#HUMS_AIMS_plot<-
+  ggplot(data=pred, aes(x=AIMS_current_total, y=fit)) +
+  geom_line(aes(col=escapism_type))+
+  geom_ribbon(aes(ymin=fit-se.fit, ymax=fit+se.fit, fill=escapism_type),alpha=0.25) +
+  ylab('Escapism Score \n(within subscale Z-score)') +
+  xlab('AIMS Score') +
+  theme_classic() +
+ theme(
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20),
+    
+  ) +
+   scale_color_manual(values=c("#56B4E9","#E69F00")) +
+  scale_fill_manual(values=c("#56B4E9","#E69F00")) +
+  geom_point(aes(y=escapism, color=escapism_type), data=escapism_AIMS, alpha=0.5)
+
+ggsave('../../figures/AIMS_paper/HUMS_AIMS.png', HUMS_AIMS_plot, dpi=350)
 ```
