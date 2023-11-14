@@ -201,6 +201,7 @@ followup_scored$deprivation_Adolescence_total_scaled <- as.vector(scale(followup
 followup_scored$threat_adolescence_scaled <- as.vector(scale(followup_scored$threat_adolescence_total))
 followup_scored$QUIC_adolescence_scaled <- as.vector(scale(followup_scored$QUIC_Adolescence_total))
 followup_scored$threat_childhood_scaled <- as.vector(scale(followup_scored$threat_childhood_total))
+followup_scored$STAI_total_scaled <- as.vector(scale(followup_scored$STAI_total))
 
 #select seed for reproducible results
 seed = 111
@@ -208,9 +209,9 @@ seed = 111
 #HAYES MEDIATION -- added age as a covariate? - need to figure out where to put age in this narrative
 ## both threat & CD.RISC are pos correlated w. age
 followup_scored$What.is.your.age.
-process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_sum_scaled", m ="escapism_sum", model = 4, seed = seed, cov="What.is.your.age.")
+process(data = followup_scored, y = "STAI_total_scaled", x = "CHAOS_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed)
 
-cor.test(followup_scored$CD.RISC_total, followup_scored$A)
+cor.test(followup_scored$STAI_total_scaled, followup_scored$AIMS_current_total_scaled)
 
 ggplot(data=followup_scored, aes(y=CD.RISC_total, x=What.is.your.age.))+
   geom_point()+
