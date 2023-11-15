@@ -124,6 +124,39 @@ Threat_AIMS<-
 cor.test(followup_scored$Threat_sum, followup_scored$AIMS_current_total)
 
 ggsave(file='../../figures/AIMS_paper/Threat_AIMS.png',Threat_AIMS, width=7.5)
+
+#gold, eBMRQ-abs, ELA, STAI, resilience, age, HUMS
+variables = dplyr::select(followup_scored, 
+                          AIMS_current_total, positive_escapism_current, negative_escapism_current,
+                          Gold_activeengagement, Gold_musicaltraining,
+                          Gold_musicalsophistication, Gold_emotion, Gold_singingabilities, 
+                          Gold_perceptualabilities, QUIC_sum, CHAOS_sum, 
+                          deprivation_sum, Threat_sum, QUIC_child_total, CHAOS_child_total, 
+                          deprivation_child_total, threat_childhood_total, 
+                          QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, 
+                          threat_adolescence_total,
+                          HUMS_adult_unhealthy, HUMS_adult_healthy,
+                          STAI_total, CD.RISC_total,What.is.your.age.)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('AIMS', 'Positive Escapism (Self-Expansion)', 'Negative Escapism (Self-Supression)', 'Gold-MSI: Active Engagement', 'Gold-MSI: Musical Training', 'Gold-MSI: General Sophistication', 'Gold-MSI: Emotion', 'Gold-MSI: Singing Abilities', 'Gold-MSI: Perceptual Abilities',  "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence","Threat Adolescence", 'Unhealthy Adult Music Usage','Healthy Adult Music Usage',"STAI", "CDRISC", "Age")
+rownames(corr_matrix) <- c('AIMS', 'Positive Escapism (Self-Expansion)', 'Negative Escapism (Self-Supression)', 'Gold-MSI: Active Engagement', 'Gold-MSI: Musical Training', 'Gold-MSI: General Sophistication', 'Gold-MSI: Emotion', 'Gold-MSI: Singing Abilities', 'Gold-MSI: Perceptual Abilities',  "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence","Threat Adolescence", 'Unhealthy Adult Music Usage','Healthy Adult Music Usage',"STAI", "CDRISC", "Age")
+
+pdf(file = "../../figures/AIMS_paper/Gold_ELAcheckcorrmatrixstudy2.pdf",width=10)
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, diag=FALSE,
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
 ```
 
 #which facet of BMRQ is escapism related to?
@@ -202,6 +235,7 @@ followup_scored$threat_adolescence_scaled <- as.vector(scale(followup_scored$thr
 followup_scored$QUIC_adolescence_scaled <- as.vector(scale(followup_scored$QUIC_Adolescence_total))
 followup_scored$threat_childhood_scaled <- as.vector(scale(followup_scored$threat_childhood_total))
 followup_scored$STAI_total_scaled <- as.vector(scale(followup_scored$STAI_total))
+followup_scored$positive_escapism_current_scaled <- as.vector(scale(followup_scored$positive_escapism_current))
 
 #select seed for reproducible results
 seed = 111
@@ -209,7 +243,7 @@ seed = 111
 #HAYES MEDIATION -- added age as a covariate? - need to figure out where to put age in this narrative
 ## both threat & CD.RISC are pos correlated w. age
 followup_scored$What.is.your.age.
-process(data = followup_scored, y = "STAI_total_scaled", x = "CHAOS_sum_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed)
+process(data = followup_scored, y = "STAI_total_scaled", x = "deprivation_sum_scaled", m ="positive_escapism_current_scaled", model = 4, seed = seed)
 
 cor.test(followup_scored$STAI_total_scaled, followup_scored$AIMS_current_total_scaled)
 
@@ -1165,7 +1199,7 @@ AIMS_resilience<-
   geom_point(alpha=0.75)+
   geom_smooth(method="lm") +
   theme_classic() +
-  xlab("eBMRQ Absorption Score") +
+  xlab("AIMS Score") +
   ylab("CD.RISC-10 Score") +
   theme( 
     axis.text.x = element_text(size=18),
