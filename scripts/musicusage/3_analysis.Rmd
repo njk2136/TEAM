@@ -24,7 +24,7 @@ all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usag
 
 #HUMS, eBMRQ, Mental Health corr matrix
 ```{r}
-cor.test(all_scored$CD.RISC_total, all_scored$deprivation_sum)
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_musicseek)
 
 #HUMS, eBMRQ, Mental Health
 variables = dplyr::select(all_scored, 
@@ -430,5 +430,22 @@ abs_resilience<-
 cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
 
 ggsave(file='../../figures/AIMS_paper/abs_resilience.png',abs_resilience)
+```
+
+#trying mediation model
+```{r}
+#select seed for reproducible results
+seed = 111
+
+all_scored$BMRQ_absorptionscaled <- scale(all_scored$BMRQ_absorption)
+all_scored$CD.RISC_totalscaled <- scale(all_scored$CD.RISC_total)
+all_scored$CHAOS_sumscaled<- scale(all_scored$CHAOS_sum)
+all_scored$STAI_sumscaled<- scale(all_scored$STAI_total)
+all_scored$CHAOS_childscaled <- scale(all_scored$CHAOS_child_total)
+all_scored$CHAOS_adolscaled <- scale(all_scored$CHAOS_Adolescence_total)
+
+process(data = all_scored, y = "CD.RISC_totalscaled", x = "CHAOS_adolscaled", m ="BMRQ_absorptionscaled", model = 4, seed = seed)
+
+cor.test(followup_scored$CHAOS_Adolescence_total, followup_scored$CHAOS_child_total)
 ```
 

@@ -161,7 +161,7 @@ dev.off()
 
 #which facet of BMRQ is escapism related to?
 ```{r}
-cor.test(followup_scored$Threat_sum, followup_scored$What.is.your.age.)
+cor.test(followup_scored$CHAOS_sum, followup_scored$BMRQ_moodreg)
 
 followup_scored$escapism_sum <- followup_scored$positive_escapism_current + followup_scored$negative_escapism_current
 
@@ -243,7 +243,7 @@ seed = 111
 #HAYES MEDIATION -- added age as a covariate? - need to figure out where to put age in this narrative
 ## both threat & CD.RISC are pos correlated w. age
 followup_scored$What.is.your.age.
-process(data = followup_scored, y = "STAI_total_scaled", x = "deprivation_sum_scaled", m ="positive_escapism_current_scaled", model = 4, seed = seed)
+process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_adolescence_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed, cov="CHAOS_child_scaled")
 
 cor.test(followup_scored$STAI_total_scaled, followup_scored$AIMS_current_total_scaled)
 
@@ -304,7 +304,7 @@ summary(m2)
 m2 <-lm(data=followup_scored, negative_escapism_current ~ deprivation_sum + CD.RISC_total)
 summary(m2)
 
-cor.test(followup_scored$BMRQ_musicseek, followup_scored$STAI_total)
+cor.test(followup_scored$QUIC_child_total, followup_scored$BMRQ_moodreg)
 ```
 
 #SL results
