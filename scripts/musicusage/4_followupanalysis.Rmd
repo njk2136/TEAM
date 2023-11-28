@@ -21,13 +21,6 @@ source("../reverseCode.R")
 #load data
 ```{r}
 followup_scored <- read.csv(file='../../data/SLfollowupscored.csv')
-
-
-liking <- read.csv(file='../../data/SL_followup/masterinteractionliking.csv')
-groove_stiminfo <- read.csv(file="../../stimuli/senn_stim/stim_information.csv")
-names(groove_stiminfo)[2] <- "stim"
-
-table(followup_scored$What.sex.were.you.assigned.at.birth.)
 ```
 
 #correlation matrices
@@ -94,33 +87,98 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
 
 dev.off()
+
+#plotting ELA + Abs scatters
+CHAOS_AIMS<-
+  ggplot(data=followup_scored, aes(x=CHAOS_sum, y=AIMS_current_total)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total CHAOS Score") +
+  ylab("AIMS Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(followup_scored$CHAOS_sum, followup_scored$AIMS_current_total)
+
+ggsave(file='../../figures/AIMS_paper/CHAOS_AIMS.png',CHAOS_AIMS)
+
+Threat_AIMS<-
+  ggplot(data=followup_scored, aes(x=Threat_sum, y=AIMS_current_total)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total Threat Score") +
+  ylab("AIMS Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(followup_scored$Threat_sum, followup_scored$AIMS_current_total)
+
+ggsave(file='../../figures/AIMS_paper/Threat_AIMS.png',Threat_AIMS, width=7.5)
+
+#gold, eBMRQ-abs, ELA, STAI, resilience, age, HUMS
+variables = dplyr::select(followup_scored, 
+                          AIMS_current_total, positive_escapism_current, negative_escapism_current,
+                          Gold_activeengagement, Gold_musicaltraining,
+                          Gold_musicalsophistication, Gold_emotion, Gold_singingabilities, 
+                          Gold_perceptualabilities, QUIC_sum, CHAOS_sum, 
+                          deprivation_sum, Threat_sum, QUIC_child_total, CHAOS_child_total, 
+                          deprivation_child_total, threat_childhood_total, 
+                          QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, 
+                          threat_adolescence_total,
+                          HUMS_adult_unhealthy, HUMS_adult_healthy,
+                          STAI_total, CD.RISC_total,What.is.your.age.)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('AIMS', 'Positive Escapism (Self-Expansion)', 'Negative Escapism (Self-Supression)', 'Gold-MSI: Active Engagement', 'Gold-MSI: Musical Training', 'Gold-MSI: General Sophistication', 'Gold-MSI: Emotion', 'Gold-MSI: Singing Abilities', 'Gold-MSI: Perceptual Abilities',  "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence","Threat Adolescence", 'Unhealthy Adult Music Usage','Healthy Adult Music Usage',"STAI", "CDRISC", "Age")
+rownames(corr_matrix) <- c('AIMS', 'Positive Escapism (Self-Expansion)', 'Negative Escapism (Self-Supression)', 'Gold-MSI: Active Engagement', 'Gold-MSI: Musical Training', 'Gold-MSI: General Sophistication', 'Gold-MSI: Emotion', 'Gold-MSI: Singing Abilities', 'Gold-MSI: Perceptual Abilities',  "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence","Threat Adolescence", 'Unhealthy Adult Music Usage','Healthy Adult Music Usage',"STAI", "CDRISC", "Age")
+
+pdf(file = "../../figures/AIMS_paper/Gold_ELAcheckcorrmatrixstudy2.pdf",width=10)
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, diag=FALSE,
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
 ```
 
 #which facet of BMRQ is escapism related to?
 ```{r}
-cor.test(followup_scored$Threat_sum, followup_scored$What.is.your.age.)
+cor.test(followup_scored$CHAOS_sum, followup_scored$BMRQ_moodreg)
 
 followup_scored$escapism_sum <- followup_scored$positive_escapism_current + followup_scored$negative_escapism_current
 
-m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
+
+
+escapism_AIMS <- followup_scored %>%
+  dplyr::select(positive_escapism_current, negative_escapism_current, AIMS_current_total, ID) 
+
+escapism_AIMS$positive_escapism_current <- (escapism_AIMS$positive_escapism_current)/5
+escapism_AIMS$negative_escapism_current <- (escapism_AIMS$negative_escapism_current)/6
+
+escapism_AIMS <- escapism_AIMS %>%
+  pivot_longer(positive_escapism_current:negative_escapism_current, names_to = "type", values_to = "escapism")
+
+m1 <-lmer(data=escapism_AIMS, scale(escapism) ~  scale(AIMS_current_total)*type + (1|ID))
 summary(m1)
 
-escapismcoef <-
-  plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
- ylim(-0.8, 0.8) +
-  ggtitle("Escapism Score") +
-  ylab("Standardized Beta Coefficient Estimates")+
-  theme_light() +
-  theme(title=element_text(family="Arial", size=20),
-    axis.title.x = element_text(family="Arial", size=18),
-    axis.title.y = element_text(family="Arial",size=18),
-    axis.text.x = element_text(family="Arial", size=16),
-    axis.text.y = element_text(family="Arial",size=16),
-  ) +
-  scale_x_discrete(labels=c("Absorption (AIMS)","BMRQ - Sensorimotor Reward","BMRQ - Music Seeking", "BMRQ - Social Reward", "BMRQ - Emotion Evocation","BMRQ - Mood Regulation")) +
-  geom_hline(yintercept=0,color='black',linetype='dashed')
-
-ggsave(escapismcoef, file='../../figures/statistical_learningfollowup/escapismcoef.png', width=10)
 
 m1 <-lm(data=followup_scored, scale(positive_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
 summary(m1)
@@ -159,9 +217,13 @@ plot_model(m1, show.values = TRUE,vline.color = "lightgrey") +
 #absorption mediation models
 ```{r}
 cor.test(followup_scored$AIMS_current_total, followup_scored$positive_escapism_current)
+
 followup_scored$CHAOS_sum_scaled <- as.vector(scale(followup_scored$CHAOS_sum))
+
 followup_scored$AIMS_current_total_scaled <- as.vector(scale(followup_scored$AIMS_current_total))
+
 followup_scored$escapism_sum_scaled <- as.vector(scale(followup_scored$escapism_sum))
+
 followup_scored$CD.RISC_total_scaled <- as.vector(scale(followup_scored$CD.RISC_total))
 followup_scored$deprivation_sum_scaled <- as.vector(scale(followup_scored$deprivation_sum))
 followup_scored$threat_sum_scaled <- as.vector(scale(followup_scored$Threat_sum))
@@ -172,6 +234,8 @@ followup_scored$deprivation_Adolescence_total_scaled <- as.vector(scale(followup
 followup_scored$threat_adolescence_scaled <- as.vector(scale(followup_scored$threat_adolescence_total))
 followup_scored$QUIC_adolescence_scaled <- as.vector(scale(followup_scored$QUIC_Adolescence_total))
 followup_scored$threat_childhood_scaled <- as.vector(scale(followup_scored$threat_childhood_total))
+followup_scored$STAI_total_scaled <- as.vector(scale(followup_scored$STAI_total))
+followup_scored$positive_escapism_current_scaled <- as.vector(scale(followup_scored$positive_escapism_current))
 
 #select seed for reproducible results
 seed = 111
@@ -179,9 +243,9 @@ seed = 111
 #HAYES MEDIATION -- added age as a covariate? - need to figure out where to put age in this narrative
 ## both threat & CD.RISC are pos correlated w. age
 followup_scored$What.is.your.age.
-process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_sum_scaled", m ="escapism_sum", model = 4, seed = seed, cov="What.is.your.age.")
+process(data = followup_scored, y = "CD.RISC_total_scaled", x = "CHAOS_adolescence_scaled", m ="AIMS_current_total_scaled", model = 4, seed = seed, cov="CHAOS_child_scaled")
 
-cor.test(followup_scored$CD.RISC_total, followup_scored$A)
+cor.test(followup_scored$STAI_total_scaled, followup_scored$AIMS_current_total_scaled)
 
 ggplot(data=followup_scored, aes(y=CD.RISC_total, x=What.is.your.age.))+
   geom_point()+
@@ -240,7 +304,7 @@ summary(m2)
 m2 <-lm(data=followup_scored, negative_escapism_current ~ deprivation_sum + CD.RISC_total)
 summary(m2)
 
-cor.test(followup_scored$BMRQ_musicseek, followup_scored$STAI_total)
+cor.test(followup_scored$QUIC_child_total, followup_scored$BMRQ_moodreg)
 ```
 
 #SL results
@@ -836,6 +900,62 @@ ggplot(data=followup_scored, aes(x=CD.RISC_total, y=deprivation_sum))+
 ##check timing relationships across both samples
 ```
 
+#HUMS & AIMS
+```{r}
+HUMS_AIMS <- 
+followup_scored %>%
+  dplyr::select(ID, AIMS_current_total, HUMS_adult_unhealthy, HUMS_adult_healthy)
+
+HUMS_AIMS$HUMS_adult_unhealthy <- scale(HUMS_AIMS$HUMS_adult_unhealthy)
+HUMS_AIMS$HUMS_adult_healthy <- scale(HUMS_AIMS$HUMS_adult_healthy)
+
+HUMS_AIMS <-HUMS_AIMS %>%
+  pivot_longer(HUMS_adult_unhealthy:HUMS_adult_healthy, names_to = "usage_type", values_to = "HUMS")
+
+HUMS_AIMS$usage_type <- as.factor(HUMS_AIMS$usage_type)
+contrasts(HUMS_AIMS$usage_type) <- c(-0.5,0.5)
+HUMS_AIMS$AIMS_scaled <- scale(HUMS_AIMS$AIMS_current_total)
+
+
+m1 <- lmer((HUMS) ~ (AIMS_scaled)*usage_type + (1|ID), data=HUMS_AIMS)
+summary(m1)
+
+##plotting
+
+newdata <- expand.grid(
+  AIMS_scaled=seq(-2.8090675,2.0247280,0.01),
+  HUMS = seq(-3.3741340, 4.1651413, 0.1),
+  usage_type = c("HUMS_adult_unhealthy", "HUMS_adult_healthy")
+)
+
+predictions<- predictSE(m1, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions)
+pred$AIMS_current_total <-pred$AIMS_scaled * attr(HUMS_AIMS$AIMS_scaled, 'scaled:scale') + attr(HUMS_AIMS$AIMS_scaled, 'scaled:center')
+
+
+HUMS_AIMS_plot<-
+  ggplot(data=pred, aes(x=AIMS_current_total, y=fit)) +
+  geom_line(aes(col=usage_type))+
+  geom_ribbon(aes(ymin=fit-se.fit, ymax=fit+se.fit, fill=usage_type),alpha=0.25) +
+  ylab('Music Usage Score \n(within subscale Z-score)') +
+  xlab('AIMS Score') +
+  theme_classic() +
+ theme(
+   legend.position = "none",
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20)
+  ) +
+   scale_color_manual(values=c("#56B4E9","#E69F00")) +
+  scale_fill_manual(values=c("#56B4E9","#E69F00")) +
+  geom_point(aes(y=HUMS, color=usage_type), data=HUMS_AIMS, alpha=0.5)
+
+ggsave('../../figures/AIMS_paper/HUMS_AIMS.png', HUMS_AIMS_plot, dpi=350)
+```
 
 #resilience & AIMS plot
 ```{r}
@@ -867,4 +987,228 @@ cols_reverse <- c("CHAOS_child1_1", "CHAOS_child2_1", "CHAOS_child4_1", "CHAOS_c
                    "CHAOS_child12_1", "CHAOS_child14_1","CHAOS_child15_1")
 
 CHAOS_child[cols_reverse] <- lapply(CHAOS_child[cols_reverse], reverseCode, min=1, max=5)
+```
+
+#AIMS + escapism
+```{r}
+#first order correlation
+#sum
+AIMS_escapismsum<-
+  ggplot(data=followup_scored, aes(x=AIMS_current_total, y=escapism_sum)) +
+  geom_point(alpha=0.75)+
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("AIMS Score") +
+  ylab("Escapism Sum Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+cor.test(followup_scored$AIMS_current_total, followup_scored$escapism_sum)
+ggsave('../../figures/AIMS_paper/AIMS_escapismsum.png', AIMS_escapismsum, dpi=350)
+
+#pos
+AIMS_selfexpansion<-
+  ggplot(data=followup_scored, aes(x=AIMS_current_total, y=positive_escapism_current)) +
+  geom_point(alpha=0.75)+
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("AIMS Score") +
+  ylab("Self Expansion Escapism Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+cor.test(followup_scored$AIMS_current_total, followup_scored$positive_escapism_current)
+ggsave('../../figures/AIMS_paper/AIMS_selfexpansion.png', AIMS_selfexpansion, dpi=350)
+
+#neg
+AIMS_selfsupression<-
+  ggplot(data=followup_scored, aes(x=AIMS_current_total, y=negative_escapism_current)) +
+  geom_point(alpha=0.75)+
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("AIMS Score") +
+  ylab("Self Supression Escapism Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+cor.test(followup_scored$AIMS_current_total, followup_scored$negative_escapism_current)
+ggsave('../../figures/AIMS_paper/AIMS_selfsupression.png', AIMS_selfsupression, dpi=350)
+
+#interaction comparison
+escapism_AIMS <- 
+followup_scored %>%
+  dplyr::select(ID, AIMS_current_total, negative_escapism_current, positive_escapism_current)
+
+escapism_AIMS$negative_escapism_current <- scale(escapism_AIMS$negative_escapism_current)
+escapism_AIMS$positive_escapism_current <- scale(escapism_AIMS$positive_escapism_current)
+
+escapism_AIMS <-escapism_AIMS %>%
+  pivot_longer(negative_escapism_current:positive_escapism_current, names_to = "escapism_type", values_to = "escapism")
+
+escapism_AIMS$escapism_type <- as.factor(escapism_AIMS$escapism_type)
+contrasts(escapism_AIMS$escapism_type) <- c(-0.5,0.5)
+escapism_AIMS$AIMS_scaled <- scale(escapism_AIMS$AIMS_current_total)
+
+
+m1 <- lmer((escapism) ~ (AIMS_scaled)*escapism_type + (1|ID), data=escapism_AIMS)
+summary(m1)
+
+##plotting
+
+newdata <- expand.grid(
+  AIMS_scaled=seq(-2.8090675,2.0247280,0.01),
+  HUMS = seq(-2.223430, 1.527875, 0.1),
+  escapism_type = c("negative_escapism_current", "positive_escapism_current")
+)
+
+predictions<- predictSE(m1, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions)
+pred$AIMS_current_total <-pred$AIMS_scaled * attr(escapism_AIMS$AIMS_scaled, 'scaled:scale') + attr(escapism_AIMS$AIMS_scaled, 'scaled:center')
+pred$escapism_type <- ifelse(pred$escapism_type=="negative_escapism_current", "Self Suppression", "Self Expansion")
+escapism_AIMS$escapism_type <- ifelse(escapism_AIMS$escapism_type=="negative_escapism_current", "Self Suppression", "Self Expansion")
+
+escapism_AIMS_plot<-
+  ggplot(data=pred, aes(x=AIMS_current_total, y=fit)) +
+  geom_line(aes(col=escapism_type))+
+  geom_ribbon(aes(ymin=fit-se.fit, ymax=fit+se.fit, fill=escapism_type),alpha=0.25) +
+  ylab('Escapism Score \n(within subscale Z-score)') +
+  xlab('AIMS Score') +
+  theme_classic() +
+ theme(
+   legend.position = "none",
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20),
+  ) +
+   scale_color_manual(values=c("#E69F00","#56B4E9")) +
+  scale_fill_manual(values=c("#E69F00","#56B4E9")) +
+  geom_point(aes(y=escapism, color=escapism_type), data=escapism_AIMS, alpha=0.5)
+
+ggsave('../../figures/AIMS_paper/escapism_AIMS.png', escapism_AIMS_plot, dpi=350)
+
+#getting labels
+label <- expand.grid(
+ AIMS_scaled=0,
+  HUMS = 1.5,
+  escapism_type = c("negative_escapism_current", "positive_escapism_current")
+)
+
+label$HUMS <- ifelse(label$escapism_type=="negative_escapism_current", label$HUMS -1, label$HUMS )
+
+label$escapism_type <- ifelse(label$escapism_type=="negative_escapism_current", "Self Suppression", "Self Expansion")
+
+AIMS_escap_label <- 
+  ggplot(data=label, aes(x=AIMS_scaled, y=HUMS)) +
+  scale_color_manual(values=c("#E69F00","#56B4E9")) +
+  scale_fill_manual(values=c("#E69F00","#56B4E9"))  +
+  geom_label_repel(aes(label = escapism_type, color=escapism_type),
+   #              nudge_x = -0.8,
+    #               na.rm = TRUE,
+                  data=label,
+                   family="Arial",
+                 size=6,
+                 min.segment.length = Inf) +
+    theme_classic()
+
+ggsave(AIMS_escap_label, file='../../figures/AIMS_paper/AIMS_escap_label.png')
+
+#subscale analyses
+m1 <-lm(data=followup_scored, scale(escapism_sum) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
+summary(m1)
+
+
+escapismcoef <-
+  plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.8, 0.8) +
+  ggtitle("Escapism Score") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Absorption (AIMS)","BMRQ - Sensorimotor Reward","BMRQ - Music Seeking", "BMRQ - Social Reward", "BMRQ - Emotion Evocation","BMRQ - Mood Regulation")) +
+  geom_hline(yintercept=0,color='black',linetype='dashed')
+
+ggsave(escapismcoef, file='../../figures/statistical_learningfollowup/escapismcoef.png', width=10)
+
+#pos
+m1 <-lm(data=followup_scored, scale(positive_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
+summary(m1)
+
+
+selfexpansion_subscale <-
+  plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.8, 0.8) +
+  ggtitle("Self Expansion Escapism Score") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Absorption (AIMS)","BMRQ - Sensorimotor Reward","BMRQ - Music Seeking", "BMRQ - Social Reward", "BMRQ - Emotion Evocation","BMRQ - Mood Regulation")) +
+  geom_hline(yintercept=0,color='black',linetype='dashed')
+
+ggsave(selfexpansion_subscale, file='../../figures/AIMS_paper/selfexpansion_subscale.png', width=10, dpi=350)
+
+#neg
+m1 <-lm(data=followup_scored, scale(negative_escapism_current) ~  scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor) + scale(AIMS_current_total))
+summary(m1)
+
+
+selfsuppression_subscale <-
+  plot_model(m1, show.values = TRUE,vline.color = "lightgrey") + 
+ ylim(-0.8, 0.8) +
+  ggtitle("Self Suppression Escapism Score") +
+  ylab("Standardized Beta Coefficient Estimates")+
+  theme_light() +
+  theme(title=element_text(family="Arial", size=20),
+    axis.title.x = element_text(family="Arial", size=18),
+    axis.title.y = element_text(family="Arial",size=18),
+    axis.text.x = element_text(family="Arial", size=16),
+    axis.text.y = element_text(family="Arial",size=16),
+  ) +
+  scale_x_discrete(labels=c("Absorption (AIMS)","BMRQ - Sensorimotor Reward","BMRQ - Music Seeking", "BMRQ - Social Reward", "BMRQ - Emotion Evocation","BMRQ - Mood Regulation")) +
+  geom_hline(yintercept=0,color='black',linetype='dashed')
+
+ggsave(selfsuppression_subscale, file='../../figures/AIMS_paper/selfsuppression_subscale.png', width=10, dpi=350)
+```
+
+#plotting abs-res
+```{r}
+AIMS_resilience<-
+  ggplot(data=followup_scored, aes(x=AIMS_current_total, y=CD.RISC_total)) +
+  geom_point(alpha=0.75)+
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("AIMS Score") +
+  ylab("CD.RISC-10 Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(followup_scored$AIMS_current_total, followup_scored$CD.RISC_total)
+
+ggsave(file='../../figures/AIMS_paper/AIMS_resilience.png',AIMS_resilience)
 ```

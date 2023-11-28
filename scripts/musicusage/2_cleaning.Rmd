@@ -19,8 +19,8 @@ master <- read.csv(file="../../data/pleasing-displeasing_followup/pleasing_displ
 ```{r}
 #removing Ps without ELA + HUMs
 scored_data <- scored_data[complete.cases(scored_data[ , 391:422]),]
-#removing Ps without STAI
-scored_data <- scored_data[complete.cases(scored_data[ , 431]),]
+#removing Ps without STAI + CD.RISC
+scored_data <- scored_data[complete.cases(scored_data[ , 431:432]),]
 ```
 
 #merge dataframes
@@ -28,7 +28,12 @@ scored_data <- scored_data[complete.cases(scored_data[ , 431]),]
 names(scored_data)[20] <- "ID"
 master <- master[-1]
 names(master)[1] <- "ID"
-all_scored <- merge(master, scored_data, by.x="ID", by.y="ID")
+'%notin%' <- Negate('%in%')
+all_scored <- merge(master, scored_data, by="ID")
+
+
+check <- subset(scored_data, scored_data$ID %notin%  all_scored$ID)
+
 write.csv(all_scored, "../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
 ```
 

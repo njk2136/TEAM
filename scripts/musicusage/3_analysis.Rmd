@@ -20,12 +20,12 @@ library(ggrepel)
 #read in data
 ```{r}
 all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usage/all_scored.csv")
-
-table(all_scored$What.sex.were.you.assigned.at.birth.)
 ```
 
 #HUMS, eBMRQ, Mental Health corr matrix
 ```{r}
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_musicseek)
+
 #HUMS, eBMRQ, Mental Health
 variables = dplyr::select(all_scored, 
                           HUMS_adolescence_unhealthy, HUMS_adult_unhealthy,
@@ -44,6 +44,75 @@ rownames(corr_matrix) <- c('Unhealthy Adolescent Music Usage', 'Unhealthy Adult 
                            'Sensorimotor', "PAS", "STAI", "CDRISC")
 
 pdf(file = "../../figures/pleasing:displeasing_followup/full_sample/eBMRQ_HUMS_mentalhealth.pdf")
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, diag=FALSE,
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1))
+
+dev.off()
+
+
+CHAOS_ebmrqabs<-
+  ggplot(data=all_scored, aes(x=CHAOS_sum, y=BMRQ_absorption)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total CHAOS Score") +
+  ylab("eBMRQ Absorption Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_absorption)
+
+ggsave(file='../../figures/AIMS_paper/CHAOS_ebmrqabs.png',CHAOS_ebmrqabs)
+
+Threat_ebmrqabs<-
+  ggplot(data=all_scored, aes(x=Threat_sum, y=BMRQ_absorption)) +
+         geom_point() +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("Total Threat Score") +
+  ylab("eBMRQ Absorption Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_absorption)
+
+ggsave(file='../../figures/AIMS_paper/Threat_ebmrqabs.png',Threat_ebmrqabs)
+
+#gold, eBMRQ-abs, ELA, STAI, resilience, age, HUMS
+variables = dplyr::select(all_scored, 
+                          BMRQ_absorption, Gold_activeengagement, Gold_musicaltraining,
+                          Gold_musicalsophistication, Gold_emotion, Gold_singingabilities, 
+                          Gold_perceptualabilities, QUIC_sum, CHAOS_sum, 
+                          deprivation_sum, Threat_sum, QUIC_child_total, CHAOS_child_total, 
+                          deprivation_child_total, threat_childhood_total, 
+                          QUIC_Adolescence_total, 
+                          CHAOS_Adolescence_total, deprivation_Adolescence_total, 
+                          threat_adolescence_total,
+                          HUMS_adult_unhealthy, HUMS_adult_healthy,
+                          STAI_total, CD.RISC_total,What.is.your.age.)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+colnames(corr_matrix) <- c('eBMRQ: Absorption', 'Gold-MSI: Active Engagement', 'Gold-MSI: Musical Training', 'Gold-MSI: General Sophistication', 'Gold-MSI: Emotion', 'Gold-MSI: Singing Abilities', 'Gold-MSI: Perceptual Abilities',  "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence","Threat Adolescence", 'Unhealthy Adult Music Usage','Healthy Adult Music Usage',"STAI", "CDRISC", "Age")
+rownames(corr_matrix) <- c('eBMRQ: Absorption', 'Gold-MSI: Active Engagement', 'Gold-MSI: Musical Training', 'Gold-MSI: General Sophistication', 'Gold-MSI: Emotion', 'Gold-MSI: Singing Abilities', 'Gold-MSI: Perceptual Abilities',  "QUIC Sum", "CHAOS Sum", 
+                           "Deprivation Sum","Threat Sum","QUIC Childhood", "CHAOS Childhood", 
+                           "Deprivation Childhood","Threat Childhood","QUIC Adolescence", "CHAOS Adolescence", "Deprivation Adolescence","Threat Adolescence", 'Unhealthy Adult Music Usage','Healthy Adult Music Usage', "STAI", "CDRISC", "Age")
+
+pdf(file = "../../figures/AIMS_paper/Gold_ELAcheckcorrmatrixstudy1.pdf",width=10)
 
 corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
          sig.level = c(0.001,0.01,0.05), pch.cex=0.9, pch.col = "black", tl.col = "black", type="lower",tl.srt =45, diag=FALSE,
@@ -253,7 +322,7 @@ ggsave(abs_unhealthyusage, file='../../figures/pleasing:displeasing_followup/abs
   
 
 HUMS_Absorption <- all_scored %>%
-  select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy) %>%
+  dplyr::select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy) %>%
   pivot_longer(HUMS_adult_healthy:HUMS_adult_unhealthy, names_to = "type", values_to = "HUMS")
 
 HUMS_Absorption$type <- ifelse(HUMS_Absorption$type=="HUMS_adult_unhealthy", "Unhealthy", "Healthy")
@@ -268,8 +337,8 @@ label$HUMS <- ifelse(label$type=="Unhealthy", label$HUMS -1, label$HUMS )
 
 abs_HUMS_label <- 
   ggplot(data=HUMS_Absorption, aes(x=BMRQ_absorption, y=HUMS)) +
-  scale_color_manual(values=c("#56B4E9", "#E69F00")) +
-  scale_fill_manual(values=c("#56B4E9", "#E69F00")) +
+  scale_color_manual(values=c("#E69F00","#56B4E9")) +
+  scale_fill_manual(values=c("#E69F00","#56B4E9")) +
   geom_label_repel(aes(label = type, color=type),
    #              nudge_x = -0.8,
     #               na.rm = TRUE,
@@ -284,13 +353,99 @@ ggsave(abs_HUMS_label, file='../../figures/pleasing:displeasing_followup/abs_HUM
 cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
 
 HUMS_Absorption <- all_scored %>%
-  select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy, ID) %>%
+  dplyr::select(BMRQ_absorption, HUMS_adult_healthy, HUMS_adult_unhealthy, ID)
+
+HUMS_Absorption$HUMS_adult_healthy <- scale(HUMS_Absorption$HUMS_adult_healthy)
+HUMS_Absorption$HUMS_adult_unhealthy <- scale(HUMS_Absorption$HUMS_adult_unhealthy)
+
+
+
+HUMS_Absorption <- HUMS_Absorption %>%
   pivot_longer(HUMS_adult_healthy:HUMS_adult_unhealthy, names_to = "type", values_to = "HUMS")
 
 HUMS_Absorption$type <- ifelse(HUMS_Absorption$type=="HUMS_adult_unhealthy", "Unhealthy", "Healthy")
 HUMS_Absorption$type <- as.factor(HUMS_Absorption$type)
+HUMS_Absorption$absorption_scaled <- scale(HUMS_Absorption$BMRQ_absorption)
+
 contrasts(HUMS_Absorption$type) <- c(-0.5,0.5)
-m3 <- lmer(scale(HUMS) ~ scale(BMRQ_absorption)*type + (1|ID), data=HUMS_Absorption)
+m3 <- lmer((HUMS) ~ absorption_scaled*type + (1|ID), data=HUMS_Absorption)
 summary(m3)
+
+#plotting
+##plotting
+newdata <- expand.grid(
+  absorption_scaled=seq(-2.092594,1.517042,0.01),
+  HUMS = seq(-3.4162226, 4.0308494, 0.1),
+  type = c("Healthy", "Unhealthy")
+)
+
+predictions<- predictSE(m3, newdata, se.fit = TRUE, print.matrix =
+        TRUE, level = 0)
+
+pred <- cbind(newdata, predictions)
+
+pred$BMRQ_absorption <- (pred$absorption_scaled * attr(HUMS_Absorption$absorption_scaled, 'scaled:scale') + attr(HUMS_Absorption$absorption_scaled, 'scaled:center'))
+
+HUMS_AIMS_plot<-
+  ggplot(data=pred, aes(x=BMRQ_absorption, y=fit)) +
+  geom_jitter(data=HUMS_Absorption, (aes(y=HUMS, color=type)),alpha=0.5,width = 0.09)+
+  geom_line(aes(col=type))+
+  geom_ribbon(aes(ymin=fit-se.fit, ymax=fit+se.fit, fill=type),alpha=0.25) +
+  ylab('Music Usage Score \n(within subscale Z-score)') +
+  xlab('eBMRQ Absorption Score') +
+  theme_classic() +
+ theme(
+   legend.position = "none",
+    axis.title.x = element_text(family="Arial", size=22),
+    axis.title.y = element_text(family="Arial",size=22),
+    axis.text.x = element_text(family="Arial", size=20),
+    axis.text.y = element_text(family="Arial",size=20),
+    strip.text.x = element_text(family="Arial",size=20)
+  ) +
+   scale_color_manual(values=c("#E69F00","#56B4E9")) +
+  scale_fill_manual(values=c("#E69F00","#56B4E9"))
+
+
+ggsave('../../figures/AIMS_paper/HUMS_Absorptionplot.png', HUMS_AIMS_plot, dpi=350)
+
+cor.test(all_scored$CD.RISC_total, scale(all_scored$BMRQ_absorption))
+```
+
+#plotting res + abs
+```{r}
+abs_resilience<-
+  ggplot(data=all_scored, aes(x=BMRQ_absorption, y=CD.RISC_total)) +
+         geom_jitter(width=0.05, alpha=0.75) +
+  geom_smooth(method="lm") +
+  theme_classic() +
+  xlab("eBMRQ Absorption Score") +
+  ylab("CD.RISC-10 Score") +
+  theme( 
+    axis.text.x = element_text(size=18),
+    axis.text.y = element_text(size=18),
+    axis.title.x = element_text(size=24),
+    axis.title.y = element_text(size=24)
+  )
+
+cor.test(all_scored$BMRQ_absorption, all_scored$CD.RISC_total)
+
+ggsave(file='../../figures/AIMS_paper/abs_resilience.png',abs_resilience)
+```
+
+#trying mediation model
+```{r}
+#select seed for reproducible results
+seed = 111
+
+all_scored$BMRQ_absorptionscaled <- scale(all_scored$BMRQ_absorption)
+all_scored$CD.RISC_totalscaled <- scale(all_scored$CD.RISC_total)
+all_scored$CHAOS_sumscaled<- scale(all_scored$CHAOS_sum)
+all_scored$STAI_sumscaled<- scale(all_scored$STAI_total)
+all_scored$CHAOS_childscaled <- scale(all_scored$CHAOS_child_total)
+all_scored$CHAOS_adolscaled <- scale(all_scored$CHAOS_Adolescence_total)
+
+process(data = all_scored, y = "CD.RISC_totalscaled", x = "CHAOS_adolscaled", m ="BMRQ_absorptionscaled", model = 4, seed = seed)
+
+cor.test(followup_scored$CHAOS_Adolescence_total, followup_scored$CHAOS_child_total)
 ```
 
