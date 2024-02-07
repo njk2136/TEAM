@@ -206,6 +206,24 @@ dev.off()
 
 m1 <- lm(CD.RISC_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data=second)
 summary(m1)
+
+
+#how are the subscales relating to one another?
+variables = dplyr::select(second, 
+                          MH_total,MH_caregiverbeliefs,
+                          MH_caregiversinging, MH_childhoodattitude, MH_musicmaking, MH_socialcontexts)
+output = corr.test(variables)
+
+corr_matrix = output$r
+p_matrix <- output$p
+
+pdf(file = "../../figures/statistical_learningfollowup/CFA_new.pdf",width = 13, height=13)
+
+corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
+         sig.level = c(0.001,0.01,0.05), pch.col = "black", tl.col = "black", type="lower",tl.srt =45, 
+         col=colorRampPalette(c("darkblue","white","red"))(100),cl.lim=c(0,1), diag = FALSE)
+
+dev.off()
 ```
 
 
