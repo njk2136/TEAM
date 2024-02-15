@@ -27,6 +27,8 @@ goldmsi_table <- read.csv(file='../../figures/m@h/goldmsi_table.csv')
 ebmrq_table <- read.csv(file='../../figures/m@h/ebmrq_table.csv')
 testretest_table <- read.csv(file='../../figures/m@h/testretest_table.csv')
 SRQ_table <- read.csv(file='../../figures/m@h/srq_table.csv')
+demo_table1 <- read.csv(file='../../data/m@hr/demo_table_study1.csv')
+demo_table <- read.csv(file='../../data/m@hr/demo_table_study2.csv')
 ```
 
 #correcting musical training scoring of goldmsi
@@ -891,5 +893,42 @@ SRQ_table_apa <-
   )
 print(SRQ_table_apa)
 flextable::save_as_docx(SRQ_table_apa, path = '../../figures/m@h/SRQ_table.docx')
+
+#study 1 demo
+demo_table1 <- demo_table1 %>%
+    dplyr::rename_with(
+      ~ case_when(
+        . == "X" ~ "Study 1 Sample (n = 290)",
+        TRUE ~ .
+      )
+    )
+
+demo1table <- 
+nice_table(
+    demo_table1[1:19, ],
+   title = c("Table 1", "Study 1 Sample Demographics"),
+    note = c("Demographic information for the Study 1 sample.")
+  )
+
+flextable::save_as_docx(demo1table, path = '../../figures/m@h/demo1table.docx')
+
+#study 2 demo
+demo_table <- demo_table %>%
+    dplyr::rename_with(
+      ~ case_when(
+        . == "Entire.Study.2.Sample.n...288" ~ "Entire Study 2 Sample (n = 288)",
+        . == "Test.Retest.Sample.n...46" ~ "Test Retest Sample (n = 46)",
+        TRUE ~ .
+      )
+    )
+
+#demo2table <- 
+nice_table(
+    demo_table[1:19, ],
+   title = c("Table 5", "Study 2 Sample Demographics"),
+    note = c("Demographic information for the entire Study 2 sample, as well as only those included in the test-retest analysis.")
+  )
+
+flextable::save_as_docx(demo2table, path = '../../figures/m@h/demo2table.docx')
 ```
 

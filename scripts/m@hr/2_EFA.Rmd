@@ -36,7 +36,9 @@ updateMH <- MH[complete.cases(MH),]
 names(original)[2] <- "ID"
 demo <- merge(original, data, by.x = "ID", by.y="Q158")
 
-table(demo$What.is.your.ethnicity..check.all.that.apply..)
+demo1 <- demo[complete.cases(demo[500:530]),]
+
+table(demo1$What.is.your.ethnicity..check.all.that.apply..)
 ```
 
 #determine how many factors to use
