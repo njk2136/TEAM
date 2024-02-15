@@ -272,6 +272,12 @@ summary(fa.none)
 SL_transformation <- EFAtools::SL(fa.none, type="psych",method="ML")
 SL_transformation <- SL_transformation[[2]]
 SL_transformation
+
+omega <-omega(SL_transformation, nfactors=5,n.iter=1,p=.05,poly=FALSE,key=NULL,
+    flip=TRUE,digits=2, title="Omega",sl=TRUE,labels=NULL,
+    plot=TRUE)
+
+summary(omega)
 ```
 
 #scoring + combining data (maybe make into a new script / only run once - ALREADY RAN)

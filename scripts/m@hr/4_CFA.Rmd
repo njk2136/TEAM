@@ -13,12 +13,20 @@ library(corrplot)
 library(lavaan)
 library(semPlot)
 library(sjPlot)
+library(dplyr)
+library(rempsyc)
 ```
 
 #read in data
 ```{r}
 first <- read.csv(file='../../data/pleasing-displeasing_followup/scored_data.csv') 
 all <- read.csv(file='../../data/SLfollowupscored.csv')
+
+#for tables
+goldmsi_table <- read.csv(file='../../figures/m@h/goldmsi_table.csv')
+ebmrq_table <- read.csv(file='../../figures/m@h/ebmrq_table.csv')
+testretest_table <- read.csv(file='../../figures/m@h/testretest_table.csv')
+SRQ_table <- read.csv(file='../../figures/m@h/srq_table.csv')
 ```
 
 #correcting musical training scoring of goldmsi
@@ -684,7 +692,7 @@ SRQ_current_total <- all$SRQ_current_total
 corr.test(MH_total, SRQ_current_total)
 
 BMRQ_socialreward <-
-ggplot(second, aes(x=MH_socialcontexts, y=BMRQ_socialreward)) + 
+ggplot(all, aes(x=MH_socialcontexts, y=BMRQ_socialreward)) + 
   theme_classic() +
   geom_point(position="jitter") + 
   geom_smooth(method=lm) + 
@@ -725,7 +733,7 @@ summary(m1)
 m1 <- lm(STAI_total ~ MH_caregiverbeliefs + MH_caregiversinging + MH_childhoodattitude + MH_musicmaking + MH_socialcontexts, data = all)
 summary(m1)
 
-m1 <- lm(scale(MH_socialcontexts) ~ scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_absorption) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor), data=second)
+m1 <- lm(scale(MH_socialcontexts) ~ scale(BMRQ_moodreg) + scale(BMRQ_emotion) + scale(BMRQ_socialreward) + scale(BMRQ_absorption) + scale(BMRQ_musicseek) + scale(BMRQ_sensorimotor), data=all)
 summary(m1)
 
 BMRQ_socialreward <- 
@@ -771,9 +779,99 @@ all$HUMS_adult_healthy
 ```
 
 ```{r}
-mh <- second$MH_childhoodattitude
-x <- second$Gold_musicaltraining
+mh <- all$MH_childhoodattitude
+x <- all$BMRQ_musicseek
 
 cor.test(mh, x)
+```
+
+#tables
+```{r}
+#Test-Retest
+testretest_table <- testretest_table %>%
+    dplyr::rename_with(
+      ~ case_when(
+        . == "Music.Home...Retrospective.Subscales" ~ "Music@Home - Retrospective Subscales ",
+        . == "Test.Retest..ICC..Over.4.Months" ~ "Test-Retest (ICC) Over 4 Months",
+        TRUE ~ .
+      )
+    )
+
+testretest_table_apa <-
+  nice_table(
+    testretest_table[1:8, ],
+    title = c("Table 3", "Test-Retest Reliability"),
+    note = c("Music@Home - Retrospective test-retest reliability measured via intra-class correlation (ICC) values between Study 1 and Study 2 (4 months delay) for 46 participants. The following thresholds were used: fair—0.40 ≤ values ≤ 0.59; good— 0.60 ≤ values ≤ 0.74; and excellent— values ≥ 0.75 for test-retest reliability.")
+  )
+print(testretest_table_apa)
+flextable::save_as_docx(testretest_table_apa, path = '../../figures/m@h/testretest_table.docx')
+  
+#Gold-MSI
+goldmsi_table <- goldmsi_table %>%
+    dplyr::rename_with(
+      ~ case_when(
+        . == "Music.Home...Retrospective.Subscales" ~ " ",
+        . == "Active.Engagement" ~ "Active Engagement",
+        . == "Perceptual.Abilities" ~ "Perceptual Abilities",
+        . == "Musical.Training" ~ "Musical Training",
+        . == "Singing.Abilities" ~ "Singing Abilities",
+        . == "Emotion" ~ "Emotion",
+        . == "Musical.Sophistication" ~ "Musical Sophistication",
+        TRUE ~ .
+      )
+    )
+
+goldmsi_table_apa <-
+  nice_table(
+    goldmsi_table[1:7, ],
+    title = c("Table 4", "Gold-MSI Subscale Associations"),
+    note = c("Bivariate correlations relating Goldsmith Musical Sophistication Index (Gold-MSI) subscales (top row) and Music@Home - Retrospective subscales (left column) in the Study 2 sample. * p < .05, ** p <.01, *** p <.001.")
+  )
+print(goldmsi_table_apa)
+flextable::save_as_docx(goldmsi_table_apa, path = '../../figures/m@h/goldmsi_table.docx')
+
+#eBMRQ
+ebmrq_table <- ebmrq_table %>%
+    dplyr::rename_with(
+      ~ case_when(
+        . == "Music.Home...Retrospective.Subscales" ~ " ",
+        . == "Mood.Regulation" ~ "Mood Regulation",
+        . == "Emotion" ~ "Emotion",
+        . == "Social.Reward" ~ "Social Reward",
+        . == "Absorption" ~ "Absorption",
+        . == "Music.Seeking" ~ "Music Seeking",
+        . == "Sensorimotor" ~ "Sensorimotor",
+        . == "Total" ~ "Total",
+        TRUE ~ .
+      )
+    )
+
+ebmrq_table_apa <-
+  nice_table(
+    ebmrq_table[1:8, ],
+    title = c("Table 5", "eBMRQ Subscale Associations"),
+    note = c("Bivariate correlations relating Extended Barcelona Music Reward Questionnaire subscales (eBMRQ) subscales (top row) and Music@Home - Retrospective subscales (left column) in the Study 2 sample. * p < .05, ** p <.01, *** p <.001.")
+  )
+print(ebmrq_table_apa)
+flextable::save_as_docx(ebmrq_table_apa, path = '../../figures/m@h/ebmrq_table.docx')
+
+#SRQ
+SRQ_table <- SRQ_table %>%
+    dplyr::rename_with(
+      ~ case_when(
+        . == "Music.Home...Retrospective.Subscales" ~ "Music@Home - Retrospective Subscales ",
+        . == "SRQ" ~ "SRQ",
+        TRUE ~ .
+      )
+    )
+
+SRQ_table_apa <-
+  nice_table(
+    SRQ_table[1:8, ],
+    title = c("Table 6", "SRQ Associations"),
+    note = c("Bivariate correlations relating the Social Reward Questionnaire (SRQ) subscales and Music@Home - Retrospective subscales in the Study 2 sample. * p < .05, ** p <.01, *** p <.001.")
+  )
+print(SRQ_table_apa)
+flextable::save_as_docx(SRQ_table_apa, path = '../../figures/m@h/SRQ_table.docx')
 ```
 
