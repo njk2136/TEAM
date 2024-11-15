@@ -15,6 +15,7 @@ library(sjPlot)
 library(corrplot)
 library(psych)
 library(ggrepel)
+source("process.R")
 ```
 
 #read in data
@@ -24,7 +25,7 @@ all_scored <- read.csv(file="../../data/pleasing-displeasing_followup/music_usag
 
 #HUMS, eBMRQ, Mental Health corr matrix
 ```{r}
-cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_musicseek)
+cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_absorption, method="spearman")
 
 #HUMS, eBMRQ, Mental Health
 variables = dplyr::select(all_scored, 
@@ -52,12 +53,12 @@ corrplot(corr_matrix, p.mat = p_matrix, insig = "label_sig",
 dev.off()
 
 
-CHAOS_ebmrqabs<-
-  ggplot(data=all_scored, aes(x=CHAOS_sum, y=BMRQ_absorption)) +
+QUIC_ebmrqabs<-
+  ggplot(data=all_scored, aes(x=QUIC_sum, y=BMRQ_absorption)) +
          geom_point() +
   geom_smooth(method="lm") +
   theme_classic() +
-  xlab("Total CHAOS Score") +
+  xlab("QUIC Sum Score") +
   ylab("eBMRQ Absorption Score") +
   theme( 
     axis.text.x = element_text(size=18),
@@ -66,17 +67,17 @@ CHAOS_ebmrqabs<-
     axis.title.y = element_text(size=24)
   )
 
-cor.test(all_scored$CHAOS_sum, all_scored$BMRQ_absorption)
+cor.test(all_scored$QUIC_sum, all_scored$BMRQ_absorption, method="spearman")
 
-ggsave(file='../../figures/AIMS_paper/CHAOS_ebmrqabs.png',CHAOS_ebmrqabs)
+ggsave(file='../../figures/AIMS_paper/QUIC_ebmrqabs.png',QUIC_ebmrqabs, dpi=2000)
 
-Threat_ebmrqabs<-
-  ggplot(data=all_scored, aes(x=Threat_sum, y=BMRQ_absorption)) +
+CDRISC_ebmrqabs<-
+  ggplot(data=all_scored, aes(x=BMRQ_absorption, y=CD.RISC_total)) +
          geom_point() +
   geom_smooth(method="lm") +
   theme_classic() +
-  xlab("Total Threat Score") +
-  ylab("eBMRQ Absorption Score") +
+  xlab("eBMRQ Absorption Score") +
+  ylab("CD.RISC-10 Score") +
   theme( 
     axis.text.x = element_text(size=18),
     axis.text.y = element_text(size=18),
@@ -84,9 +85,9 @@ Threat_ebmrqabs<-
     axis.title.y = element_text(size=24)
   )
 
-cor.test(all_scored$Threat_sum, all_scored$BMRQ_absorption)
+cor.test(all_scored$Threat_sum, all_scored$BMRQ_absorption,  method="spearman")
 
-ggsave(file='../../figures/AIMS_paper/Threat_ebmrqabs.png',Threat_ebmrqabs)
+ggsave(file='../../figures/AIMS_paper/CDRISC_ebmrqabs.png',CDRISC_ebmrqabs, dpi=2000)
 
 #gold, eBMRQ-abs, ELA, STAI, resilience, age, HUMS
 variables = dplyr::select(all_scored, 
@@ -386,6 +387,7 @@ pred <- cbind(newdata, predictions)
 
 pred$BMRQ_absorption <- (pred$absorption_scaled * attr(HUMS_Absorption$absorption_scaled, 'scaled:scale') + attr(HUMS_Absorption$absorption_scaled, 'scaled:center'))
 
+#FIG2
 HUMS_AIMS_plot<-
   ggplot(data=pred, aes(x=BMRQ_absorption, y=fit)) +
   geom_jitter(data=HUMS_Absorption, (aes(y=HUMS, color=type)),alpha=0.5,width = 0.09)+
@@ -406,7 +408,7 @@ HUMS_AIMS_plot<-
   scale_fill_manual(values=c("#E69F00","#56B4E9"))
 
 
-ggsave('../../figures/AIMS_paper/HUMS_Absorptionplot.png', HUMS_AIMS_plot, dpi=350)
+ggsave('../../figures/AIMS_paper/HUMS_Absorptionplot1.png', HUMS_AIMS_plot, dpi=2000)
 
 cor.test(all_scored$CD.RISC_total, scale(all_scored$BMRQ_absorption))
 ```
@@ -440,12 +442,19 @@ seed = 111
 all_scored$BMRQ_absorptionscaled <- scale(all_scored$BMRQ_absorption)
 all_scored$CD.RISC_totalscaled <- scale(all_scored$CD.RISC_total)
 all_scored$CHAOS_sumscaled<- scale(all_scored$CHAOS_sum)
+all_scored$QUIC_sumscaled<- scale(all_scored$QUIC_sum)
 all_scored$STAI_sumscaled<- scale(all_scored$STAI_total)
 all_scored$CHAOS_childscaled <- scale(all_scored$CHAOS_child_total)
 all_scored$CHAOS_adolscaled <- scale(all_scored$CHAOS_Adolescence_total)
+all_scored$age_scaled <- scale(all_scored$What.is.your.age.)
+all_scored$Gold_musicaltraining_scaled <- scale(all_scored$Gold_musicaltraining)
 
-process(data = all_scored, y = "CD.RISC_totalscaled", x = "CHAOS_adolscaled", m ="BMRQ_absorptionscaled", model = 4, seed = seed)
+
+process(data = all_scored, y = "CD.RISC_totalscaled", x = "QUIC_sumscaled", m ="BMRQ_absorptionscaled", model = 4, seed = seed, cov="STAI_sumscaled")
 
 cor.test(followup_scored$CHAOS_Adolescence_total, followup_scored$CHAOS_child_total)
+
+m1 <- lm(data=all_scored, CD.RISC_totalscaled ~ CHAOS_sumscaled + BMRQ_absorptionscaled)
+summary(m1)
 ```
 
